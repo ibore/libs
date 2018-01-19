@@ -1,7 +1,6 @@
-package me.ibore.libs.util;
+package me.ibore.libs.manager;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.content.Context;
 
 import java.util.Stack;
@@ -13,18 +12,18 @@ import java.util.Stack;
  * website: ibore.me
  */
 
-public class ActivityUtil {
+public final class ActivityManager {
 
     private static Stack<Activity> activityStack;
-    private static ActivityUtil instance;
+    private static ActivityManager instance;
 
-    private ActivityUtil(){}
+    private ActivityManager(){}
     /**
      * 单一实例
      */
-    public static ActivityUtil getAppManager(){
+    public static ActivityManager getAppManager(){
         if(instance==null){
-            instance=new ActivityUtil();
+            instance=new ActivityManager();
         }
         return instance;
     }
@@ -88,7 +87,7 @@ public class ActivityUtil {
     public void AppExit(Context context) {
         try {
             finishAllActivity();
-            ActivityManager activityMgr= (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+            android.app.ActivityManager activityMgr= (android.app.ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
             activityMgr.restartPackage(context.getPackageName());
             System.exit(0);
         } catch (Exception e) { }

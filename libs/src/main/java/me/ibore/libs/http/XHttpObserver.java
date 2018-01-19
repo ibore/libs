@@ -5,7 +5,7 @@ import android.content.DialogInterface;
 
 import io.reactivex.observers.DisposableObserver;
 import me.ibore.libs.XApplication;
-import me.ibore.libs.util.NetworkUtil;
+import me.ibore.libs.util.NetworkUtils;
 import me.ibore.libs.view.LoadDialog;
 
 /**
@@ -34,7 +34,7 @@ public abstract class XHttpObserver<T> extends DisposableObserver<T> implements 
     @Override
     protected void onStart() {
         if (null != loadDialog) loadDialog.show();
-        if (!NetworkUtil.isNetworkAvailable(XApplication.getContext())) {
+        if (!NetworkUtils.isConnected()) {
             dispose();
             onError(new XHttpException(XHttpException.NetworkNotConnected, "网络未连接"));
         }

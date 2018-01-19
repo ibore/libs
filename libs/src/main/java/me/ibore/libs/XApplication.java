@@ -3,6 +3,8 @@ package me.ibore.libs;
 import android.app.Application;
 import android.content.Context;
 
+import me.ibore.libs.util.Utils;
+
 /**
  * description:
  * author: Ibore Xie
@@ -18,6 +20,7 @@ public class XApplication extends Application {
     public void onCreate() {
         super.onCreate();
         this.mContext = getApplicationContext();
+        Utils.init(this);
     }
 
     public static Context getContext() {

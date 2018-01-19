@@ -13,9 +13,10 @@ import android.widget.Toast;
 
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import me.ibore.libs.audio.AudioPlayer;
+import me.ibore.libs.manager.ActivityManager;
 import me.ibore.libs.rxbus.RxBus;
 import me.ibore.libs.rxbus.Subscribe;
-import me.ibore.libs.util.ActivityUtil;
 import me.ibore.libs.util.ClassUtil;
 
 /**
@@ -35,7 +36,7 @@ public abstract class XActivity<P extends XPresenter> extends AppCompatActivity 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ActivityUtil.getAppManager().addActivity(this);
+        ActivityManager.getAppManager().addActivity(this);
         rootView = getLayoutView(getLayoutId());
         setContentView(rootView);
         unbinder = ButterKnife.bind(this);
@@ -44,6 +45,7 @@ public abstract class XActivity<P extends XPresenter> extends AppCompatActivity 
         presenter.onAttach(this);
         RxBus.get().register(this);
         onBindData();
+
     }
 
     protected abstract @LayoutRes int getLayoutId();
@@ -59,7 +61,7 @@ public abstract class XActivity<P extends XPresenter> extends AppCompatActivity 
         RxBus.get().unRegister(this);
         presenter.onDetach();
         unbinder.unbind();
-        ActivityUtil.getAppManager().finishActivity(this);
+        ActivityManager.getAppManager().finishActivity(this);
     }
 
     protected View getRootView() {
