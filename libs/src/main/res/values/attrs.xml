@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <declare-styleable name="RoundImageView">
+    <declare-styleable name="XImageView">
         <attr name="riv_borderWidth" format="dimension|reference"/>
         <attr name="riv_borderColor" format="color|reference"/>
         <attr name="riv_leftTopRadius" format="dimension|reference"/>

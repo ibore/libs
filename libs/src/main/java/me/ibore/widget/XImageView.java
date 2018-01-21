@@ -23,7 +23,7 @@ import me.ibore.libs.R;
  * website: ibore.me
  */
 
-public class RoundImageView extends android.support.v7.widget.AppCompatImageView {
+public class XImageView extends android.support.v7.widget.AppCompatImageView {
 
     public final static int Normal = 0;
     public final static int Circle = 1;
@@ -56,25 +56,25 @@ public class RoundImageView extends android.support.v7.widget.AppCompatImageView
 
     private Paint borderPaint;
 
-    public RoundImageView(Context context) {
+    public XImageView(Context context) {
         this(context, null, 0);
     }
 
-    public RoundImageView(Context context, AttributeSet attrs) {
+    public XImageView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public RoundImageView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public XImageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         if (attrs != null) {
-            TypedArray ta = getContext().obtainStyledAttributes(attrs, R.styleable.RoundImageView, defStyleAttr, 0);
-            borderWidth = ta.getDimension(R.styleable.RoundImageView_riv_borderWidth, 0);
-            borderColor = ta.getColor(R.styleable.RoundImageView_riv_borderColor, 0);
-            style = ta.getInt(R.styleable.RoundImageView_riv_style, Normal);
-            leftTopRadius = ta.getDimension(R.styleable.RoundImageView_riv_leftTopRadius, 0);
-            rightTopRadius = ta.getDimension(R.styleable.RoundImageView_riv_rightTopRadius, 0);
-            rightBottomRadius = ta.getDimension(R.styleable.RoundImageView_riv_rightBottomRadius, 0);
-            leftBottomRadius = ta.getDimension(R.styleable.RoundImageView_riv_leftBottomRadius, 0);
+            TypedArray ta = getContext().obtainStyledAttributes(attrs, R.styleable.XImageView, defStyleAttr, 0);
+            borderWidth = ta.getDimension(R.styleable.XImageView_riv_borderWidth, 0);
+            borderColor = ta.getColor(R.styleable.XImageView_riv_borderColor, 0);
+            style = ta.getInt(R.styleable.XImageView_riv_style, Normal);
+            leftTopRadius = ta.getDimension(R.styleable.XImageView_riv_leftTopRadius, 0);
+            rightTopRadius = ta.getDimension(R.styleable.XImageView_riv_rightTopRadius, 0);
+            rightBottomRadius = ta.getDimension(R.styleable.XImageView_riv_rightBottomRadius, 0);
+            leftBottomRadius = ta.getDimension(R.styleable.XImageView_riv_leftBottomRadius, 0);
             ta.recycle();
         }
         init();
