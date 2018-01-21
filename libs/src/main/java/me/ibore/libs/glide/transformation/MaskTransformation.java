@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.NonNull;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.Transformation;
@@ -27,6 +26,10 @@ import me.ibore.libs.glide.internal.Utils;
  */
 
 public class MaskTransformation implements Transformation<Bitmap> {
+
+    private static final int VERSION = 1;
+    private static final String ID = "me.ibore.libs.glide.MaskTransformation." + VERSION;
+    private static final byte[] ID_BYTES = ID.getBytes(CHARSET);
 
     private static Paint sMaskingPaint = new Paint();
     private Context mContext;
@@ -52,9 +55,8 @@ public class MaskTransformation implements Transformation<Bitmap> {
         mMaskId = maskId;
     }
 
-    @NonNull
     @Override
-    public Resource<Bitmap> transform(@NonNull Context context, @NonNull Resource<Bitmap> resource, int outWidth, int outHeight) {
+    public Resource<Bitmap> transform(Context context, Resource<Bitmap> resource, int outWidth, int outHeight) {
         Bitmap source = resource.get();
 
         int width = source.getWidth();
@@ -76,7 +78,18 @@ public class MaskTransformation implements Transformation<Bitmap> {
     }
 
     @Override
-    public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
+    public boolean equals(Object obj) {
+        return obj instanceof MaskTransformation;
+    }
 
+    @Override
+    public int hashCode() {
+        return ID.hashCode();
+    }
+
+    @Override
+    public void updateDiskCacheKey(MessageDigest messageDigest) {
+        messageDigest.update(ID_BYTES);
     }
 }
+

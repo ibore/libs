@@ -6,7 +6,6 @@ import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
-import android.support.annotation.NonNull;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.Transformation;
@@ -17,13 +16,17 @@ import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 import java.security.MessageDigest;
 
 /**
- * description:灰度效果
+ * description:
  * author: Ibore Xie
- * date: 2018-01-21 22:06
+ * date: 2018-01-22 00:58
  * website: ibore.me
  */
 
 public class GrayscaleTransformation implements Transformation<Bitmap> {
+
+    private static final int VERSION = 1;
+    private static final String ID = "me.ibore.libs.glide.GrayscaleTransformation." + VERSION;
+    private static final byte[] ID_BYTES = ID.getBytes(CHARSET);
 
     private BitmapPool mBitmapPool;
 
@@ -35,9 +38,8 @@ public class GrayscaleTransformation implements Transformation<Bitmap> {
         mBitmapPool = pool;
     }
 
-    @NonNull
     @Override
-    public Resource<Bitmap> transform(@NonNull Context context, @NonNull Resource<Bitmap> resource, int outWidth, int outHeight) {
+    public Resource<Bitmap> transform(Context context, Resource<Bitmap> resource, int outWidth, int outHeight) {
         Bitmap source = resource.get();
 
         int width = source.getWidth();
@@ -61,8 +63,17 @@ public class GrayscaleTransformation implements Transformation<Bitmap> {
     }
 
     @Override
-    public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
-
+    public boolean equals(Object obj) {
+        return obj instanceof GrayscaleTransformation;
     }
 
+    @Override
+    public int hashCode() {
+        return ID.hashCode();
+    }
+
+    @Override
+    public void updateDiskCacheKey(MessageDigest messageDigest) {
+        messageDigest.update(ID_BYTES);
+    }
 }

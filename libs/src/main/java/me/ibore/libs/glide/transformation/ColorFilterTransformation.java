@@ -6,7 +6,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
-import android.support.annotation.NonNull;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.Transformation;
@@ -25,6 +24,10 @@ import java.security.MessageDigest;
 
 public class ColorFilterTransformation implements Transformation<Bitmap> {
 
+    private static final int VERSION = 1;
+    private static final String ID = "me.ibore.libs.glide.ColorFilterTransformation." + VERSION;
+    private static final byte[] ID_BYTES = ID.getBytes(CHARSET);
+
     private BitmapPool mBitmapPool;
 
     private int mColor;
@@ -38,9 +41,8 @@ public class ColorFilterTransformation implements Transformation<Bitmap> {
         mColor = color;
     }
 
-    @NonNull
     @Override
-    public Resource<Bitmap> transform(@NonNull Context context, @NonNull Resource<Bitmap> resource, int outWidth, int outHeight) {
+    public Resource<Bitmap> transform(Context context, Resource<Bitmap> resource, int outWidth, int outHeight) {
         Bitmap source = resource.get();
 
         int width = source.getWidth();
@@ -63,7 +65,17 @@ public class ColorFilterTransformation implements Transformation<Bitmap> {
     }
 
     @Override
-    public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
+    public boolean equals(Object obj) {
+        return obj instanceof ColorFilterTransformation;
+    }
 
+    @Override
+    public int hashCode() {
+        return ID.hashCode();
+    }
+
+    @Override
+    public void updateDiskCacheKey(MessageDigest messageDigest) {
+        messageDigest.update(ID_BYTES);
     }
 }

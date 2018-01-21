@@ -191,8 +191,10 @@ public class XImageView extends android.support.v7.widget.AppCompatImageView {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        drawImage(canvas);
-        drawBorder(canvas);
+        if (style != Normal) {
+            drawImage(canvas);
+            drawBorder(canvas);
+        }
     }
 
     private void drawImage(Canvas canvas) {
