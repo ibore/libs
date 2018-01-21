@@ -9,11 +9,11 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import me.ibore.libs.audio.AudioPlayer;
 import me.ibore.libs.manager.ActivityManager;
 import me.ibore.libs.rxbus.RxBus;
 import me.ibore.libs.rxbus.Subscribe;
@@ -73,7 +73,10 @@ public abstract class XActivity<P extends XPresenter> extends AppCompatActivity 
     }
 
     protected View getLayoutView(int layoutId) {
-        return getLayoutInflater().inflate(layoutId, null);
+        View view = getLayoutInflater().inflate(layoutId, null);
+        view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+        return view;
     }
 
     @Override

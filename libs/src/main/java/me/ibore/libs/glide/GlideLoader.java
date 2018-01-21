@@ -22,7 +22,7 @@ import com.bumptech.glide.request.target.Target;
 
 import java.lang.ref.WeakReference;
 
-import me.ibore.libs.glide.transformation.GlideCircleTransformation;
+import me.ibore.libs.glide.transformation.CropCircleTransformation;
 import me.ibore.libs.http.ProgressListener;
 import me.ibore.libs.http.ProgressManager;
 
@@ -138,7 +138,7 @@ public class GlideLoader {
 
     public RequestOptions circleRequestOptions(int placeholderResId, int errorResId) {
         return requestOptions(placeholderResId, errorResId)
-                .transform(new GlideCircleTransformation());
+                .transform(new CropCircleTransformation());
     }
 
     public void loadImage(String url, int placeholderResId) {

@@ -59,7 +59,10 @@ public abstract class XFragment extends Fragment implements XView {
     }
 
     public View getLayoutView(int layoutId) {
-        return getLayoutInflater().inflate(layoutId, null);
+        View view = getLayoutInflater().inflate(layoutId, null);
+        view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+        return view;
     }
 
     public int getColorX(int colorId) {

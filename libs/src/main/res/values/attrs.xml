@@ -1,15 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <declare-styleable name="ShapeImageViewStyle">
-        <attr name="riv_border_color" format="color"/>
-        <attr name="riv_border_width" format="dimension"/>
-        <attr name="riv_corner_radius" format="dimension"/>
-        <attr name="riv_is_circle" format="boolean"/>
-        <attr name="riv_pressed_border_color" format="color"/>
-        <attr name="riv_pressed_border_width" format="dimension"/>
-        <attr name="riv_pressed_mask_color" format="color"/>
-        <attr name="riv_pressed_mode_enabled" format="boolean"/>
+    <declare-styleable name="RoundImageView">
+        <attr name="riv_borderWidth" format="dimension|reference"/>
+        <attr name="riv_borderColor" format="color|reference"/>
+        <attr name="riv_leftTopRadius" format="dimension|reference"/>
+        <attr name="riv_rightTopRadius" format="dimension|reference"/>
+        <attr name="riv_rightBottomRadius" format="dimension|reference"/>
+        <attr name="riv_leftBottomRadius" format="dimension|reference"/>
+        <attr name="riv_style" format="enum">
+            <enum name="Normal" value="0"/>
+            <enum name="Circle" value="1"/>
+            <enum name="Round" value="2"/>
+        </attr>
+    </declare-styleable>
+
+    <declare-styleable name="ShapeImageView">
+        <attr name="siv_border_color" format="color"/>
+        <attr name="siv_border_width" format="dimension"/>
+        <attr name="siv_corner_radius" format="dimension"/>
+        <attr name="siv_is_circle" format="boolean"/>
+        <attr name="siv_pressed_border_color" format="color"/>
+        <attr name="siv_pressed_border_width" format="dimension"/>
+        <attr name="siv_pressed_mask_color" format="color"/>
+        <attr name="siv_pressed_mode_enabled" format="boolean"/>
     </declare-styleable>
 
     <declare-styleable name="CircleProgressView">

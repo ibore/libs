@@ -15,15 +15,15 @@ import java.security.MessageDigest;
 
 /**
  * <pre>
- * description:
+ * description: 圆形效果
  * author: Ibore Xie
  * date: 2018/1/19 18:13
  * website: ibore.me
  * </pre>
  */
-public class GlideCircleTransformation extends BitmapTransformation {
+public class CropCircleTransformation extends BitmapTransformation {
 
-    public GlideCircleTransformation() {
+    public CropCircleTransformation() {
     }
 
     @Override

@@ -8,7 +8,6 @@ import android.support.annotation.NonNull;
 import java.io.IOException;
 
 import okhttp3.MediaType;
-import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okio.Buffer;
 import okio.BufferedSource;
@@ -25,7 +24,6 @@ import okio.Source;
  * </pre>
  */
 public class ProgressResponseBody extends ResponseBody {
-
 
     private String imageUrl;
     private ResponseBody responseBody;

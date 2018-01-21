@@ -41,7 +41,7 @@ import me.ibore.libs.util.SizeUtils;
  * website: ibore.me
  * </pre>
  */
-public class ShapeImageView extends ImageView {
+public class ShapeImageView extends android.support.v7.widget.AppCompatImageView {
 
     private static final int DEFAULT_BORDER_COLOR = Color.GRAY;
 
@@ -95,20 +95,20 @@ public class ShapeImageView extends ImageView {
 
         setScaleType(ImageView.ScaleType.CENTER_CROP);
 
-        TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.ShapeImageViewStyle, defStyleAttr, 0);
+        TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.ShapeImageView, defStyleAttr, 0);
 
-        mBorderWidth = array.getDimensionPixelSize(R.styleable.ShapeImageViewStyle_riv_border_width, 0);
-        mBorderColor = array.getColor(R.styleable.ShapeImageViewStyle_riv_border_color, DEFAULT_BORDER_COLOR);
-        mPressedBorderWidth = array.getDimensionPixelSize(R.styleable.ShapeImageViewStyle_riv_pressed_border_width, mBorderWidth);
-        mPressedBorderColor = array.getColor(R.styleable.ShapeImageViewStyle_riv_pressed_border_color, mBorderColor);
-        mPressedMaskColor = array.getColor(R.styleable.ShapeImageViewStyle_riv_pressed_mask_color, Color.TRANSPARENT);
+        mBorderWidth = array.getDimensionPixelSize(R.styleable.ShapeImageView_siv_border_width, 0);
+        mBorderColor = array.getColor(R.styleable.ShapeImageView_siv_border_color, DEFAULT_BORDER_COLOR);
+        mPressedBorderWidth = array.getDimensionPixelSize(R.styleable.ShapeImageView_siv_pressed_border_width, mBorderWidth);
+        mPressedBorderColor = array.getColor(R.styleable.ShapeImageView_siv_pressed_border_color, mBorderColor);
+        mPressedMaskColor = array.getColor(R.styleable.ShapeImageView_siv_pressed_mask_color, Color.TRANSPARENT);
         if (mPressedMaskColor != Color.TRANSPARENT) {
             mPressedColorFilter = new PorterDuffColorFilter(mPressedMaskColor, PorterDuff.Mode.DARKEN);
         }
 
-        mPressedModeEnabled = array.getBoolean(R.styleable.ShapeImageViewStyle_riv_pressed_mode_enabled, true);
-        mIsCircle = array.getBoolean(R.styleable.ShapeImageViewStyle_riv_is_circle, false);
-        mCornerRadius = array.getDimensionPixelSize(R.styleable.ShapeImageViewStyle_riv_corner_radius, 0);
+        mPressedModeEnabled = array.getBoolean(R.styleable.ShapeImageView_siv_pressed_mode_enabled, true);
+        mIsCircle = array.getBoolean(R.styleable.ShapeImageView_siv_is_circle, false);
+        mCornerRadius = array.getDimensionPixelSize(R.styleable.ShapeImageView_siv_corner_radius, 0);
         array.recycle();
     }
 
