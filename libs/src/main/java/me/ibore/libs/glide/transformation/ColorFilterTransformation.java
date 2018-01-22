@@ -15,6 +15,8 @@ import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 
 import java.security.MessageDigest;
 
+import me.ibore.libs.util.Utils;
+
 /**
  * description:
  * author: Ibore Xie
@@ -32,8 +34,8 @@ public class ColorFilterTransformation implements Transformation<Bitmap> {
 
     private int mColor;
 
-    public ColorFilterTransformation(Context context, int color) {
-        this(Glide.get(context).getBitmapPool(), color);
+    public ColorFilterTransformation(int color) {
+        this(Glide.get(Utils.getApp()).getBitmapPool(), color);
     }
 
     public ColorFilterTransformation(BitmapPool pool, int color) {

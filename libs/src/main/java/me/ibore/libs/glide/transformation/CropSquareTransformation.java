@@ -11,6 +11,8 @@ import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 
 import java.security.MessageDigest;
 
+import me.ibore.libs.util.Utils;
+
 /**
  * description:
  * author: Ibore Xie
@@ -26,8 +28,8 @@ public class CropSquareTransformation implements Transformation<Bitmap> {
 
     private BitmapPool mBitmapPool;
 
-    public CropSquareTransformation(Context context) {
-        this(Glide.get(context).getBitmapPool());
+    public CropSquareTransformation() {
+        this(Glide.get(Utils.getApp()).getBitmapPool());
     }
 
     public CropSquareTransformation(BitmapPool pool) {

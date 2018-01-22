@@ -17,6 +17,7 @@ import java.security.MessageDigest;
 
 import me.ibore.libs.glide.internal.FastBlur;
 import me.ibore.libs.glide.internal.RSBlur;
+import me.ibore.libs.util.Utils;
 
 /**
  * description: 模糊效果
@@ -34,34 +35,32 @@ public class BlurTransformation implements Transformation<Bitmap> {
     private static int MAX_RADIUS = 25;
     private static int DEFAULT_DOWN_SAMPLING = 1;
 
-    private Context mContext;
     private BitmapPool mBitmapPool;
 
     private int mRadius;
     private int mSampling;
 
-    public BlurTransformation(Context context) {
-        this(context, Glide.get(context).getBitmapPool(), MAX_RADIUS, DEFAULT_DOWN_SAMPLING);
+    public BlurTransformation() {
+        this(Glide.get(Utils.getApp()).getBitmapPool(), MAX_RADIUS, DEFAULT_DOWN_SAMPLING);
     }
 
-    public BlurTransformation(Context context, BitmapPool pool) {
-        this(context, pool, MAX_RADIUS, DEFAULT_DOWN_SAMPLING);
+    public BlurTransformation(BitmapPool pool) {
+        this(pool, MAX_RADIUS, DEFAULT_DOWN_SAMPLING);
     }
 
-    public BlurTransformation(Context context, BitmapPool pool, int radius) {
-        this(context, pool, radius, DEFAULT_DOWN_SAMPLING);
+    public BlurTransformation(BitmapPool pool, int radius) {
+        this(pool, radius, DEFAULT_DOWN_SAMPLING);
     }
 
-    public BlurTransformation(Context context, int radius) {
-        this(context, Glide.get(context).getBitmapPool(), radius, DEFAULT_DOWN_SAMPLING);
+    public BlurTransformation(int radius) {
+        this(Glide.get(Utils.getApp()).getBitmapPool(), radius, DEFAULT_DOWN_SAMPLING);
     }
 
-    public BlurTransformation(Context context, int radius, int sampling) {
-        this(context, Glide.get(context).getBitmapPool(), radius, sampling);
+    public BlurTransformation(int radius, int sampling) {
+        this(Glide.get(Utils.getApp()).getBitmapPool(), radius, sampling);
     }
 
-    public BlurTransformation(Context context, BitmapPool pool, int radius, int sampling) {
-        mContext = context.getApplicationContext();
+    public BlurTransformation(BitmapPool pool, int radius, int sampling) {
         mBitmapPool = pool;
         mRadius = radius;
         mSampling = sampling;
@@ -89,7 +88,7 @@ public class BlurTransformation implements Transformation<Bitmap> {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             try {
-                bitmap = RSBlur.blur(mContext, bitmap, mRadius);
+                bitmap = RSBlur.blur(context, bitmap, mRadius);
             } catch (RSRuntimeException e) {
                 bitmap = FastBlur.blur(bitmap, mRadius, true);
             }

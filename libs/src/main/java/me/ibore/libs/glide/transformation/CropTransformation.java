@@ -13,6 +13,8 @@ import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 
 import java.security.MessageDigest;
 
+import me.ibore.libs.util.Utils;
+
 /**
  * description:
  * author: Ibore Xie
@@ -38,24 +40,24 @@ public class CropTransformation implements Transformation<Bitmap> {
 
     private CropType mCropType = CropType.CENTER;
 
-    public CropTransformation(Context context) {
-        this(Glide.get(context).getBitmapPool());
+    public CropTransformation() {
+        this(Glide.get(Utils.getApp()).getBitmapPool());
     }
 
     public CropTransformation(BitmapPool pool) {
         this(pool, 0, 0);
     }
 
-    public CropTransformation(Context context, int width, int height) {
-        this(Glide.get(context).getBitmapPool(), width, height);
+    public CropTransformation(int width, int height) {
+        this(Glide.get(Utils.getApp()).getBitmapPool(), width, height);
     }
 
     public CropTransformation(BitmapPool pool, int width, int height) {
         this(pool, width, height, CropType.CENTER);
     }
 
-    public CropTransformation(Context context, int width, int height, CropType cropType) {
-        this(Glide.get(context).getBitmapPool(), width, height, cropType);
+    public CropTransformation(int width, int height, CropType cropType) {
+        this(Glide.get(Utils.getApp()).getBitmapPool(), width, height, cropType);
     }
 
     public CropTransformation(BitmapPool pool, int width, int height, CropType cropType) {

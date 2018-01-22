@@ -32,7 +32,6 @@ public class MaskTransformation implements Transformation<Bitmap> {
     private static final byte[] ID_BYTES = ID.getBytes(CHARSET);
 
     private static Paint sMaskingPaint = new Paint();
-    private Context mContext;
     private BitmapPool mBitmapPool;
     private int mMaskId;
 
@@ -45,13 +44,12 @@ public class MaskTransformation implements Transformation<Bitmap> {
      * the cache with the old mask. Because getId() return the same values if using the
      * same make file name. If you have a good idea please tell us, thanks.
      */
-    public MaskTransformation(Context context, int maskId) {
-        this(context, Glide.get(context).getBitmapPool(), maskId);
+    public MaskTransformation(int maskId) {
+        this(Glide.get(me.ibore.libs.util.Utils.getApp()).getBitmapPool(), maskId);
     }
 
-    public MaskTransformation(Context context, BitmapPool pool, int maskId) {
+    public MaskTransformation(BitmapPool pool, int maskId) {
         mBitmapPool = pool;
-        mContext = context.getApplicationContext();
         mMaskId = maskId;
     }
 
@@ -67,7 +65,7 @@ public class MaskTransformation implements Transformation<Bitmap> {
             result = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         }
 
-        Drawable mask = Utils.getMaskDrawable(mContext, mMaskId);
+        Drawable mask = Utils.getMaskDrawable(context, mMaskId);
 
         Canvas canvas = new Canvas(result);
         mask.setBounds(0, 0, width, height);

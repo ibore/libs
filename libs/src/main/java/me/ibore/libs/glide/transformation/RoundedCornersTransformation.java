@@ -16,6 +16,8 @@ import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 
 import java.security.MessageDigest;
 
+import me.ibore.libs.util.Utils;
+
 /**
  * description: 圆角效果
  * author: Ibore Xie
@@ -43,17 +45,17 @@ public class RoundedCornersTransformation implements Transformation<Bitmap> {
     private int mMargin;
     private CornerType mCornerType;
 
-    public RoundedCornersTransformation(Context context, int radius, int margin) {
-        this(context, radius, margin, CornerType.ALL);
+    public RoundedCornersTransformation(int radius, int margin) {
+        this(radius, margin, CornerType.ALL);
     }
 
     public RoundedCornersTransformation(BitmapPool pool, int radius, int margin) {
         this(pool, radius, margin, CornerType.ALL);
     }
 
-    public RoundedCornersTransformation(Context context, int radius, int margin,
+    public RoundedCornersTransformation(int radius, int margin,
                                         CornerType cornerType) {
-        this(Glide.get(context).getBitmapPool(), radius, margin, cornerType);
+        this(Glide.get(Utils.getApp()).getBitmapPool(), radius, margin, cornerType);
     }
 
     public RoundedCornersTransformation(BitmapPool pool, int radius, int margin,

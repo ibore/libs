@@ -15,6 +15,8 @@ import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 
 import java.security.MessageDigest;
 
+import me.ibore.libs.util.Utils;
+
 /**
  * description:
  * author: Ibore Xie
@@ -30,8 +32,8 @@ public class GrayscaleTransformation implements Transformation<Bitmap> {
 
     private BitmapPool mBitmapPool;
 
-    public GrayscaleTransformation(Context context) {
-        this(Glide.get(context).getBitmapPool());
+    public GrayscaleTransformation() {
+        this(Glide.get(Utils.getApp()).getBitmapPool());
     }
 
     public GrayscaleTransformation(BitmapPool pool) {

@@ -36,6 +36,61 @@ public class XImageView extends android.support.v7.widget.AppCompatImageView {
     private float leftBottomRadius;
     private int style;
 
+    public void setLeftTopRadius(float leftTopRadius) {
+        this.leftTopRadius = leftTopRadius;
+        if (style == Round) {
+            requestLayout();
+            invalidate();
+        }
+    }
+
+    public void setRightTopRadius(float rightTopRadius) {
+        this.rightTopRadius = rightTopRadius;
+        if (style == Round) {
+            requestLayout();
+            invalidate();
+        }
+    }
+
+    public void setRightBottomRadius(float rightBottomRadius) {
+        this.rightBottomRadius = rightBottomRadius;
+        if (style == Round) {
+            requestLayout();
+            invalidate();
+        }
+    }
+
+    public void setLeftBottomRadius(float leftBottomRadius) {
+        this.leftBottomRadius = leftBottomRadius;
+        if (style == Round) {
+            requestLayout();
+            invalidate();
+        }
+    }
+
+    public void setStyle(int style) {
+        if (this.style == style) return;
+        this.style = style;
+        requestLayout();
+        invalidate();
+    }
+
+    public void setBorderWidth(float borderWidth) {
+        this.borderWidth = borderWidth;
+        if (style == Round) {
+            requestLayout();
+            invalidate();
+        }
+    }
+
+    public void setBorderColor(int borderColor) {
+        this.borderColor = borderColor;
+        if (style == Round) {
+            requestLayout();
+            invalidate();
+        }
+    }
+
     private Paint mBitmapPaint;
     /**
      * 图片可视区
@@ -82,13 +137,10 @@ public class XImageView extends android.support.v7.widget.AppCompatImageView {
 
     private void init() {
         mBitmapPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-
         roundPath = new Path();
         borderPath = new Path();
-
         borderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         borderPaint.setStrokeWidth(borderWidth);
-
         setScaleType(ScaleType.CENTER_CROP);
     }
 

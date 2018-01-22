@@ -1,0 +1,23 @@
+apply plugin: 'com.novoda.bintray-release' // must be applied after your artifact generating plugin (eg. java / com.android.library)
+
+buildscript {
+    dependencies {
+        classpath 'com.novoda:bintray-release:0.8.0'
+    }
+}
+
+tasks.withType(Javadoc) {
+    options.addStringOption('Xdoclint:none', '-quiet')
+    options.addStringOption('encoding', 'UTF-8')
+    options.addStringOption('charSet', 'UTF-8')
+}
+
+publish {
+    userOrg = 'ibore'
+    groupId = 'me.ibore'
+    artifactId = 'video'
+    publishVersion = '1.0.0'
+    desc = 'Faster, more convenient use of the VideoPlayer'
+    website = 'https://github.com/ibore/video'
+}
+// gradlew clean build bintrayUpload -PbintrayUser=ibore -PbintrayKey=2b63920e528eebcc736978a70c86e7598f94ad2a -PdryRun=false

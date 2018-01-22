@@ -18,6 +18,8 @@ import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 
 import java.security.MessageDigest;
 
+import me.ibore.libs.util.Utils;
+
 /**
  * <pre>
  * description: 圆形效果
@@ -34,8 +36,8 @@ public class CropCircleTransformation implements Transformation<Bitmap> {
 
     private BitmapPool mBitmapPool;
 
-    public CropCircleTransformation(Context context) {
-        this(Glide.get(context).getBitmapPool());
+    public CropCircleTransformation() {
+        this(Glide.get(Utils.getApp()).getBitmapPool());
     }
 
     public CropCircleTransformation(BitmapPool pool) {
