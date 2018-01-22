@@ -9,8 +9,8 @@ tasks.withType(Javadoc) {
 publish {
     userOrg = 'ibore'
     groupId = 'me.ibore'
-    artifactId = 'video'
-    publishVersion = '1.0.0'
-    desc = 'Faster, more convenient use of the VideoPlayer'
-    website = 'https://github.com/ibore/video'
+    artifactId = 'libs'
+    publishVersion = '1.1.1'
+    desc = ''
+    website = ''
 }

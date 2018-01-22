@@ -1,2 +1,3 @@
 //include ':app', ':libs', ':video'
-include ':video'
+include ':libs'
+//include ':video'
