@@ -19,23 +19,18 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
-    lintOptions {
-        abortOnError false
-    }
-
 }
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:27.0.2'
 
-    compile 'tv.danmaku.ijk.media:ijkplayer-java:0.8.3'
-//    compile 'tv.danmaku.ijk.media:ijkplayer-exo:0.8.3'
-    compile 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.8.3'
-    compile 'tv.danmaku.ijk.media:ijkplayer-armv5:0.8.3'
-//    compile 'tv.danmaku.ijk.media:ijkplayer-arm64:0.8.3'
-    compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.8.3'
-//    compile 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.8.3'
+    compile 'tv.danmaku.ijk.media:ijkplayer-java:0.8.4'
+//    compile 'tv.danmaku.ijk.media:ijkplayer-exo:0.8.4'
+    compile 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.8.4'
+    compile 'tv.danmaku.ijk.media:ijkplayer-armv5:0.8.4'
+//    compile 'tv.danmaku.ijk.media:ijkplayer-arm64:0.8.4'
+    compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.8.4'
+//    compile 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.8.4'
 }
 apply from: "bintrayUpload.gradle"
