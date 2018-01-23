@@ -17,7 +17,7 @@ import butterknife.Unbinder;
 import me.ibore.libs.manager.ActivityManager;
 import me.ibore.libs.rxbus.RxBus;
 import me.ibore.libs.rxbus.Subscribe;
-import me.ibore.libs.util.ClassUtil;
+import me.ibore.libs.util.ClassUtils;
 
 /**
  * description:
@@ -41,7 +41,7 @@ public abstract class XActivity<P extends XPresenter> extends AppCompatActivity 
         setContentView(rootView);
         unbinder = ButterKnife.bind(this);
         onBindView(savedInstanceState);
-        presenter = ClassUtil.getClass(this, 0);
+        presenter = ClassUtils.getClass(this, 0);
         presenter.onAttach(this);
         RxBus.get().register(this);
         onBindData();

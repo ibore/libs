@@ -9,7 +9,7 @@ import java.lang.reflect.ParameterizedType;
  * website: ibore.me
  */
 
-public class ClassUtil {
+public class ClassUtils {
 
     @SuppressWarnings("unchecked")
     public static <T> T getClass(Object object, int position) {
