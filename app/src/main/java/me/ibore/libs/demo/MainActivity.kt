@@ -26,6 +26,8 @@ class MainActivity : AppCompatActivity() {
 
         xVideoPlayer.setUp("http://tanzi27niu.cdsb.mobi/wps/wp-content/uploads/2017/04/2017-04-28_18-20-56.mp4", null)
 
+        val okhttp = OkHttpClient()
+        okhttp.
     }
 }
 

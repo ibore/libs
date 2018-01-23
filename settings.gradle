@@ -1,4 +1,4 @@
 //include ':app', ':libs', ':video'
-//include ':libs'
-include ':social'
+include ':libs', ':image'
+//include ':social'
 //include ':video'

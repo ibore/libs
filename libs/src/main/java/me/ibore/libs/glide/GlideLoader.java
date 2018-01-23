@@ -23,8 +23,8 @@ import com.bumptech.glide.request.target.Target;
 import java.lang.ref.WeakReference;
 
 import me.ibore.libs.glide.transformation.CropCircleTransformation;
-import me.ibore.libs.http.ProgressListener;
-import me.ibore.libs.http.ProgressManager;
+import me.ibore.http.ProgressListener;
+import me.ibore.http.ProgressManager;
 
 /**
  * <pre>

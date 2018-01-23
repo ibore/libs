@@ -1,4 +1,4 @@
-package me.ibore.libs.http;
+package me.ibore.http;
 
 /**
  * description:
@@ -8,6 +8,7 @@ package me.ibore.libs.http;
  */
 
 public class XHttp {
+
 
 
 

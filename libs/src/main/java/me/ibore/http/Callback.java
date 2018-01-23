@@ -1,4 +1,6 @@
-package me.ibore.libs.http;
+package me.ibore.http;
+
+import java.io.File;
 
 /**
  * description:
@@ -7,10 +9,10 @@ package me.ibore.libs.http;
  * website: ibore.me
  */
 
-public interface XCallback<T> {
+public interface Callback<T> {
 
     void onSuccess(T t);
 
-    void onError(XHttpException e);
+    void onError(HttpException e);
 
 }

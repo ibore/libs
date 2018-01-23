@@ -1,10 +1,9 @@
-package me.ibore.libs.http;
+package me.ibore.http;
 
 import android.content.Context;
 import android.content.DialogInterface;
 
 import io.reactivex.observers.DisposableObserver;
-import me.ibore.libs.XApplication;
 import me.ibore.libs.util.NetworkUtils;
 import me.ibore.libs.view.LoadDialog;
 
@@ -15,18 +14,18 @@ import me.ibore.libs.view.LoadDialog;
  * website: ibore.me
  */
 
-public abstract class XHttpObserver<T> extends DisposableObserver<T> implements DialogInterface.OnCancelListener {
+public abstract class HttpObserver<T> extends DisposableObserver<T> implements DialogInterface.OnCancelListener {
 
     private LoadDialog loadDialog;
 
-    public XHttpObserver() {
+    public HttpObserver() {
     }
 
-    public XHttpObserver(Context context) {
+    public HttpObserver(Context context) {
         this(context, null);
     }
 
-    public XHttpObserver(Context context, String message) {
+    public HttpObserver(Context context, String message) {
         loadDialog = new LoadDialog(context, message);
         loadDialog.setOnCancelListener(this);
     }
@@ -36,7 +35,7 @@ public abstract class XHttpObserver<T> extends DisposableObserver<T> implements 
         if (null != loadDialog) loadDialog.show();
         if (!NetworkUtils.isConnected()) {
             dispose();
-            onError(new XHttpException(XHttpException.NetworkNotConnected, "网络未连接"));
+            onError(new HttpException(HttpException.NetworkNotConnected, "网络未连接"));
         }
     }
 

@@ -1,4 +1,4 @@
-package me.ibore.libs.http;
+package me.ibore.http;
 
 import android.text.TextUtils;
 
@@ -9,14 +9,14 @@ import android.text.TextUtils;
  * website: ibore.me
  */
 
-public class XHttpException extends Exception {
+public class HttpException extends Exception {
 
     public static final int NetworkNotConnected = 1000;
     public static final int SocketTimeout = 1001;
 
     private int mCode;
 
-    public XHttpException(int code, String detailMessage) {
+    public HttpException(int code, String detailMessage) {
         super(TextUtils.isEmpty(detailMessage) ? "" : detailMessage);
         this.mCode = code;
     }

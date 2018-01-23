@@ -15,7 +15,7 @@ import com.bumptech.glide.module.AppGlideModule;
 
 import java.io.InputStream;
 
-import me.ibore.libs.http.ProgressManager;
+import me.ibore.http.ProgressManager;
 
 /**
  * <pre>
@@ -25,12 +25,12 @@ import me.ibore.libs.http.ProgressManager;
  * website: ibore.me
  * </pre>
  */
-@GlideModule
-public class XAppGlideModule extends AppGlideModule {
-    @Override
-    public void registerComponents(@NonNull Context context, @NonNull Glide glide, @NonNull Registry registry) {
-        super.registerComponents(context, glide, registry);
-        registry.replace(GlideUrl.class, InputStream.class,
-                new OkHttpUrlLoader.Factory(ProgressManager.getOkHttpClient()));
-    }
-}
+//@GlideModule
+//public class XAppGlideModule extends AppGlideModule {
+//    @Override
+//    public void registerComponents(@NonNull Context context, @NonNull Glide glide, @NonNull Registry registry) {
+//        super.registerComponents(context, glide, registry);
+//        registry.replace(GlideUrl.class, InputStream.class,
+//                new OkHttpUrlLoader.Factory(ProgressManager.getOkHttpClient()));
+//    }
+//}
