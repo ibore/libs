@@ -1,4 +1,4 @@
-package me.ibore.libs.http;
+package me.ibore.http;
 
 import com.bumptech.glide.load.engine.GlideException;
 

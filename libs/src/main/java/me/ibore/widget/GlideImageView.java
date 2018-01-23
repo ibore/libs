@@ -12,7 +12,7 @@ import com.bumptech.glide.request.RequestOptions;
 
 import me.ibore.libs.glide.GlideImageViewListener;
 import me.ibore.libs.glide.GlideLoader;
-import me.ibore.libs.http.ProgressListener;
+import me.ibore.http.ProgressListener;
 
 /**
  * <pre>

@@ -20,7 +20,6 @@ public class WXCallbackActivity extends Activity implements IWXAPIEventHandler {
     protected WXHandler mWXHandler = null;
     protected WXHandler mWXCircleHandler = null;
 
-
     public WXCallbackActivity() {
 
     }

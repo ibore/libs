@@ -1,4 +1,4 @@
-package me.ibore.libs.http;
+package me.ibore.http;
 /**
  * Created by Administrator on 2018/1/19.
  */
