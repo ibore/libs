@@ -190,4 +190,30 @@ public final class StringUtils {
         }
         return new String(chars);
     }
+
+
+    public static boolean contentEquals(String s1, String s2) {
+        if (null == s1 ||  null == s2) {
+            return false;
+        } else {
+            return s1.contentEquals(s2);
+        }
+    }
+
+    public static boolean contains(String s1, String s2) {
+        if (null == s1 ||  null == s2) {
+            return false;
+        } else {
+            return s1.contains(s2);
+        }
+    }
+
+    public static boolean isEmpty(String s) {
+        if (null != s) {
+            if (s.length() > 0) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
