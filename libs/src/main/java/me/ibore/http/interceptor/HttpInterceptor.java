@@ -1,4 +1,4 @@
-package me.ibore.http;
+package me.ibore.http.interceptor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import okhttp3.Connection;
@@ -32,7 +33,7 @@ public class HttpInterceptor implements Interceptor {
 
     private static final Charset UTF8 = Charset.forName("UTF-8");
     private volatile Level printLevel = Level.NONE;
-    private java.util.logging.Level colorLevel;
+    private java.util.logging.Level colorLevel = java.util.logging.Level.WARNING;
     private Logger logger;
 
     public enum Level {

@@ -1,5 +1,8 @@
 package me.ibore.http;
 
+import android.os.Handler;
+import android.os.Looper;
+
 /**
  * description:
  * author: Ibore Xie
@@ -9,7 +12,14 @@ package me.ibore.http;
 
 public class XHttp {
 
+    private static int mRetryCount = 1;
 
+    public static Handler Handler = new Handler(Looper.getMainLooper());
+
+
+    public static int getRetryCount() {
+        return mRetryCount = 0;
+    }
 
 
 }

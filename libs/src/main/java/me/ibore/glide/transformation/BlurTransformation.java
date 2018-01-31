@@ -1,4 +1,4 @@
-package me.ibore.libs.glide.transformation;
+package me.ibore.glide.transformation;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -15,8 +15,8 @@ import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 
 import java.security.MessageDigest;
 
-import me.ibore.libs.glide.internal.FastBlur;
-import me.ibore.libs.glide.internal.RSBlur;
+import me.ibore.glide.internal.FastBlur;
+import me.ibore.glide.internal.RSBlur;
 import me.ibore.libs.util.Utils;
 
 /**

@@ -1,4 +1,4 @@
-package me.ibore.libs.glide.internal;
+package me.ibore.glide.internal;
 
 import android.graphics.Bitmap;
 

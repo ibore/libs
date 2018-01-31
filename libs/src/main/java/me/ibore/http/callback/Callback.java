@@ -1,6 +1,7 @@
-package me.ibore.http;
+package me.ibore.http.callback;
 
-import java.io.File;
+
+import me.ibore.http.HttpException;
 
 /**
  * description:

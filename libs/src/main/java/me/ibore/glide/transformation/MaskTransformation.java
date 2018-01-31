@@ -1,4 +1,4 @@
-package me.ibore.libs.glide.transformation;
+package me.ibore.glide.transformation;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -16,7 +16,7 @@ import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 
 import java.security.MessageDigest;
 
-import me.ibore.libs.glide.internal.Utils;
+import me.ibore.glide.internal.Utils;
 
 /**
  * description: 遮盖效果
