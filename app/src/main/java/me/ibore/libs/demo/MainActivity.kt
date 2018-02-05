@@ -4,11 +4,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import kotlinx.android.synthetic.main.activity_main.*
 import me.ibore.http.HttpException
 import me.ibore.http.callback.FileCallback
 import me.ibore.http.interceptor.HttpInterceptor
 import me.ibore.http.progress.ProgressInfo
 import me.ibore.http.progress.ProgressManager
+import me.ibore.widget.shadow.ViewShadow
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.BufferedInputStream
@@ -23,6 +25,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        ViewShadow.setElevation(tv_toast3, 20F, resources.getColor(R.color.shadow))
 //        roundImageView.setImageResource(R.mipmap.head)
 //        var transformation = RoundedCornersTransformation(10, 0)
 //        var transformation = RoundedCornersTransformation(10, 0)

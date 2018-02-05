@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -29,9 +29,30 @@
         <!--app:layout_constraintTop_toTopOf="parent" />-->
 
     <me.ibore.widget.ShadowView
-        app:shadowRound="56dp"
-        app:shadowWidth="10dp"
-        app:shadowSrc="@mipmap/sunset"
-        android:layout_width="144dp"
-        android:layout_height="144dp" />
-</android.support.constraint.ConstraintLayout>
+        app:shadowElevation="50dp"
+        android:background="@drawable/selector_icon"
+        app:shadowColor="@color/colorAccent"
+        android:layout_margin="10dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp">
+        <TextView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_centerHorizontal="true"
+            android:gravity="center"
+            android:text="Hello World!"
+            android:textColor="@android:color/white" />
+    </me.ibore.widget.ShadowView>
+
+    <TextView
+        android:background="@drawable/selector_icon"
+        android:id="@+id/tv_toast3"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:layout_margin="10dp"
+        android:gravity="center"
+        android:text="Hello World!"
+        android:textColor="@android:color/white"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="327dp" />
+</LinearLayout>
