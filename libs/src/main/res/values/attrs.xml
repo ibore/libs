@@ -53,4 +53,13 @@
         <attr name="cpv_reachCapRound" format="boolean"/>
     </declare-styleable>
 
+
+    <declare-styleable name="ShadowView">
+        <attr name="shadowRound" format="dimension" />
+        <attr name="shadowWidth" format="dimension" />
+        <attr name="shadowSrc" format="reference" />
+        <attr name="shadowColor" format="color" />
+    </declare-styleable>
+
+
 </resources>
