@@ -1,4 +1,4 @@
-package me.ibore.http.listener;
+package me.ibore.http;
 
 import me.ibore.http.HttpException;
 
@@ -6,7 +6,7 @@ import me.ibore.http.HttpException;
  * Created by Administrator on 2018/2/6.
  */
 
-public interface HttpListener<T> {
+public interface HttpListener<T> extends ProgressListener {
 
     void onSuccess(T t);
 

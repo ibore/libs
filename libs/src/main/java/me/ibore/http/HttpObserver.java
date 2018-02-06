@@ -1,4 +1,4 @@
-package me.ibore.http.observer;
+package me.ibore.http;
 
 import android.content.Context;
 import android.content.DialogInterface;

@@ -1,17 +1,12 @@
 package me.ibore.libs.demo
 
 import android.os.Bundle
-import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import kotlinx.android.synthetic.main.activity_main.*
 import me.ibore.http.*
-import me.ibore.http.observer.DownloadObserver
+import me.ibore.http.DownloadInfo
 import me.ibore.widget.ViewShadow
-
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import java.io.File
 
 
 class MainActivity : AppCompatActivity() {
@@ -24,22 +19,20 @@ class MainActivity : AppCompatActivity() {
         xImageView.setImageResource(R.mipmap.sunset)
         ViewShadow.setElevation(xImageView, 20F, resources.getColor(R.color.shadow))
 
-        XHttp.download("http://down.360safe.com/setup.exe",
+        XHttp.download("https://shouji.ssl.qihucdn.com/180202/172f26ca4742bf7ffaaa2b15ea448b38/com.qihoo.appstore_300070177.apk",
                 filesDir, object : DownloadObserver(){
-            override fun onSuccess(t: File?) {
-
+            override fun onSuccess(t: DownloadInfo?) {
+                Log.d("TAG", t.toString())
             }
 
             override fun onError(e: HttpException?) {
-
+                e!!.printStackTrace();
             }
 
             override fun onProgress(progressInfo: ProgressInfo?) {
-
+                Log.d("----", progressInfo.toString())
             }
         })
-
-
 
 //        roundImageView.setImageResource(R.mipmap.head)
 //        var transformation = RoundedCornersTransformation(10, 0)

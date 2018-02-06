@@ -1,4 +1,4 @@
-package me.ibore.http.listener;
+package me.ibore.http;
 
 import me.ibore.http.ProgressInfo;
 

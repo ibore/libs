@@ -11,17 +11,46 @@ import java.io.Serializable;
 
 public class ProgressInfo implements Serializable {
 
-    public static int DOWNLOAD = 1;
-    public static int UPLOAD = 1;
-    private int mode;
-    private int id;
+    /**
+     * 模式——下载
+     */
+    public final static int DOWNLOAD = 1;
+    /**
+     * 模式——上传
+     */
+    public final static int UPLOAD = 2;
+    /**
+     * 模式
+     */
+    private int mode = DOWNLOAD;
+    /**
+     * 请求网址
+     */
     private String url;
+    /**
+     * 当前长度
+     */
     private long current;
+    /**
+     * 总长度
+     */
     private long total;
-    private long progress;
+    /**
+     * 当前进度（以10000为单位）
+     */
+    private int progress;
+    /**
+     * 网速bytes/m
+     */
     private long speed;
-    private Object data;
+    /**
+     * TAG
+     */
     private Object tag;
+    /**
+     * 添加自定义的数据
+     */
+    private Object data;
 
     public int getMode() {
         return mode;
@@ -29,14 +58,6 @@ public class ProgressInfo implements Serializable {
 
     public void setMode(int mode) {
         this.mode = mode;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getUrl() {
@@ -63,11 +84,11 @@ public class ProgressInfo implements Serializable {
         this.total = total;
     }
 
-    public long getProgress() {
+    public int getProgress() {
         return progress;
     }
 
-    public void setProgress(long progress) {
+    public void setProgress(int progress) {
         this.progress = progress;
     }
 
@@ -79,6 +100,14 @@ public class ProgressInfo implements Serializable {
         this.speed = speed;
     }
 
+    public Object getTag() {
+        return tag;
+    }
+
+    public void setTag(Object tag) {
+        this.tag = tag;
+    }
+
     public Object getData() {
         return data;
     }
@@ -87,11 +116,17 @@ public class ProgressInfo implements Serializable {
         this.data = data;
     }
 
-    public Object getTag() {
-        return tag;
-    }
-
-    public void setTag(Object tag) {
-        this.tag = tag;
+    @Override
+    public String toString() {
+        return "ProgressInfo{" +
+                "mode=" + mode +
+                ", url='" + url + '\'' +
+                ", current=" + current +
+                ", total=" + total +
+                ", progress=" + progress +
+                ", speed=" + speed +
+                ", tag=" + tag +
+                ", data=" + data +
+                '}';
     }
 }
