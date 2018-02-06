@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import kotlinx.android.synthetic.main.activity_main.*
 import me.ibore.http.*
+import me.ibore.http.observer.DownloadObserver
 import me.ibore.widget.ViewShadow
 
 import okhttp3.OkHttpClient
@@ -22,6 +23,24 @@ class MainActivity : AppCompatActivity() {
 
         xImageView.setImageResource(R.mipmap.sunset)
         ViewShadow.setElevation(xImageView, 20F, resources.getColor(R.color.shadow))
+
+        XHttp.download("http://down.360safe.com/setup.exe",
+                filesDir, object : DownloadObserver(){
+            override fun onSuccess(t: File?) {
+
+            }
+
+            override fun onError(e: HttpException?) {
+
+            }
+
+            override fun onProgress(progressInfo: ProgressInfo?) {
+
+            }
+        })
+
+
+
 //        roundImageView.setImageResource(R.mipmap.head)
 //        var transformation = RoundedCornersTransformation(10, 0)
 //        var transformation = RoundedCornersTransformation(10, 0)
@@ -45,8 +64,8 @@ class MainActivity : AppCompatActivity() {
 //        startActivityForResult(intent, 1)
 
         //Okhttp/Retofit 下载监听
-        val mHttpInterceptor = HttpInterceptor("DEMO")
-        mHttpInterceptor.setPrintLevel(HttpInterceptor.Level.BODY)
+//        val mHttpInterceptor = HttpInterceptor("DEMO")
+//        mHttpInterceptor.setPrintLevel(HttpInterceptor.Level.BODY)
 
 //        val mOkHttpClient = ProgressManager.getInstance().with(OkHttpClient.Builder().addInterceptor(mHttpInterceptor)).build()
 //

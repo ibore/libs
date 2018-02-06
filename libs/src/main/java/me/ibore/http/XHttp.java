@@ -33,7 +33,7 @@ public class XHttp {
     }
 
 
-    public void download(String url, File filePath, DownloadObserver observer) {
+    public static void download(String url, File filePath, DownloadObserver observer) {
         DownloadManager.getInstance().download(url, filePath, observer);
     }
 }

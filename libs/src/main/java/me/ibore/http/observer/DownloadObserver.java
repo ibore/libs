@@ -1,5 +1,7 @@
 package me.ibore.http.observer;
 
+import java.io.File;
+
 import me.ibore.http.HttpException;
 import me.ibore.http.ProgressInfo;
 import me.ibore.http.listener.HttpListener;
@@ -9,12 +11,12 @@ import me.ibore.http.listener.ProgressListener;
  * Created by Administrator on 2018/2/6.
  */
 
-public abstract class DownloadObserver extends HttpObserver<ProgressInfo> implements ProgressListener, HttpListener<String> {
+public abstract class DownloadObserver extends HttpObserver<ProgressInfo> implements ProgressListener, HttpListener<File> {
 
     @Override
     public void onNext(ProgressInfo httpInfo) {
         if (httpInfo.getCurrent() == httpInfo.getTotal()) {
-            onSuccess((String) httpInfo.getData());
+            onSuccess((File) httpInfo.getData());
         } else {
             onProgress(httpInfo);
         }
