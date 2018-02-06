@@ -1,4 +1,4 @@
-package me.ibore.widget.shadow;
+package me.ibore.widget;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -25,7 +25,6 @@ import java.util.Arrays;
  */
 
 public final class ViewShadow {
-
     private static final String TAG = "ViewShadow";
 
     private static final int SHADOW_RADIUS = 4;

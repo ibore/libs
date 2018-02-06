@@ -10,13 +10,10 @@ import me.ibore.http.callback.FileCallback
 import me.ibore.http.interceptor.HttpInterceptor
 import me.ibore.http.progress.ProgressInfo
 import me.ibore.http.progress.ProgressManager
-import me.ibore.widget.shadow.ViewShadow
+import me.ibore.widget.ViewShadow
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.io.BufferedInputStream
 import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
 
 
 class MainActivity : AppCompatActivity() {
