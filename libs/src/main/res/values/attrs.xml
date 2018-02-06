@@ -1,29 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <declare-styleable name="XImageView">
-        <attr name="riv_borderWidth" format="dimension|reference"/>
-        <attr name="riv_borderColor" format="color|reference"/>
-        <attr name="riv_leftTopRadius" format="dimension|reference"/>
-        <attr name="riv_rightTopRadius" format="dimension|reference"/>
-        <attr name="riv_rightBottomRadius" format="dimension|reference"/>
-        <attr name="riv_leftBottomRadius" format="dimension|reference"/>
-        <attr name="riv_style" format="enum">
-            <enum name="Normal" value="0"/>
-            <enum name="Circle" value="1"/>
-            <enum name="Round" value="2"/>
-        </attr>
-    </declare-styleable>
-
     <declare-styleable name="ShapeImageView">
-        <attr name="siv_border_color" format="color"/>
-        <attr name="siv_border_width" format="dimension"/>
-        <attr name="siv_corner_radius" format="dimension"/>
-        <attr name="siv_is_circle" format="boolean"/>
-        <attr name="siv_pressed_border_color" format="color"/>
-        <attr name="siv_pressed_border_width" format="dimension"/>
-        <attr name="siv_pressed_mask_color" format="color"/>
-        <attr name="siv_pressed_mode_enabled" format="boolean"/>
+        <attr name="siv_borderWidth" format="dimension|reference"/>
+        <attr name="siv_borderColor" format="color|reference"/>
+        <attr name="siv_radius" format="dimension|reference"/>
+        <attr name="siv_leftTopRadius" format="dimension|reference"/>
+        <attr name="siv_rightTopRadius" format="dimension|reference"/>
+        <attr name="siv_rightBottomRadius" format="dimension|reference"/>
+        <attr name="siv_leftBottomRadius" format="dimension|reference"/>
+        <attr name="siv_style" format="enum">
+            <enum name="normal" value="0"/>
+            <enum name="circle" value="1"/>
+            <enum name="round" value="2"/>
+        </attr>
     </declare-styleable>
 
     <declare-styleable name="CircleProgressView">

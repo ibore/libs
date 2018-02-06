@@ -3,6 +3,12 @@ package me.ibore.http;
 import android.os.Handler;
 import android.os.Looper;
 
+import java.io.File;
+
+import me.ibore.http.download.DownloadManager;
+import me.ibore.http.observer.DownloadObserver;
+import okhttp3.OkHttpClient;
+
 /**
  * description:
  * author: Ibore Xie
@@ -22,4 +28,12 @@ public class XHttp {
     }
 
 
+    public static OkHttpClient getOkHttpClient() {
+        return new OkHttpClient.Builder().build();
+    }
+
+
+    public void download(String url, File filePath, DownloadObserver observer) {
+        DownloadManager.getInstance().download(url, filePath, observer);
+    }
 }

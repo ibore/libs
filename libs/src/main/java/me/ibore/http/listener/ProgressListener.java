@@ -1,4 +1,6 @@
-package me.ibore.http.progress;
+package me.ibore.http.listener;
+
+import me.ibore.http.ProgressInfo;
 
 /**
  * description: OKHttp进度回调类
@@ -9,11 +11,6 @@ package me.ibore.http.progress;
 
 public interface ProgressListener {
 
-    /**
-     * 进度监听
-     *
-     * @param progressInfo 关于进度的所有信息
-     */
     void onProgress(ProgressInfo progressInfo);
 
 }

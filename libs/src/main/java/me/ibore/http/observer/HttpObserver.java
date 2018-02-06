@@ -1,9 +1,11 @@
-package me.ibore.http;
+package me.ibore.http.observer;
 
 import android.content.Context;
 import android.content.DialogInterface;
 
 import io.reactivex.observers.DisposableObserver;
+import me.ibore.http.HttpException;
+import me.ibore.http.listener.HttpListener;
 import me.ibore.libs.util.NetworkUtils;
 import me.ibore.libs.view.LoadDialog;
 
@@ -16,7 +18,7 @@ import me.ibore.libs.view.LoadDialog;
 
 public abstract class HttpObserver<T> extends DisposableObserver<T> implements DialogInterface.OnCancelListener {
 
-    private LoadDialog loadDialog;
+    LoadDialog loadDialog;
 
     public HttpObserver() {
     }
@@ -37,11 +39,6 @@ public abstract class HttpObserver<T> extends DisposableObserver<T> implements D
             dispose();
             onError(new HttpException(HttpException.NetworkNotConnected, "网络未连接"));
         }
-    }
-
-    @Override
-    public void onError(Throwable e) {
-        onComplete();
     }
 
     @Override

@@ -1,16 +1,13 @@
 package me.ibore.libs.demo
 
-import android.content.Intent
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import kotlinx.android.synthetic.main.activity_main.*
-import me.ibore.http.HttpException
-import me.ibore.http.callback.FileCallback
-import me.ibore.http.interceptor.HttpInterceptor
-import me.ibore.http.progress.ProgressInfo
-import me.ibore.http.progress.ProgressManager
+import me.ibore.http.*
 import me.ibore.widget.ViewShadow
+
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
@@ -23,7 +20,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        ViewShadow.setElevation(tv_toast3, 20F, resources.getColor(R.color.shadow))
+        xImageView.setImageResource(R.mipmap.sunset)
+        ViewShadow.setElevation(xImageView, 20F, resources.getColor(R.color.shadow))
 //        roundImageView.setImageResource(R.mipmap.head)
 //        var transformation = RoundedCornersTransformation(10, 0)
 //        var transformation = RoundedCornersTransformation(10, 0)
@@ -50,26 +48,26 @@ class MainActivity : AppCompatActivity() {
         val mHttpInterceptor = HttpInterceptor("DEMO")
         mHttpInterceptor.setPrintLevel(HttpInterceptor.Level.BODY)
 
-        val mOkHttpClient = ProgressManager.getInstance().with(OkHttpClient.Builder().addInterceptor(mHttpInterceptor)).build()
-
-        val file = File(cacheDir, "download")
-        val fileCallback = object : FileCallback(file) {
-            override fun onSuccess(t: File?) {
-
-            }
-
-            override fun onProgress(progressInfo: ProgressInfo?) {
-                Log.d("----", progressInfo.toString())
-
-            }
-            override fun onError(e: HttpException?) {
-
-            }
-        }
-        ProgressManager.getInstance().addResponseListener(mDownloadUrl, fileCallback)
-        val request = Request.Builder()
-                .url(mDownloadUrl)
-                .build()
-        mOkHttpClient.newCall(request).enqueue(fileCallback)
+//        val mOkHttpClient = ProgressManager.getInstance().with(OkHttpClient.Builder().addInterceptor(mHttpInterceptor)).build()
+//
+//        val file = File(cacheDir, "download")
+//        val fileCallback = object : FileCallback(file) {
+//            override fun onSuccess(t: File?) {
+//
+//            }
+//
+//            override fun onProgress(progressInfo: ProgressInfo?) {
+//                Log.d("----", progressInfo.toString())
+//
+//            }
+//            override fun onError(e: HttpException?) {
+//
+//            }
+//        }
+//        ProgressManager.getInstance().addResponseListener(mDownloadUrl, fileCallback)
+//        val request = Request.Builder()
+//                .url(mDownloadUrl)
+//                .build()
+//        mOkHttpClient.newCall(request).enqueue(fileCallback)
     }
 }

@@ -1,4 +1,4 @@
-package me.ibore.http.interceptor;
+package me.ibore.http;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

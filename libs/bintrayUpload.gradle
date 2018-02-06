@@ -10,7 +10,7 @@ publish {
     userOrg = 'ibore'
     groupId = 'me.ibore'
     artifactId = 'libs'
-    publishVersion = '1.2.0'
+    publishVersion = '1.2.1'
     desc = ''
     website = ''
 }
