@@ -11,6 +11,9 @@ import java.io.Serializable;
 
 public class ProgressInfo implements Serializable {
 
+    public static int DOWNLOAD = 1;
+    public static int UPLOAD = 1;
+    private int mode;
     private int id;
     private String url;
     private long current;
@@ -19,6 +22,14 @@ public class ProgressInfo implements Serializable {
     private long speed;
     private Object data;
     private Object tag;
+
+    public int getMode() {
+        return mode;
+    }
+
+    public void setMode(int mode) {
+        this.mode = mode;
+    }
 
     public int getId() {
         return id;
@@ -76,11 +87,11 @@ public class ProgressInfo implements Serializable {
         this.data = data;
     }
 
-//    public Object getTag() {
-//        return tag;
-//    }
-//
-//    public void setTag(Object tag) {
-//        this.tag = tag;
-//    }
+    public Object getTag() {
+        return tag;
+    }
+
+    public void setTag(Object tag) {
+        this.tag = tag;
+    }
 }
