@@ -7,7 +7,7 @@ import android.graphics.BitmapFactory;
  * Created by Administrator on 2018/2/6.
  */
 
-public abstract class BitmapObserver extends HttpObserver<HttpInfo> implements HttpListener<BitmapInfo> {
+public abstract class BitmapObserver extends HttpObserver<HttpInfo> implements HttpListener<BitmapInfo>, ProgressListener {
 
     @Override
     public void onNext(HttpInfo httpInfo) {

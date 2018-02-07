@@ -4,7 +4,7 @@ package me.ibore.http;
  * Created by Administrator on 2018/2/6.
  */
 
-public abstract class DownloadObserver extends HttpObserver<HttpInfo> implements HttpListener<DownloadInfo> {
+public abstract class DownloadObserver extends HttpObserver<HttpInfo> implements HttpListener<DownloadInfo>, ProgressListener {
 
     @Override
     public void onNext(HttpInfo httpInfo) {
