@@ -1,7 +1,5 @@
 package me.ibore.http;
 
-import me.ibore.http.listener.HttpListener;
-
 /**
  * Created by Administrator on 2018/2/6.
  */

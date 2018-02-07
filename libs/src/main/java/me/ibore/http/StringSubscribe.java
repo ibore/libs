@@ -21,17 +21,16 @@ import okhttp3.Response;
 
 public class StringSubscribe implements ObservableOnSubscribe<HttpInfo> {
 
-    private HttpInfo<String> httpInfo;
+    private HttpInfo<StringInfo> httpInfo;
 
-    public StringSubscribe(HttpInfo<String> httpInfo) {
+    public StringSubscribe(HttpInfo<StringInfo> httpInfo) {
         this.httpInfo = httpInfo;
     }
 
     @Override
     public void subscribe(ObservableEmitter<HttpInfo> e) throws Exception {
         ProgressInfo progressInfo = httpInfo.getProgressInfo();
-        String downloadInfo  = httpInfo.getResponseInfo();
-
+        StringInfo stringInfo = httpInfo.getResponseInfo();
         if (progressInfo.getCurrent() == progressInfo.getTotal()) {
             e.onNext(httpInfo);
         } else {
@@ -53,7 +52,7 @@ public class StringSubscribe implements ObservableOnSubscribe<HttpInfo> {
                 int len;
                 long lastRefreshUiTime = 0;
                 while ((len = is.read(buffer)) != -1) {
-                    stringBuffer.append(buffer, 0, len);
+                    stringBuffer.append(buffer);
                     bytesWritten += len;
                     long curTime = System.currentTimeMillis();
                     long lastWriteBytes = 0;
@@ -67,14 +66,14 @@ public class StringSubscribe implements ObservableOnSubscribe<HttpInfo> {
                         progressInfo.setSpeed(networkSpeed);
                         progressInfo.setCurrent(bytesWritten);
                         progressInfo.setProgress((int) (bytesWritten * 10000 / contentLength));
+                        stringInfo.setData(stringBuffer.toString());
                         e.onNext(httpInfo);
                     }
                 }
-                fileOutputStream.flush();
             } finally {
-                CloseUtils.closeIO(is, fileOutputStream);
+                CloseUtils.closeIO(is);
             }
-            e.onComplete();//完成
+            e.onComplete();
         }
 
     }

@@ -4,16 +4,23 @@ import android.os.Handler;
 import android.os.Looper;
 
 import java.io.File;
-import java.io.ObjectOutput;
+
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import me.ibore.libs.R;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 import static me.ibore.http.Utils.CHECKNULL;
-import static me.ibore.http.Utils.createHttpInfo;
+import static me.ibore.http.Utils.createBitmapInfo;
+import static me.ibore.http.Utils.createDownloadInfo;
+import static me.ibore.http.Utils.createStringInfo;
+
 
 /**
  * description:
@@ -24,36 +31,102 @@ import static me.ibore.http.Utils.createHttpInfo;
 
 public class XHttp {
 
-    public static final int RETRY_COUNT = 1;
+    static int RETRY_COUNT = 3;
 
-    public static final long REFRESH_TIME = 300;
+    static int REFRESH_TIME = 300;
 
-    public static Handler Handler = new Handler(Looper.getMainLooper());
+    static int TIME_OUT = 10000;
 
+    private static OkHttpClient mOkHttpClient;
+
+    public static final Handler Handler = new Handler(Looper.getMainLooper());
+
+    /**
+     * 初始化
+     * @param okHttpClient 自定义的OKHttpClient
+     * @param RETRY_COUNT 重试次数(默认3次)
+     * @param REFRESH_TIME 进度刷新时间(默认300)
+     */
+    public static void init(OkHttpClient okHttpClient, int RETRY_COUNT, int REFRESH_TIME) {
+        XHttp.mOkHttpClient = okHttpClient;
+        XHttp.RETRY_COUNT = RETRY_COUNT;
+        XHttp.REFRESH_TIME = REFRESH_TIME;
+        XHttp.TIME_OUT = okHttpClient.connectTimeoutMillis();
+    }
+
+    /**
+     * 获取OkHttpClient
+     * @return OkHttpClient
+     */
     public static OkHttpClient getOkHttpClient() {
-        HttpInterceptor httpInterceptor = new HttpInterceptor("HTTP");
-        httpInterceptor.setPrintLevel(HttpInterceptor.Level.BODY);
-        return new OkHttpClient.Builder().addInterceptor(httpInterceptor).build();
+        if (null == mOkHttpClient) {
+            HttpInterceptor httpInterceptor = new HttpInterceptor("HTTP");
+            httpInterceptor.setPrintLevel(HttpInterceptor.Level.BODY);
+            mOkHttpClient = new OkHttpClient.Builder().addInterceptor(httpInterceptor).build();
+        }
+        return mOkHttpClient;
     }
 
-    public static void download(String url, File fileDirs, DownloadObserver downloadObserver) {
+    /**
+     * 创建Retrofit
+     * @param baseUrl 公共网址
+     * @return Retrofit
+     */
+    public static Retrofit createRetrofit(String baseUrl) {
+        Retrofit retrofit= new Retrofit.Builder()
+                .baseUrl(baseUrl)
+                .client(getOkHttpClient())
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .build();
+        return retrofit;
+    }
+
+    /**
+     * 下载文件（带缓存）支持断点下载
+     * @param url
+     * @param fileDirs
+     * @param observer
+     */
+    public static void download(String url, File fileDirs, DownloadObserver observer) {
         CHECKNULL(getOkHttpClient());
         Observable.just(url)
-                .flatMap(s -> Observable.just(createHttpInfo(s, fileDirs)))
+                .flatMap(s -> Observable.just(createDownloadInfo(s, fileDirs)))
                 .flatMap(httpInfo -> Observable.create(new DownloadSubscribe(httpInfo)))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
-                .subscribe(downloadObserver);
+                .subscribe(observer);
     }
 
-    public static void download(String url, File fileDirs, BitmapObserver bitmapObserver) {
+    /**
+     * 下载图片（带缓存）支持断点下载
+     * @param url 王子
+     * @param fileDirs 缓存目录
+     * @param observer 回调
+     */
+    public static void download(String url, File fileDirs, BitmapObserver observer) {
         CHECKNULL(getOkHttpClient());
         Observable.just(url)
-                .flatMap(s -> Observable.just(createHttpInfo(s, fileDirs)))
+                .flatMap(s -> Observable.just(createBitmapInfo(s, fileDirs)))
                 .flatMap(httpInfo -> Observable.create(new DownloadSubscribe(httpInfo)))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
-                .subscribe(bitmapObserver);
+                .subscribe(observer);
+    }
+
+    /**
+     * 下载数据
+     * @param url 网址
+     * @param observer 回调
+     */
+    public static void download(String url, StringObserver observer) {
+        CHECKNULL(getOkHttpClient());
+        Observable.just(url)
+                .flatMap(s -> Observable.just(createStringInfo(s)))
+                .flatMap(httpInfo -> Observable.create(new StringSubscribe(httpInfo)))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(observer);
     }
 
     public static void get(String url) {

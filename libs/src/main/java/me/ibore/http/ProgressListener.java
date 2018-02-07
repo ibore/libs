@@ -1,6 +1,5 @@
 package me.ibore.http;
 
-import me.ibore.http.ProgressInfo;
 
 /**
  * description: OKHttp进度回调类

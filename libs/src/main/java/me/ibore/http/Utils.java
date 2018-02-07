@@ -3,7 +3,6 @@ package me.ibore.http;
 import java.io.File;
 import java.io.IOException;
 
-import me.ibore.http.listener.HttpListener;
 import okhttp3.Request;
 import okhttp3.Response;
 
@@ -21,7 +20,7 @@ class Utils {
         }
     }
 
-    public static HttpInfo createHttpInfo(String url, File fileDirs) throws IOException {
+    public static HttpInfo createDownloadInfo(String url, File fileDirs) throws IOException {
         HttpInfo<DownloadInfo> httpInfo = new HttpInfo<>();
         ProgressInfo progressInfo = new ProgressInfo();
         progressInfo.setMode(ProgressInfo.DOWNLOAD);
@@ -36,9 +35,38 @@ class Utils {
         return httpInfo;
     }
 
-    public static long getContentLength(String downloadUrl) {
+    public static HttpInfo createBitmapInfo(String url, File fileDirs) throws IOException {
+        HttpInfo<BitmapInfo> httpInfo = new HttpInfo<>();
+        ProgressInfo progressInfo = new ProgressInfo();
+        progressInfo.setMode(ProgressInfo.DOWNLOAD);
+        progressInfo.setUrl(url);
+        progressInfo.setTotal(getContentLength(url));
+        BitmapInfo bitmapInfo = new BitmapInfo();
+        bitmapInfo.setUrl(url);
+        bitmapInfo.setFileName(url.substring(url.lastIndexOf("/")));
+        bitmapInfo.setFile(new File(fileDirs, bitmapInfo.getFileName()));
+        httpInfo.setProgressInfo(progressInfo);
+        httpInfo.setResponseInfo(bitmapInfo);
+        return httpInfo;
+    }
+
+    public static HttpInfo<StringInfo> createStringInfo(String url) {
+        HttpInfo<StringInfo> httpInfo = new HttpInfo<>();
+        ProgressInfo progressInfo = new ProgressInfo();
+        progressInfo.setMode(ProgressInfo.DOWNLOAD);
+        progressInfo.setUrl(url);
+        progressInfo.setTotal(getContentLength(url));
+        StringInfo stringInfo = new StringInfo();
+        stringInfo.setUrl(url);
+        httpInfo.setProgressInfo(progressInfo);
+        httpInfo.setResponseInfo(stringInfo);
+        return httpInfo;
+    }
+
+
+    public static long getContentLength(String url) {
         Request request = new Request.Builder()
-                .url(downloadUrl)
+                .url(url)
                 .build();
         try {
             Response response = getOkHttpClient().newCall(request).execute();

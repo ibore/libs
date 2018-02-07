@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 
 import io.reactivex.observers.DisposableObserver;
-import me.ibore.http.HttpException;
-import me.ibore.http.listener.HttpListener;
 import me.ibore.libs.util.NetworkUtils;
 import me.ibore.libs.view.LoadDialog;
 

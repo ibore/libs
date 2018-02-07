@@ -19,7 +19,7 @@ public class XApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        this.mContext = getApplicationContext();
+        mContext = getApplicationContext();
         Utils.init(this);
     }
 

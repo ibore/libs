@@ -1,16 +1,16 @@
 package me.ibore.http;
 
 /**
- * Created by Administrator on 2018/2/6.
+ * Created by Administrator on 2018/2/7.
  */
 
-public abstract class DownloadObserver extends HttpObserver<HttpInfo> implements HttpListener<DownloadInfo> {
+public abstract class StringObserver extends HttpObserver<HttpInfo> implements HttpListener<StringInfo> {
 
     @Override
     public void onNext(HttpInfo httpInfo) {
         onProgress(httpInfo.getProgressInfo());
         if (httpInfo.getProgressInfo().getCurrent() == httpInfo.getProgressInfo().getTotal()) {
-            onSuccess((DownloadInfo) httpInfo.getResponseInfo());
+            onSuccess((StringInfo) httpInfo.getResponseInfo());
         }
     }
 
@@ -23,5 +23,4 @@ public abstract class DownloadObserver extends HttpObserver<HttpInfo> implements
     public void onError(Throwable e) {
         Utils.OnError(this, e);
     }
-
 }

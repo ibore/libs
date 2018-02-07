@@ -1,5 +1,7 @@
 package me.ibore.libs.demo
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
@@ -17,16 +19,15 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         xImageView.setImageResource(R.mipmap.sunset)
-        ViewShadow.setElevation(xImageView, 20F, resources.getColor(R.color.shadow))
+//        ViewShadow.setElevation(xImageView, 20F, resources.getColor(R.color.shadow))
 
-        XHttp.download("https://shouji.ssl.qihucdn.com/180202/172f26ca4742bf7ffaaa2b15ea448b38/com.qihoo.appstore_300070177.apk",
-                filesDir, object : DownloadObserver(){
-            override fun onSuccess(t: DownloadInfo?) {
-                Log.d("TAG", t.toString())
+        XHttp.download("http://p1.so.qhmsg.com/t014e1de0f43d7b2066.jpg", filesDir, object : BitmapObserver(){
+            override fun onSuccess(t: BitmapInfo?) {
+                xImageView.setImageBitmap(t!!.bitmap)
             }
 
             override fun onError(e: HttpException?) {
-                e!!.printStackTrace();
+                e!!.printStackTrace()
             }
 
             override fun onProgress(progressInfo: ProgressInfo?) {
