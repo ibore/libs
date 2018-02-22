@@ -1,14 +1,11 @@
 package me.ibore.libs.demo
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import kotlinx.android.synthetic.main.activity_main.*
 import me.ibore.http.*
-import me.ibore.http.DownloadInfo
-import me.ibore.widget.ViewShadow
+import me.ibore.libs.util.ToastUtils
+import okhttp3.OkHttpClient
 
 
 class MainActivity : AppCompatActivity() {
@@ -18,16 +15,25 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        xImageView.setImageResource(R.mipmap.sunset)
+//        xImageView.setImageResource(R.mipmap.sunset)
 //        ViewShadow.setElevation(xImageView, 20F, resources.getColor(R.color.shadow))
 
-        XHttp.download("http://p1.so.qhmsg.com/t014e1de0f43d7b2066.jpg", filesDir, object : BitmapObserver(){
-            override fun onSuccess(t: BitmapInfo?) {
-                xImageView.setImageBitmap(t!!.bitmap)
+        val httpInterceptor = HttpInterceptor("HTTP")
+        httpInterceptor.setPrintLevel(HttpInterceptor.Level.BODY)
+        val mOkHttpClient : OkHttpClient = OkHttpClient.Builder().addInterceptor(httpInterceptor).build()
+        XHttp.init(applicationContext, mOkHttpClient, 3 , 300)
+        XHttp.download("https://www.so.com/?src=so.com", object : StringObserver(){
+            override fun onSuccess(t: StringInfo?) {
+//                xImageView.setImageBitmap(BitmapFactory.decodeStream(ByteArrayInputStream(t!!.data.toByteArray())))
             }
+//
+//            override fun onSuccess(t: DownloadInfo?) {
+//                xImageView.setImageBitmap(BitmapFactory.decodeFile(t!!.file.absolutePath))
+//            }
 
             override fun onError(e: HttpException?) {
                 e!!.printStackTrace()
+                ToastUtils.showShort(e.message)
             }
 
             override fun onProgress(progressInfo: ProgressInfo?) {

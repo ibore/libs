@@ -54,8 +54,7 @@ public abstract class XDialog extends Dialog {
         super.dismiss();
     }
 
-    protected abstract @LayoutRes
-    int getLayoutId();
+    protected abstract @LayoutRes int getLayoutId();
 
     protected abstract void onBindView(Bundle savedInstanceState);
 

@@ -4,7 +4,7 @@ android {
     compileSdkVersion 27
 
     defaultConfig {
-        minSdkVersion 15
+        minSdkVersion 16
         targetSdkVersion 27
         versionCode 7
         versionName "1.2.1"
@@ -50,6 +50,7 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.5.0'
     // 更方便的RecyclerView
     compile 'me.ibore.widget:recyclerview:1.2.0'
+    compile 'me.ibore:http:1.0.0'
 
 }
 

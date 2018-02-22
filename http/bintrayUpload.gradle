@@ -9,8 +9,8 @@ tasks.withType(Javadoc) {
 publish {
     userOrg = 'ibore'
     groupId = 'me.ibore'
-    artifactId = 'libs'
-    publishVersion = '1.2.4'
-    desc = ''
-    website = ''
+    artifactId = 'http'
+    publishVersion = '1.0.0'
+    desc = 'https://www.github.com/ibore/http'
+    website = 'https://www.github.com/ibore/http'
 }
