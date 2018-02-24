@@ -88,6 +88,34 @@ public final class StringUtils {
     }
 
     /**
+     * 判断两字符串是否相等
+     * @param a 待校验字符串 a
+     * @param b 待校验字符串 b
+     * @return
+     */
+    public static boolean contentEquals(String a, String b) {
+        if (null == a ||  null == b) {
+            return false;
+        } else {
+            return a.contentEquals(b);
+        }
+    }
+
+    /**
+     * 判断两字符串是否包含
+     * @param a
+     * @param b
+     * @return
+     */
+    public static boolean contains(String a, String b) {
+        if (null == a ||  null == b) {
+            return false;
+        } else {
+            return a.contains(b);
+        }
+    }
+
+    /**
      * null 转为长度为 0 的字符串
      *
      * @param s 待转字符串
@@ -191,29 +219,4 @@ public final class StringUtils {
         return new String(chars);
     }
 
-
-    public static boolean contentEquals(String s1, String s2) {
-        if (null == s1 ||  null == s2) {
-            return false;
-        } else {
-            return s1.contentEquals(s2);
-        }
-    }
-
-    public static boolean contains(String s1, String s2) {
-        if (null == s1 ||  null == s2) {
-            return false;
-        } else {
-            return s1.contains(s2);
-        }
-    }
-
-    public static boolean isEmpty(String s) {
-        if (null != s) {
-            if (s.length() > 0) {
-                return false;
-            }
-        }
-        return true;
-    }
 }
