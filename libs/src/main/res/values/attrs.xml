@@ -43,4 +43,18 @@
         <attr name="cpv_reachCapRound" format="boolean"/>
     </declare-styleable>
 
+    <declare-styleable name="FlowLayout">
+        <attr name="fl_singleLine" format="boolean" />
+        <attr name="fl_maxLines" format="integer" />
+        <attr name="fl_multiChecked" format="boolean" />
+        <attr name="fl_horizontalSpace" format="dimension" />
+        <attr name="fl_verticalSpace" format="dimension" />
+        <attr name="fl_columnNumbers" format="integer" />
+        <attr name="fl_rowNumbers" format="integer" />
+        <attr name="fl_cutLineWidth" format="dimension" />
+        <attr name="fl_cutLineColor" format="color" />
+        <attr name="fl_cutLine" format="boolean" />
+        <attr name="fl_lineCenter" format="boolean" />
+    </declare-styleable>
+
 </resources>
