@@ -5,6 +5,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -317,7 +318,7 @@ public class FlowLayout extends ViewGroup {
         int sizeWidth = getWidth();
         int sizeHeight = getHeight();
         //子View的平均宽高 默认所有View宽高一致
-        View  tempChild = getChildAt(0);
+        View tempChild = getChildAt(0);
         MarginLayoutParams  lp = (MarginLayoutParams) tempChild
                 .getLayoutParams();
         int childAvWidth = (int) ((sizeWidth - getPaddingLeft() - getPaddingRight() - mHorizontalSpace * (mColumnNumbers-1))/mColumnNumbers)-lp.leftMargin-lp.rightMargin;
