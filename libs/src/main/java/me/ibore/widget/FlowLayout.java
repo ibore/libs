@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import me.ibore.libs.R;
@@ -19,12 +20,11 @@ import me.ibore.libs.R;
  * Created by Administrator on 2018/2/27.
  */
 
-public class FlowLayout extends ViewGroup {
-
+public class FlowLayout extends ViewGroup  {
     /**
      * 存储所有的View，按行记录
      */
-    private List<List<View>> mAllViews = new ArrayList<>();
+    private List<List<View>> mAllViews = new ArrayList<List<View>>();
     /**
      * 记录每一行的宽度
      */
@@ -36,7 +36,7 @@ public class FlowLayout extends ViewGroup {
     /**
      * 记录每一行的最大高度
      */
-    private List<Integer> mLineHeight = new ArrayList<>();
+    private List<Integer> mLineHeight = new ArrayList<Integer>();
     /**
      * 记录设置最大行数量
      */
@@ -118,7 +118,6 @@ public class FlowLayout extends ViewGroup {
      * 长按监听
      */
     private OnLongItemClickListener mOnLongItemClickListener;
-
     public FlowLayout(Context context) {
         super(context);
     }
@@ -157,6 +156,8 @@ public class FlowLayout extends ViewGroup {
         } else {
             setFlowMeasure(widthMeasureSpec,heightMeasureSpec);
         }
+
+
     }
 
     /**
@@ -318,7 +319,7 @@ public class FlowLayout extends ViewGroup {
         int sizeWidth = getWidth();
         int sizeHeight = getHeight();
         //子View的平均宽高 默认所有View宽高一致
-        View tempChild = getChildAt(0);
+        View  tempChild = getChildAt(0);
         MarginLayoutParams  lp = (MarginLayoutParams) tempChild
                 .getLayoutParams();
         int childAvWidth = (int) ((sizeWidth - getPaddingLeft() - getPaddingRight() - mHorizontalSpace * (mColumnNumbers-1))/mColumnNumbers)-lp.leftMargin-lp.rightMargin;
@@ -466,36 +467,42 @@ public class FlowLayout extends ViewGroup {
         if (child.getTag()==null){
             child.setTag(mCurrentItemIndex);
         }
-        child.setOnLongClickListener(view -> {
-            if (mOnLongItemClickListener != null) {
-                mOnLongItemClickListener.onLongItemClick((key == -1 ? (int) view.getTag() : key),view);
-                return true;
+        child.setOnLongClickListener(new OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                if (mOnLongItemClickListener != null) {
+                    mOnLongItemClickListener.onLongItemClick((Integer)(key == -1 ? view.getTag() : key),view);
+                    return true;
+                }
+                return false;
             }
-            return false;
         });
-        child.setOnClickListener(view -> {
-            if (mIsMultiChecked) {
-                if (mCheckedViews.contains(view)) {
-                    mCheckedViews.remove(view);
-                    view.setSelected(false);
-                } else {
-                    view.setSelected(true);
-                    mCheckedViews.add(view);
-                    mSelectedView = view;
-                }
-            } else {
-                if (view.isSelected()) {
-                    view.setSelected(false);
-                } else {
-                    if (mSelectedView != null) {
-                        mSelectedView.setSelected(false);
+        child.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mIsMultiChecked) {
+                    if (mCheckedViews.contains(view)) {
+                        mCheckedViews.remove(view);
+                        view.setSelected(false);
+                    } else {
+                        view.setSelected(true);
+                        mCheckedViews.add(view);
+                        mSelectedView = view;
                     }
-                    view.setSelected(true);
-                    mSelectedView = view;
+                } else {
+                    if (view.isSelected()) {
+                        view.setSelected(false);
+                    } else {
+                        if (mSelectedView != null) {
+                            mSelectedView.setSelected(false);
+                        }
+                        view.setSelected(true);
+                        mSelectedView = view;
+                    }
                 }
-            }
-            if (mOnItemClickListener != null) {
-                mOnItemClickListener.onItemClick((Integer)(key == -1 ? view.getTag() : key),view);
+                if (mOnItemClickListener != null) {
+                    mOnItemClickListener.onItemClick((Integer)(key == -1 ? view.getTag() : key),view);
+                }
             }
         });
     }
@@ -876,36 +883,29 @@ public class FlowLayout extends ViewGroup {
         mOnLongItemClickListener = onLongItemClickListener;
     }
 
-
     public abstract static class Adapter<T> extends BaseAdapter {
 
-        private List<T> mDatas;
+        private List<T> mList;
 
-        public void setDatas(List<T> datas) {
-            mDatas = datas;
+        public Adapter(List<T> datas) {
+            mList = datas;
         }
-        public List<T> getDatas() {
-            return mDatas;
-        }
-
-        public void clearDatas() {
-            mDatas.clear();
-
+        public Adapter(T[] datas) {
+            mList = new ArrayList<T>(Arrays.asList(datas));
         }
 
-        @Override
-        public int getCount() {
-            return mDatas == null ? 0 : mDatas.size();
-        }
-
-        @Override
         public T getItem(int position) {
-            return mDatas.get(position);
+            return mList.get(position);
         }
 
         @Override
         public long getItemId(int position) {
             return 0;
         }
+
+        public int getCount() {
+            return mList == null ? 0 : mList.size();
+        }
+
     }
 }
