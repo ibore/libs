@@ -1,4 +1,4 @@
-package me.ibore.widget;
+package me.ibore.libs.adapter;
 
 import android.support.v4.view.PagerAdapter;
 import android.view.View;

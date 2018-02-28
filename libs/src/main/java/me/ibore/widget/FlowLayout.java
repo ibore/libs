@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 
 import java.util.ArrayList;
@@ -19,13 +18,12 @@ import me.ibore.libs.R;
  * Created by Administrator on 2018/2/27.
  */
 
-public class FlowLayout extends AdapterView {
-
+public class FlowLayout extends ViewGroup {
 
     /**
      * 存储所有的View，按行记录
      */
-    private List<List<View>> mAllViews = new ArrayList<List<View>>();
+    private List<List<View>> mAllViews = new ArrayList<>();
     /**
      * 记录每一行的宽度
      */
@@ -37,7 +35,7 @@ public class FlowLayout extends AdapterView {
     /**
      * 记录每一行的最大高度
      */
-    private List<Integer> mLineHeight = new ArrayList<Integer>();
+    private List<Integer> mLineHeight = new ArrayList<>();
     /**
      * 记录设置最大行数量
      */
@@ -467,42 +465,36 @@ public class FlowLayout extends AdapterView {
         if (child.getTag()==null){
             child.setTag(mCurrentItemIndex);
         }
-        child.setOnLongClickListener(new OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                if (mOnLongItemClickListener != null) {
-                    mOnLongItemClickListener.onLongItemClick((Integer)(key == -1 ? view.getTag() : key),view);
-                    return true;
-                }
-                return false;
+        child.setOnLongClickListener(view -> {
+            if (mOnLongItemClickListener != null) {
+                mOnLongItemClickListener.onLongItemClick((key == -1 ? (int) view.getTag() : key),view);
+                return true;
             }
+            return false;
         });
-        child.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mIsMultiChecked) {
-                    if (mCheckedViews.contains(view)) {
-                        mCheckedViews.remove(view);
-                        view.setSelected(false);
-                    } else {
-                        view.setSelected(true);
-                        mCheckedViews.add(view);
-                        mSelectedView = view;
-                    }
+        child.setOnClickListener(view -> {
+            if (mIsMultiChecked) {
+                if (mCheckedViews.contains(view)) {
+                    mCheckedViews.remove(view);
+                    view.setSelected(false);
                 } else {
-                    if (view.isSelected()) {
-                        view.setSelected(false);
-                    } else {
-                        if (mSelectedView != null) {
-                            mSelectedView.setSelected(false);
-                        }
-                        view.setSelected(true);
-                        mSelectedView = view;
+                    view.setSelected(true);
+                    mCheckedViews.add(view);
+                    mSelectedView = view;
+                }
+            } else {
+                if (view.isSelected()) {
+                    view.setSelected(false);
+                } else {
+                    if (mSelectedView != null) {
+                        mSelectedView.setSelected(false);
                     }
+                    view.setSelected(true);
+                    mSelectedView = view;
                 }
-                if (mOnItemClickListener != null) {
-                    mOnItemClickListener.onItemClick((Integer)(key == -1 ? view.getTag() : key),view);
-                }
+            }
+            if (mOnItemClickListener != null) {
+                mOnItemClickListener.onItemClick((Integer)(key == -1 ? view.getTag() : key),view);
             }
         });
     }
@@ -729,7 +721,7 @@ public class FlowLayout extends AdapterView {
         mAdapter = adapter;
         if (mAdapter.getCount() != 0) {
             for (int i = 0; i < mAdapter.getCount(); i ++) {
-                View view = mAdapter.getView(i);
+                View view = mAdapter.getView(i, null, this);
                 addView(view);
             }
             requestLayout();
@@ -884,61 +876,35 @@ public class FlowLayout extends AdapterView {
     }
 
 
-    public abstract static class Adapter<T> {
+    public abstract static class Adapter<T> extends BaseAdapter {
 
-        private List<T> mList;
+        private List<T> mDatas;
 
         public void setDatas(List<T> datas) {
-            if (null == datas) {
-                clearDatas();
-            }
-            notifyDataSetChanged();
+            mDatas = datas;
         }
         public List<T> getDatas() {
             return mDatas;
         }
 
-        public T getData(int postion) {
-            return mDatas.get(postion);
-        }
-
-        public void addData(T data) {
-            mDatas.add(data);
-            notifyItemChanged(mDatas.size() - 1);
-        }
-
-        public void addData(T data, int postion) {
-            mDatas.add(postion, data);
-            notifyItemInserted(hasHeaderView() ? postion + 1 : postion);
-        }
-
-        public void addDatas(List<T> datas) {
-            mDatas.addAll(datas);
-            notifyDataSetChanged();
-        }
-
         public void clearDatas() {
             mDatas.clear();
-            mIsShowContent = false;
-            notifyDataSetChanged();
+
         }
 
         @Override
         public int getCount() {
-            return mList == null ? 0 : mList.size();
+            return mDatas == null ? 0 : mDatas.size();
         }
 
         @Override
         public T getItem(int position) {
-            return mList.get(position);
+            return mDatas.get(position);
         }
 
         @Override
         public long getItemId(int position) {
             return 0;
         }
-
     }
-
-
 }

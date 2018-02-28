@@ -42,13 +42,32 @@
         <!--android:shadowRadius="20"-->
         <!--android:text="Hello World!"-->
         <!--android:textColor="@android:color/white" />-->
-    <me.ibore.widget.ShapeImageView
-        android:id="@+id/xImageView"
-        app:siv_style="round"
-        app:siv_borderColor="@color/colorAccent"
-        app:siv_borderWidth="2dp"
-        app:siv_radius="8dp"
-        app:siv_leftTopRadius="8dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    <me.ibore.widget.TagLayout
+        android:id="@+id/flow_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:alignContent="flex_start"
+        app:alignItems="center"
+        app:dividerDrawable="@drawable/bg_flow_divider"
+        app:flexDirection="row"
+        app:flexWrap="wrap"
+        app:justifyContent="flex_start"
+        app:showDivider="beginning|middle|end"
+        app:selectDrawable="@drawable/bg_flow_selected"
+        app:defaultDrawable="@drawable/bg_flow_unselect"
+        app:selectTextColor="@android:color/white"
+        app:defaultTextColor="#53CAC3"
+        app:mode="MULTI"/>
+
+    <Button
+        android:id="@+id/btn_get_count"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="请选择" />
+
+    <Button
+        android:id="@+id/btn_switch_data"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="切换数据" />
 </LinearLayout>
