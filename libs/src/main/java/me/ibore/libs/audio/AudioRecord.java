@@ -64,13 +64,10 @@ public final class AudioRecord {
     }
 
     private void initTimer() {
-        mHandlerRunable = new Runnable() {
-            @Override
-            public void run() {
-                if (mListener != null){
-                    mListener.onRecord(isRecording()? mRecorder.getMaxAmplitude() * mMaxVol / 0x7FFF : 0, (mCount++) * 100);
-                    mHandler.postDelayed(mHandlerRunable, 100);
-                }
+        mHandlerRunable = () -> {
+            if (mListener != null){
+                mListener.onRecord(isRecording()? mRecorder.getMaxAmplitude() * mMaxVol / 0x7FFF : 0, (mCount++) * 100);
+                mHandler.postDelayed(mHandlerRunable, 100);
             }
         };
         mHandler.postDelayed(mHandlerRunable, 100);

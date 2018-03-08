@@ -3,6 +3,7 @@ package me.ibore.libs.demo
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import me.ibore.libs.util.DeviceUtils
 import me.ibore.libs.util.StringUtils
 
 
@@ -38,7 +39,7 @@ class MainActivity : AppCompatActivity() {
 //                Log.d("----", progressInfo.toString())
 //            }
 //        })
-        Log.d("----", StringUtils.equals("A", "A").toString())
+        Log.d("----", DeviceUtils.getDeviceUuid().toString())
 //        roundImageView.setImageResource(R.mipmap.head)
 //        var transformation = RoundedCornersTransformation(10, 0)
 //        var transformation = RoundedCornersTransformation(10, 0)

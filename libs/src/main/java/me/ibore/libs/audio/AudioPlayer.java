@@ -53,32 +53,23 @@ public final class AudioPlayer {
         }
         release();
         mMediaPlayer = new MediaPlayer();
-        mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-                canPlay = true;
-                if (needPlay) start();
-                if (null != mTotalTime)mTotalTime.setText(sec2Time(getDuration() / 1000));
-            }
+        mMediaPlayer.setOnPreparedListener(mp -> {
+            canPlay = true;
+            if (needPlay) start();
+            if (null != mTotalTime)mTotalTime.setText(sec2Time(getDuration() / 1000));
         });
-        mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                upDateProgress(10000, getDuration(), getDuration());
-                if (null != mListenter) mListenter.onComplete();
-                if (null != mPlayPause) mPlayPause.setChecked(true);
-            }
+        mMediaPlayer.setOnCompletionListener(mp -> {
+            upDateProgress(10000, getDuration(), getDuration());
+            if (null != mListenter) mListenter.onComplete();
+            if (null != mPlayPause) mPlayPause.setChecked(true);
         });
-        mMediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-            @Override
-            public boolean onError(MediaPlayer mp, int what, int extra) {
-                if (null != mListenter && what != -38) {
-                    mListenter.onError();
-                }
-                release();
-                canPlay = false;
-                return false;
+        mMediaPlayer.setOnErrorListener((mp, what, extra) -> {
+            if (null != mListenter && what != -38) {
+                mListenter.onError();
             }
+            release();
+            canPlay = false;
+            return false;
         });
     }
 

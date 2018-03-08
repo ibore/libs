@@ -13,6 +13,8 @@ import android.text.TextUtils;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 
@@ -47,7 +49,10 @@ public final class HtmlUtils {
         @Override
         public Drawable getDrawable(final String source) {
             final URLDrawable urlDrawable = new URLDrawable();
-            Glide.with(textView.getContext()).asBitmap().load(source).into(new SimpleTarget<Bitmap>() {
+            Glide.with(textView.getContext()).asBitmap()
+                    .apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.ALL))
+                    .load(source)
+                    .into(new SimpleTarget<Bitmap>() {
                 @Override
                 public void onResourceReady(Bitmap bitmap, Transition<? super Bitmap> transition) {
                     try {
