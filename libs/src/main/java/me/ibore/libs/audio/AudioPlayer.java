@@ -36,7 +36,7 @@ public final class AudioPlayer {
     private TextView mCurrentTime;
     private TextView mTotalTime;
     private CheckBox mPlayPause;
-    private OnPlayerListenter mListenter;
+    private OnPlayerListener mListener;
 
     private boolean canPlay;
     private String mUrl = "";
@@ -60,12 +60,12 @@ public final class AudioPlayer {
         });
         mMediaPlayer.setOnCompletionListener(mp -> {
             upDateProgress(10000, getDuration(), getDuration());
-            if (null != mListenter) mListenter.onComplete();
+            if (null != mListener) mListener.onComplete();
             if (null != mPlayPause) mPlayPause.setChecked(true);
         });
         mMediaPlayer.setOnErrorListener((mp, what, extra) -> {
-            if (null != mListenter && what != -38) {
-                mListenter.onError();
+            if (null != mListener && what != -38) {
+                mListener.onError();
             }
             release();
             canPlay = false;
@@ -88,30 +88,30 @@ public final class AudioPlayer {
         play(url, null, needPlay);
     }
 
-    public void play(String url, OnPlayerListenter onPlayerListenter) {
-        play(url, onPlayerListenter, false);
+    public void play(String url, OnPlayerListener onPlayerListener) {
+        play(url, onPlayerListener, false);
     }
 
-    public void play(String url, OnPlayerListenter onPlayerListenter, boolean needPlay) {
-        play(url, onPlayerListenter, needPlay, 0);
+    public void play(String url, OnPlayerListener onPlayerListener, boolean needPlay) {
+        play(url, onPlayerListener, needPlay, 0);
     }
 
-    public void play(String url, OnPlayerListenter onPlayerListenter, boolean needPlay, int progress) {
+    public void play(String url, OnPlayerListener onPlayerListener, boolean needPlay, int progress) {
         if (TextUtils.isEmpty(url)) {
             return;
         }
         this.mUrl = url;
-        this.mListenter = onPlayerListenter;
-        if (null != mListenter) mListenter.onProgress(0, 0, 0);
+        this.mListener = onPlayerListener;
+        if (null != mListener) mListener.onProgress(0, 0, 0);
         try {
             initPlayer(needPlay, progress);
             mMediaPlayer.setDataSource(mUrl);
             mMediaPlayer.prepareAsync();
         } catch (Exception e) {
             e.printStackTrace();
-            if (null != mListenter) {
-                mListenter.onError();
-                mListenter.onComplete();
+            if (null != mListener) {
+                mListener.onError();
+                mListener.onComplete();
             }
         }
         if (null != mPlayPause) {
@@ -156,10 +156,10 @@ public final class AudioPlayer {
                 }
             }
             mMediaPlayer.start();
-            if (null != mListenter) mListenter.onStart();
+            if (null != mListener) mListener.onStart();
         } else {
             int progress = null == mSeekBar ? 0 : mSeekBar.getProgress();
-            play(mUrl, mListenter, true, progress);
+            play(mUrl, mListener, true, progress);
         }
     }
 
@@ -168,7 +168,7 @@ public final class AudioPlayer {
         if (null != mPlayPause) mPlayPause.setChecked(true);
         if (mMediaPlayer != null && isPlaying()) {
             mMediaPlayer.pause();
-            if (null != mListenter) mListenter.onPause();
+            if (null != mListener) mListener.onPause();
         }
     }
 
@@ -224,7 +224,7 @@ public final class AudioPlayer {
                 total = getDuration();
                 mHander.postDelayed(this, 300);
             }
-            if (null != mListenter) mListenter.onProgress(percent, current, total);
+            if (null != mListener) mListener.onProgress(percent, current, total);
             upDateProgress((int) (10000 * ((double) getCurrent() / getDuration())), current, total);
         }
     };
@@ -236,7 +236,7 @@ public final class AudioPlayer {
     }
 
 
-    public abstract static class OnPlayerListenter {
+    public abstract static class OnPlayerListener {
 
         protected void onStart() {
 
