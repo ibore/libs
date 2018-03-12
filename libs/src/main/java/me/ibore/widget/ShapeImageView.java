@@ -3,13 +3,18 @@ package me.ibore.widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
+import android.graphics.Shader;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -25,265 +30,243 @@ import me.ibore.libs.R;
 
 public class ShapeImageView extends android.support.v7.widget.AppCompatImageView {
 
-    public final static int Normal = 0;
-    public final static int Circle = 1;
-    public final static int Round = 2;
-
-    private static final PorterDuffXfermode xFermode = new PorterDuffXfermode(PorterDuff.Mode.DST_IN);
-    private float radius;
-    private float leftTopRadius;
-    private float rightTopRadius;
-    private float rightBottomRadius;
-    private float leftBottomRadius;
-    private int style;
-
-    public void setLeftTopRadius(float leftTopRadius) {
-        this.leftTopRadius = leftTopRadius;
-        if (style == Round) {
-            requestLayout();
-            invalidate();
-        }
-    }
-
-    public void setRightTopRadius(float rightTopRadius) {
-        this.rightTopRadius = rightTopRadius;
-        if (style == Round) {
-            requestLayout();
-            invalidate();
-        }
-    }
-
-    public void setRightBottomRadius(float rightBottomRadius) {
-        this.rightBottomRadius = rightBottomRadius;
-        if (style == Round) {
-            requestLayout();
-            invalidate();
-        }
-    }
-
-    public void setLeftBottomRadius(float leftBottomRadius) {
-        this.leftBottomRadius = leftBottomRadius;
-        if (style == Round) {
-            requestLayout();
-            invalidate();
-        }
-    }
-
-    public void setStyle(int style) {
-        if (this.style == style) return;
-        this.style = style;
-        requestLayout();
-        invalidate();
-    }
-
-    public void setBorderWidth(float borderWidth) {
-        this.borderWidth = borderWidth;
-        if (style == Round) {
-            requestLayout();
-            invalidate();
-        }
-    }
-
-    public void setBorderColor(int borderColor) {
-        this.borderColor = borderColor;
-        if (style == Round) {
-            requestLayout();
-            invalidate();
-        }
-    }
-
-    private Paint mBitmapPaint;
-    /**
-     * 图片可视区
-     */
-    protected Path roundPath;
-    /**
-     * 图片边框
-     */
-    protected Path borderPath;
-    /**
-     * 边框宽度
-     */
-    protected float borderWidth;
-    /**
-     * 边框颜色
-     */
     protected int borderColor;
-
-    private Paint borderPaint;
+    protected int borderWidth;
+    protected int mShape;
+    protected int roundRadius;
+    protected int leftTopRadius;
+    protected int rightTopRadius;
+    protected int rightBottomRadius;
+    protected int leftBottomRadius;
+    protected boolean onlyDrawBorder;
+    private Paint shaderPaint;
+    private Paint mPaint;
+    private Shader shader;
 
     public ShapeImageView(Context context) {
-        this(context, null, 0);
+        this(context, null);
     }
 
     public ShapeImageView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public ShapeImageView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        if (attrs != null) {
-            TypedArray ta = getContext().obtainStyledAttributes(attrs, R.styleable.ShapeImageView, defStyleAttr, 0);
-            borderWidth = ta.getDimension(R.styleable.ShapeImageView_siv_borderWidth, 0);
-            borderColor = ta.getColor(R.styleable.ShapeImageView_siv_borderColor, 0);
-            style = ta.getInt(R.styleable.ShapeImageView_siv_style, Normal);
-            leftTopRadius = ta.getDimension(R.styleable.ShapeImageView_siv_leftTopRadius, 0);
-            rightTopRadius = ta.getDimension(R.styleable.ShapeImageView_siv_rightTopRadius, 0);
-            rightBottomRadius = ta.getDimension(R.styleable.ShapeImageView_siv_rightBottomRadius, 0);
-            leftBottomRadius = ta.getDimension(R.styleable.ShapeImageView_siv_leftBottomRadius, 0);
-            radius = ta.getDimension(R.styleable.ShapeImageView_siv_radius, 0);
-            ta.recycle();
+    public ShapeImageView(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ShapeImageView);
+        mShape = a.getInt(R.styleable.ShapeImageView_sivShape, Shape.CIRCLE);
+        borderColor = a.getColor(R.styleable.ShapeImageView_sivBorderColor, Color.TRANSPARENT);
+        borderWidth = a.getDimensionPixelSize(R.styleable.ShapeImageView_sivBorderWidth, 0);
+        roundRadius = a.getDimensionPixelSize(R.styleable.ShapeImageView_sivRoundRadius, 0);
+        leftTopRadius = a.getDimensionPixelSize(R.styleable.ShapeImageView_sivLeftTopRadius, -1);
+        if (leftTopRadius == -1){
+            leftTopRadius = roundRadius;
         }
-        init();
-    }
-
-    private void init() {
-        mBitmapPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        roundPath = new Path();
-        borderPath = new Path();
-        borderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        borderPaint.setStrokeWidth(borderWidth);
-        setScaleType(ScaleType.CENTER_CROP);
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-        if(changed){
-            if (style != Normal) {
-                initBorderPath();
-                initRoundPath();
-            }
+        rightTopRadius = a.getDimensionPixelSize(R.styleable.ShapeImageView_sivRightTopRadius, -1);
+        if (rightTopRadius == -1){
+            rightTopRadius = roundRadius;
         }
-    }
-
-
-    /**
-     * 初始化边框Path
-     */
-    protected void initBorderPath() {
-        if (style == Circle) {
-            borderPath.reset();
-            final float halfBorderWidth = borderWidth * 0.5f;
-            final int width = getWidth();
-            final int height = getHeight();
-            final float cx = width * 0.5f;
-            final float cy = height * 0.5f;
-            final float radius = Math.min(width, height) * 0.5f;
-            borderPath.addCircle(cx, cy, radius - halfBorderWidth, Path.Direction.CW);
-        } else {
-            borderPath.reset();
-            /**
-             * 乘以0.5会导致border在圆角处不能包裹原图
-             */
-            final float halfBorderWidth = borderWidth * 0.35f;
-            final int width = getWidth();
-            final int height = getHeight();
-            if (radius != 0) {
-                radius = Math.min(radius, Math.min(width, height) * 0.5f);
-                leftTopRadius = rightTopRadius = rightBottomRadius = leftBottomRadius = radius;
-            } else {
-                leftTopRadius = Math.min(leftTopRadius, Math.min(width, height) * 0.5f);
-                rightTopRadius = Math.min(rightTopRadius, Math.min(width, height) * 0.5f);
-                rightBottomRadius = Math.min(rightBottomRadius, Math.min(width, height) * 0.5f);
-                leftBottomRadius = Math.min(leftBottomRadius, Math.min(width, height) * 0.5f);
-            }
-            RectF rect = new RectF(halfBorderWidth, halfBorderWidth,
-                    width - halfBorderWidth, height - halfBorderWidth);
-            borderPath.addRoundRect(rect,
-                    new float[]{leftTopRadius, leftTopRadius, rightTopRadius, rightTopRadius,
-                            rightBottomRadius, rightBottomRadius, leftBottomRadius, leftBottomRadius},
-                    Path.Direction.CW);
+        rightBottomRadius = a.getDimensionPixelSize(R.styleable.ShapeImageView_sivRightBottomRadius, -1);
+        if (rightBottomRadius == -1){
+            rightBottomRadius = roundRadius;
         }
-    }
-
-    /**
-     * 初始化图片区域Path
-     */
-    protected void initRoundPath() {
-        if (style == Circle) {
-            roundPath.reset();
-            final int width = getWidth();
-            final int height = getHeight();
-            final float cx = width * 0.5f;
-            final float cy = height * 0.5f;
-            final float radius = Math.min(width, height) * 0.5f;
-            roundPath.addCircle(cx, cy, radius, Path.Direction.CW);
-        } else {
-            roundPath.reset();
-            final int width = getWidth();
-            final int height = getHeight();
-            if (radius != 0) {
-                radius = Math.min(radius, Math.min(width, height) * 0.5f);
-                leftTopRadius = rightTopRadius = rightBottomRadius = leftBottomRadius = radius;
-            } else {
-                leftTopRadius = Math.min(leftTopRadius, Math.min(width, height) * 0.5f);
-                rightTopRadius = Math.min(rightTopRadius, Math.min(width, height) * 0.5f);
-                rightBottomRadius = Math.min(rightBottomRadius, Math.min(width, height) * 0.5f);
-                leftBottomRadius = Math.min(leftBottomRadius, Math.min(width, height) * 0.5f);
-            }
-            RectF rect = new RectF(0, 0, width, height);
-            roundPath.addRoundRect(rect,
-                    new float[]{leftTopRadius, leftTopRadius, rightTopRadius, rightTopRadius,
-                            rightBottomRadius, rightBottomRadius, leftBottomRadius, leftBottomRadius},
-                    Path.Direction.CW);
+        leftBottomRadius = a.getDimensionPixelSize(R.styleable.ShapeImageView_sivLeftBottomRadius, -1);
+        if (leftBottomRadius == -1){
+            leftBottomRadius = roundRadius;
         }
+        onlyDrawBorder = a.getBoolean(R.styleable.ShapeImageView_sivOnlyDrawBorder, false);
+        a.recycle();
+        sharedConstructor(context);
     }
 
-
-    /**
-     * 获取图片区域纯颜色Bitmap
-     * @return
-     */
-    protected Bitmap getRoundBitmap() {
-        Bitmap bitmap = Bitmap.createBitmap(getWidth(), getHeight(),
-                Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setColor(Color.WHITE);
-        canvas.drawPath(roundPath, paint);
-        return bitmap;
+    public void setOnlyDrawBorder(boolean onlyDrawBorder) {
+        this.onlyDrawBorder = onlyDrawBorder;
     }
 
-    private void drawBorder(Canvas canvas) {
-        borderPaint.setStyle(Paint.Style.STROKE);
-        borderPaint.setColor(borderColor);
-        canvas.drawPath(borderPath, borderPaint);
+    private void sharedConstructor(Context context) {
+        shaderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (style != Normal) {
-            drawImage(canvas);
-            drawBorder(canvas);
-        }
-    }
-
-    private void drawImage(Canvas canvas) {
-        Drawable drawable = getDrawable();
-        if(!isInEditMode() && drawable != null) {
-            try {
-                Bitmap bitmap;
-                if (drawable instanceof ColorDrawable) {
-                    bitmap = Bitmap.createBitmap(2, 2, Bitmap.Config.ARGB_8888);
-                } else {
-                    bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-                }
-                Canvas drawCanvas = new Canvas(bitmap);
-                drawable.setBounds(0, 0, drawCanvas.getWidth(), drawCanvas.getHeight());
-                drawable.draw(drawCanvas);
-
-                Bitmap roundBm = getRoundBitmap();
-                mBitmapPaint.reset();
-                mBitmapPaint.setFilterBitmap(false);
-                mBitmapPaint.setXfermode(xFermode);
-                drawCanvas.drawBitmap(roundBm, 0, 0, mBitmapPaint);
-                mBitmapPaint.setXfermode(null);
-                canvas.drawBitmap(bitmap, 0, 0, mBitmapPaint);
-            } catch (Exception e) {
-                e.printStackTrace();
+        if (onlyDrawBorder) {
+            super.onDraw(canvas);
+        } else {
+            Bitmap bmp = drawableToBitmap(getDrawable());
+            if (bmp != null) {
+                float bmpW = bmp.getWidth();
+                float bmpH = bmp.getHeight();
+                float h = getHeight();
+                float w = getWidth();
+                drawShader(canvas, bmp, bmpW, bmpH, w, h);
+                drawShape(canvas, w, h);
             }
         }
+        drawBorder(canvas);
     }
+
+    private void drawShader(Canvas canvas, Bitmap bmp, float bmpW, float bmpH, float w, float h) {
+        shader = new BitmapShader(bmp, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+        Matrix matrix = new Matrix();
+        setMatrix(matrix, bmpW, bmpH, w, h);
+        shader.setLocalMatrix(matrix);
+        shaderPaint.setColor(Color.TRANSPARENT);
+        shaderPaint.setShader(shader);
+        canvas.drawPaint(shaderPaint);
+    }
+
+    public void setMatrix(Matrix matrix, float bmpW, float bmpH, float w, float h) {
+        ScaleType scaleType = getScaleType();
+        if (scaleType == ScaleType.CENTER) {
+            float dx = (w - bmpW) / 2;
+            float dy = (h - bmpH) / 2;
+            matrix.setTranslate(dx, dy);
+        } else if (scaleType == ScaleType.CENTER_CROP) {
+            float ratio = Math.max(w / bmpW, h / bmpH);
+            float useWidth = bmpW * ratio;
+            float useHeight = bmpH * ratio;
+            matrix.setTranslate((w - useWidth) / 2, (h - useHeight) / 2);
+            matrix.preScale(ratio, ratio);
+        } else if (scaleType == ScaleType.CENTER_INSIDE) {
+            float ratio = Math.min(w / bmpW, h / bmpH);
+            if (ratio > 1) {
+                ratio = 1;
+            }
+            float useWidth = bmpW * ratio;
+            float useHeight = bmpH * ratio;
+            matrix.setTranslate((w - useWidth) / 2, (h - useHeight) / 2);
+            matrix.preScale(ratio, ratio);
+        } else if (scaleType == ScaleType.FIT_CENTER) {
+            float ratio = Math.min(w / bmpW, h / bmpH);
+            float useWidth = bmpW * ratio;
+            matrix.setTranslate((w - useWidth) / 2, 0);
+            matrix.preScale(ratio, ratio);
+        } else if (scaleType == ScaleType.FIT_END) {
+            float ratio = Math.min(w / bmpW, h / bmpH);
+            float useWidth = bmpW * ratio;
+            matrix.setTranslate(w - useWidth, 0);
+            matrix.preScale(ratio, ratio);
+
+        } else if (scaleType == ScaleType.FIT_START) {
+            float ratio = Math.min(w / bmpW, h / bmpH);
+            matrix.setScale(ratio, ratio);
+        } else if (scaleType == ScaleType.FIT_XY) {
+            float wRatio = w / bmpW;
+            float hRatio = h / bmpH;
+            matrix.setScale(wRatio, hRatio);
+        } else if (scaleType == ScaleType.MATRIX) {
+            //do nothing
+        }
+    }
+
+
+    private void drawShape(Canvas canvas, float w, float h) {
+        RectF rectF = new RectF();
+        shaderPaint.setColor(Color.WHITE);
+        shaderPaint.setAntiAlias(true);
+        shaderPaint.setStyle(Paint.Style.FILL);
+        switch (mShape) {
+            case Shape.CIRCLE:
+                float min = Math.min(w, h);
+                rectF.left = (w - min) / 2 + borderWidth / 2;
+                rectF.top = (h - min) / 2 + borderWidth / 2;
+                rectF.right = w - (w - min) / 2 - borderWidth / 2;
+                rectF.bottom = h - (h - min) / 2 - borderWidth / 2;
+                canvas.drawArc(rectF, 0, 360, true, shaderPaint);
+                break;
+            case Shape.RECTANGLE:
+                Path path = new Path();
+                rectF.left = borderWidth / 2;
+                rectF.top = borderWidth / 2;
+                rectF.right = w - borderWidth / 2;
+                rectF.bottom = h - borderWidth / 2;
+                float[] rad = {leftTopRadius, leftTopRadius, rightTopRadius, rightTopRadius, rightBottomRadius, rightBottomRadius, leftBottomRadius, leftBottomRadius};
+                path.addRoundRect(rectF, rad, Path.Direction.CW);
+                canvas.drawPath(path, shaderPaint);
+                break;
+            case Shape.ARC:
+                rectF.left = borderWidth / 2;
+                rectF.top = borderWidth / 2;
+                rectF.right = w - borderWidth / 2;
+                rectF.bottom = h - borderWidth / 2;
+                canvas.drawArc(rectF, 0, 360, true, shaderPaint);
+                break;
+        }
+    }
+
+    private Bitmap drawableToBitmap(Drawable drawable) {
+        if (drawable == null) {
+            return null;
+        }
+        if (drawable instanceof BitmapDrawable) {
+            return ((BitmapDrawable) drawable).getBitmap();
+        }
+        int w = drawable.getIntrinsicWidth();
+        int h = drawable.getIntrinsicHeight();
+        Bitmap.Config config =
+                drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888
+                        : Bitmap.Config.RGB_565;
+        Bitmap bitmap = Bitmap.createBitmap(w, h, config);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, w, h);
+        drawable.draw(canvas);
+        return bitmap;
+
+    }
+
+
+    private void drawBorder(Canvas canvas) {
+        if (borderWidth == 0 || borderColor == Color.TRANSPARENT) {
+            return;
+        }
+        mPaint.setAntiAlias(true);
+        mPaint.setStyle(Paint.Style.STROKE);
+        mPaint.setStrokeWidth(borderWidth);
+        mPaint.setColor(borderColor);
+        switch (mShape) {
+            case Shape.CIRCLE:
+                float radius = (Math.min(getWidth(), getHeight()) - borderWidth) / 2;
+                float cx = getWidth() / 2f;
+                float cy = getHeight() / 2f;
+                canvas.drawCircle(cx, cy, radius, mPaint);
+                break;
+            case Shape.RECTANGLE:
+                Path path = new Path();
+                RectF rectF = new RectF();
+                rectF.left = borderWidth / 2;
+                rectF.top = borderWidth / 2;
+                rectF.right = getWidth() - borderWidth / 2;
+                rectF.bottom = getHeight() - borderWidth / 2;
+
+                float[] rad = {leftTopRadius, leftTopRadius, rightTopRadius, rightTopRadius, rightBottomRadius, rightBottomRadius, leftBottomRadius, leftBottomRadius};
+                path.addRoundRect(rectF, rad, Path.Direction.CW);
+                canvas.drawPath(path, mPaint);
+                return;
+            case Shape.ARC:
+                RectF rectF2 = new RectF();
+                rectF2.left = borderWidth / 2;
+                rectF2.top = borderWidth / 2;
+                rectF2.right = getWidth() - borderWidth / 2;
+                rectF2.bottom = getHeight() - borderWidth / 2;
+                canvas.drawArc(rectF2, 0, 360, false, mPaint);
+                break;
+        }
+    }
+
+    public void setBorderColor(int color) {
+        borderColor = color;
+    }
+
+    public void setBorderWidth(int width) {
+        this.borderWidth = width;
+    }
+
+    public static class Shape {
+        public static final int CIRCLE = 1;
+        public static final int RECTANGLE = 2;
+        public static final int ARC = 3;
+    }
+
 
 }

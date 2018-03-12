@@ -4,20 +4,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="me.ibore.libs.demo.MainActivity">
+    tools:context="me.ibore.libs.demo.MainActivity"
+    android:orientation="vertical">
 
-    <!--<me.ibore.widget.XImageView-->
-        <!--android:scaleType="centerCrop"-->
-        <!--app:riv_style="Round"-->
-        <!--app:riv_leftTopRadius="6dp"-->
-        <!--app:riv_rightBottomRadius="6dp"-->
-        <!--android:id="@+id/roundImageView"-->
-        <!--android:layout_width="128dp"-->
-        <!--android:layout_height="128dp"-->
-        <!--app:layout_constraintBottom_toBottomOf="parent"-->
-        <!--app:layout_constraintLeft_toLeftOf="parent"-->
-        <!--app:layout_constraintRight_toRightOf="parent"-->
-        <!--app:layout_constraintTop_toTopOf="parent" />-->
+
+    <me.ibore.widget.ShapeImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="30dp"
+        android:src="@mipmap/head"
+        app:sivRoundRadius="8dp"
+        app:sivShape="rectangle" />
 
     <!--<me.ibore.video.XVideoPlayer-->
         <!--android:id="@+id/xVideoPlayer"-->
