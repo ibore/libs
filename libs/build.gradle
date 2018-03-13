@@ -51,6 +51,7 @@ dependencies {
     // 更方便的RecyclerView
     compile 'me.ibore.widget:recyclerview:1.2.0'
     compile 'me.ibore:http:1.0.0'
+//    compile 'me.ibore:router:0.0.1'
     // 谷歌   流布局
     compile 'com.google.android:flexbox:0.3.2'
 
