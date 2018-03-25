@@ -1,10 +1,14 @@
 package me.ibore.libs.demo
 
 import android.os.Bundle
+import android.os.FileObserver
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import me.ibore.http.*
 import me.ibore.libs.util.DeviceUtils
 import me.ibore.libs.util.StringUtils
+import me.ibore.libs.util.ToastUtils
+import okhttp3.OkHttpClient
 
 
 class MainActivity : AppCompatActivity() {
@@ -17,29 +21,33 @@ class MainActivity : AppCompatActivity() {
 //        xImageView.setImageResource(R.mipmap.sunset)
 //        ViewShadow.setElevation(xImageView, 20F, resources.getColor(R.color.shadow))
 
-//        val httpInterceptor = HttpInterceptor("HTTP")
-//        httpInterceptor.setPrintLevel(HttpInterceptor.Level.BODY)
-//        val mOkHttpClient : OkHttpClient = OkHttpClient.Builder().addInterceptor(httpInterceptor).build()
-//        XHttp.init(applicationContext, mOkHttpClient, 3 , 300)
-//        XHttp.download("https://www.so.com/?src=so.com", object : StringObserver(){
+        val httpInterceptor = HttpInterceptor("HTTP")
+        httpInterceptor.setPrintLevel(HttpInterceptor.Level.BODY)
+        val mOkHttpClient : OkHttpClient = OkHttpClient.Builder().addInterceptor(httpInterceptor).build()
+        XHttp.init(applicationContext, mOkHttpClient, 3 , 300)
+        XHttp.download("http:\\/\\/test.persons.net.cn\\/img\\/20180211\\/ymapp__ff0d3ba92e687c335f72a456860da5cb09b6ef5067c6-wUMlou_fw658_s.jpg", cacheDir, object : DownloadObserver(){
+            override fun onSuccess(t: DownloadInfo?) {
+                Log.d("---", t!!.file.absolutePath)
+            }
+
 //            override fun onSuccess(t: StringInfo?) {
 ////                xImageView.setImageBitmap(BitmapFactory.decodeStream(ByteArrayInputStream(t!!.data.toByteArray())))
 //            }
-////
-////            override fun onSuccess(t: DownloadInfo?) {
-////                xImageView.setImageBitmap(BitmapFactory.decodeFile(t!!.file.absolutePath))
-////            }
 //
-//            override fun onError(e: HttpException?) {
-//                e!!.printStackTrace()
-//                ToastUtils.showShort(e.message)
+//            override fun onSuccess(t: DownloadInfo?) {
+//                xImageView.setImageBitmap(BitmapFactory.decodeFile(t!!.file.absolutePath))
 //            }
-//
-//            override fun onProgress(progressInfo: ProgressInfo?) {
-//                Log.d("----", progressInfo.toString())
-//            }
-//        })
-        Log.d("----", DeviceUtils.getDeviceUuid().toString())
+
+            override fun onError(e: HttpException?) {
+                e!!.printStackTrace()
+                ToastUtils.showShort(e.message)
+            }
+
+            override fun onProgress(progressInfo: ProgressInfo?) {
+                Log.d("----", progressInfo.toString())
+            }
+        })
+//        Log.d("----", DeviceUtils.getDeviceUuid().toString())
 //        roundImageView.setImageResource(R.mipmap.head)
 //        var transformation = RoundedCornersTransformation(10, 0)
 //        var transformation = RoundedCornersTransformation(10, 0)

@@ -2,6 +2,7 @@ package me.ibore.libs.base;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.LayoutRes;
@@ -28,7 +29,15 @@ public abstract class XDialog extends Dialog {
     private CompositeDisposable compositeDisposable;
 
     public XDialog(@NonNull Context context) {
-        super(context);
+        super(context, 0);
+    }
+
+    public XDialog(Context context, int themeResId) {
+        super(context, themeResId);
+    }
+
+    protected XDialog(Context context, boolean cancelable, OnCancelListener cancelListener) {
+        super(context, cancelable, cancelListener);
     }
 
     public void setGravity(int gravity) {
