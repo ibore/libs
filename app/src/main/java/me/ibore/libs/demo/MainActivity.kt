@@ -8,6 +8,7 @@ import me.ibore.http.*
 import me.ibore.libs.util.DeviceUtils
 import me.ibore.libs.util.StringUtils
 import me.ibore.libs.util.ToastUtils
+import me.ibore.widget.recycler.CommonAdapter
 import okhttp3.OkHttpClient
 
 
