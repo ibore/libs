@@ -1,14 +1,10 @@
 package me.ibore.libs.demo
 
 import android.os.Bundle
-import android.os.FileObserver
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import me.ibore.http.*
-import me.ibore.libs.util.DeviceUtils
-import me.ibore.libs.util.StringUtils
 import me.ibore.libs.util.ToastUtils
-import me.ibore.widget.recycler.CommonAdapter
 import okhttp3.OkHttpClient
 
 
