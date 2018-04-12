@@ -13,7 +13,7 @@ import java.util.List;
  * date: 2018-01-21 13:12
  * website: ibore.me
  */
-
+@Deprecated
 public class FragmentAdapter extends FragmentStatePagerAdapter {
 
     private List<Fragment> mFragments;

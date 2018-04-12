@@ -13,7 +13,7 @@ import java.util.List;
  * date: 2018-01-21 13:11
  * website: ibore.me
  */
-
+@Deprecated
 public class ViewAdapter extends PagerAdapter {
 
     private List<View> mViews;

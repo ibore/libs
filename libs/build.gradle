@@ -37,20 +37,20 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
     // 黄油刀
     api 'com.jakewharton:butterknife:8.8.1'
+    api 'com.github.bumptech.glide:glide:4.5.0'
+    //
+    compile 'com.google.code.gson:gson:2.8.2'
     // 网络请求框架
-    api 'com.squareup.retrofit2:retrofit:2.3.0'
-    api 'com.squareup.retrofit2:converter-gson:2.3.0'
-    api 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
+//    api 'com.squareup.retrofit2:retrofit:2.3.0'
+//    api 'com.squareup.retrofit2:converter-gson:2.3.0'
+//    api 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
     // RxJava和RxAndroid
     api 'io.reactivex.rxjava2:rxjava:2.1.8'
     api 'io.reactivex.rxjava2:rxandroid:2.0.1'
-    // Glide
-    api 'com.github.bumptech.glide:glide:4.5.0'
-    api 'com.github.bumptech.glide:okhttp3-integration:4.5.0'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.5.0'
+
     // 更方便的RecyclerView
 
-    api 'me.ibore:http:1.0.0'
+//    api 'me.ibore:http:1.0.0'
 //    api 'me.ibore:router:0.0.1'
     // 谷歌   流布局
 //    api 'com.google.android:flexbox:0.3.2'

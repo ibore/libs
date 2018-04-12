@@ -122,8 +122,7 @@ public class GsonUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T jsonToBeanDateSerializer(String jsonStr, Class<T> cl,
-                                                 final String pattern) {
+    public static <T> T jsonToBeanDateSerializer(String jsonStr, Class<T> cl, final String pattern) {
         Object obj = null;
         gson = new GsonBuilder()
                 .registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
