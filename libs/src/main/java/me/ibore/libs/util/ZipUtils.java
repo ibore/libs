@@ -3,6 +3,8 @@ package me.ibore.libs.util;
  * Created by Administrator on 2018/1/19.
  */
 
+import android.util.Log;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -28,7 +30,6 @@ import java.util.zip.ZipOutputStream;
  * </pre>
  */
 public final class ZipUtils {
-
     private static final int BUFFER_LEN = 8192;
 
     private ZipUtils() {
@@ -36,178 +37,167 @@ public final class ZipUtils {
     }
 
     /**
-     * 批量压缩文件
+     * Zip the files.
      *
-     * @param resFiles    待压缩文件路径集合
-     * @param zipFilePath 压缩文件路径
-     * @return {@code true}: 压缩成功<br>{@code false}: 压缩失败
-     * @throws IOException IO错误时抛出
+     * @param srcFiles    The source of files.
+     * @param zipFilePath The path of ZIP file.
+     * @return {@code true}: success<br>{@code false}: fail
+     * @throws IOException if an I/O error has occurred
      */
-    public static boolean zipFiles(final Collection<String> resFiles,
+    public static boolean zipFiles(final Collection<String> srcFiles,
                                    final String zipFilePath)
             throws IOException {
-        return zipFiles(resFiles, zipFilePath, null);
+        return zipFiles(srcFiles, zipFilePath, null);
     }
 
     /**
-     * 批量压缩文件
+     * Zip the files.
      *
-     * @param resFilePaths 待压缩文件路径集合
-     * @param zipFilePath  压缩文件路径
-     * @param comment      压缩文件的注释
-     * @return {@code true}: 压缩成功<br>{@code false}: 压缩失败
-     * @throws IOException IO错误时抛出
+     * @param srcFilePaths The paths of source files.
+     * @param zipFilePath  The path of ZIP file.
+     * @param comment      The comment.
+     * @return {@code true}: success<br>{@code false}: fail
+     * @throws IOException if an I/O error has occurred
      */
-    public static boolean zipFiles(final Collection<String> resFilePaths,
+    public static boolean zipFiles(final Collection<String> srcFilePaths,
                                    final String zipFilePath,
                                    final String comment)
             throws IOException {
-        if (resFilePaths == null || zipFilePath == null) return false;
+        if (srcFilePaths == null || zipFilePath == null) return false;
         ZipOutputStream zos = null;
         try {
             zos = new ZipOutputStream(new FileOutputStream(zipFilePath));
-            for (String resFile : resFilePaths) {
-                if (!zipFile(getFileByPath(resFile), "", zos, comment)) return false;
+            for (String srcFile : srcFilePaths) {
+                if (!zipFile(getFileByPath(srcFile), "", zos, comment)) return false;
             }
             return true;
         } finally {
             if (zos != null) {
                 zos.finish();
-                CloseUtils.closeIO(zos);
+                zos.close();
             }
         }
     }
 
     /**
-     * 批量压缩文件
+     * Zip the files.
      *
-     * @param resFiles 待压缩文件集合
-     * @param zipFile  压缩文件
-     * @return {@code true}: 压缩成功<br>{@code false}: 压缩失败
-     * @throws IOException IO错误时抛出
+     * @param srcFiles The source of files.
+     * @param zipFile  The ZIP file.
+     * @return {@code true}: success<br>{@code false}: fail
+     * @throws IOException if an I/O error has occurred
      */
-    public static boolean zipFiles(final Collection<File> resFiles, final File zipFile)
+    public static boolean zipFiles(final Collection<File> srcFiles, final File zipFile)
             throws IOException {
-        return zipFiles(resFiles, zipFile, null);
+        return zipFiles(srcFiles, zipFile, null);
     }
 
     /**
-     * 批量压缩文件
+     * Zip the files.
      *
-     * @param resFiles 待压缩文件集合
-     * @param zipFile  压缩文件
-     * @param comment  压缩文件的注释
-     * @return {@code true}: 压缩成功<br>{@code false}: 压缩失败
-     * @throws IOException IO错误时抛出
+     * @param srcFiles The source of files.
+     * @param zipFile  The ZIP file.
+     * @param comment  The comment.
+     * @return {@code true}: success<br>{@code false}: fail
+     * @throws IOException if an I/O error has occurred
      */
-    public static boolean zipFiles(final Collection<File> resFiles,
+    public static boolean zipFiles(final Collection<File> srcFiles,
                                    final File zipFile,
                                    final String comment)
             throws IOException {
-        if (resFiles == null || zipFile == null) return false;
+        if (srcFiles == null || zipFile == null) return false;
         ZipOutputStream zos = null;
         try {
             zos = new ZipOutputStream(new FileOutputStream(zipFile));
-            for (File resFile : resFiles) {
-                if (!zipFile(resFile, "", zos, comment)) return false;
+            for (File srcFile : srcFiles) {
+                if (!zipFile(srcFile, "", zos, comment)) return false;
             }
             return true;
         } finally {
             if (zos != null) {
                 zos.finish();
-                CloseUtils.closeIO(zos);
+                zos.close();
             }
         }
     }
 
     /**
-     * 压缩文件
+     * Zip the file.
      *
-     * @param resFilePath 待压缩文件路径
-     * @param zipFilePath 压缩文件路径
-     * @return {@code true}: 压缩成功<br>{@code false}: 压缩失败
-     * @throws IOException IO 错误时抛出
+     * @param srcFilePath The path of source file.
+     * @param zipFilePath The path of ZIP file.
+     * @return {@code true}: success<br>{@code false}: fail
+     * @throws IOException if an I/O error has occurred
      */
-    public static boolean zipFile(final String resFilePath,
+    public static boolean zipFile(final String srcFilePath,
                                   final String zipFilePath)
             throws IOException {
-        return zipFile(getFileByPath(resFilePath), getFileByPath(zipFilePath), null);
+        return zipFile(getFileByPath(srcFilePath), getFileByPath(zipFilePath), null);
     }
 
     /**
-     * 压缩文件
+     * Zip the file.
      *
-     * @param resFilePath 待压缩文件路径
-     * @param zipFilePath 压缩文件路径
-     * @param comment     压缩文件的注释
-     * @return {@code true}: 压缩成功<br>{@code false}: 压缩失败
-     * @throws IOException IO 错误时抛出
+     * @param srcFilePath The path of source file.
+     * @param zipFilePath The path of ZIP file.
+     * @param comment     The comment.
+     * @return {@code true}: success<br>{@code false}: fail
+     * @throws IOException if an I/O error has occurred
      */
-    public static boolean zipFile(final String resFilePath,
+    public static boolean zipFile(final String srcFilePath,
                                   final String zipFilePath,
                                   final String comment)
             throws IOException {
-        return zipFile(getFileByPath(resFilePath), getFileByPath(zipFilePath), comment);
+        return zipFile(getFileByPath(srcFilePath), getFileByPath(zipFilePath), comment);
     }
 
     /**
-     * 压缩文件
+     * Zip the file.
      *
-     * @param resFile 待压缩文件
-     * @param zipFile 压缩文件
-     * @return {@code true}: 压缩成功<br>{@code false}: 压缩失败
-     * @throws IOException IO 错误时抛出
+     * @param srcFile The source of file.
+     * @param zipFile The ZIP file.
+     * @return {@code true}: success<br>{@code false}: fail
+     * @throws IOException if an I/O error has occurred
      */
-    public static boolean zipFile(final File resFile,
+    public static boolean zipFile(final File srcFile,
                                   final File zipFile)
             throws IOException {
-        return zipFile(resFile, zipFile, null);
+        return zipFile(srcFile, zipFile, null);
     }
 
     /**
-     * 压缩文件
+     * Zip the file.
      *
-     * @param resFile 待压缩文件
-     * @param zipFile 压缩文件
-     * @param comment 压缩文件的注释
-     * @return {@code true}: 压缩成功<br>{@code false}: 压缩失败
-     * @throws IOException IO 错误时抛出
+     * @param srcFile The source of file.
+     * @param zipFile The ZIP file.
+     * @param comment The comment.
+     * @return {@code true}: success<br>{@code false}: fail
+     * @throws IOException if an I/O error has occurred
      */
-    public static boolean zipFile(final File resFile,
+    public static boolean zipFile(final File srcFile,
                                   final File zipFile,
                                   final String comment)
             throws IOException {
-        if (resFile == null || zipFile == null) return false;
+        if (srcFile == null || zipFile == null) return false;
         ZipOutputStream zos = null;
         try {
             zos = new ZipOutputStream(new FileOutputStream(zipFile));
-            return zipFile(resFile, "", zos, comment);
+            return zipFile(srcFile, "", zos, comment);
         } finally {
             if (zos != null) {
-                CloseUtils.closeIO(zos);
+                zos.close();
             }
         }
     }
 
-    /**
-     * 压缩文件
-     *
-     * @param resFile  待压缩文件
-     * @param rootPath 相对于压缩文件的路径
-     * @param zos      压缩文件输出流
-     * @param comment  压缩文件的注释
-     * @return {@code true}: 压缩成功<br>{@code false}: 压缩失败
-     * @throws IOException IO 错误时抛出
-     */
-    private static boolean zipFile(final File resFile,
+    private static boolean zipFile(final File srcFile,
                                    String rootPath,
                                    final ZipOutputStream zos,
                                    final String comment)
             throws IOException {
-        rootPath = rootPath + (isSpace(rootPath) ? "" : File.separator) + resFile.getName();
-        if (resFile.isDirectory()) {
-            File[] fileList = resFile.listFiles();
-            // 如果是空文件夹那么创建它，我把'/'换为File.separator测试就不成功，eggPain
+        rootPath = rootPath + (isSpace(rootPath) ? "" : File.separator) + srcFile.getName();
+        if (srcFile.isDirectory()) {
+            File[] fileList = srcFile.listFiles();
             if (fileList == null || fileList.length <= 0) {
                 ZipEntry entry = new ZipEntry(rootPath + '/');
                 entry.setComment(comment);
@@ -215,14 +205,13 @@ public final class ZipUtils {
                 zos.closeEntry();
             } else {
                 for (File file : fileList) {
-                    // 如果递归返回 false 则返回 false
                     if (!zipFile(file, rootPath, zos, comment)) return false;
                 }
             }
         } else {
             InputStream is = null;
             try {
-                is = new BufferedInputStream(new FileInputStream(resFile));
+                is = new BufferedInputStream(new FileInputStream(srcFile));
                 ZipEntry entry = new ZipEntry(rootPath);
                 entry.setComment(comment);
                 zos.putNextEntry(entry);
@@ -233,19 +222,21 @@ public final class ZipUtils {
                 }
                 zos.closeEntry();
             } finally {
-                CloseUtils.closeIO(is);
+                if (is != null) {
+                    is.close();
+                }
             }
         }
         return true;
     }
 
     /**
-     * 解压文件
+     * Unzip the file.
      *
-     * @param zipFilePath 待解压文件路径
-     * @param destDirPath 目标目录路径
-     * @return 文件链表
-     * @throws IOException IO 错误时抛出
+     * @param zipFilePath The path of ZIP file.
+     * @param destDirPath The path of destination directory.
+     * @return the unzipped files
+     * @throws IOException if unzip unsuccessfully
      */
     public static List<File> unzipFile(final String zipFilePath,
                                        final String destDirPath)
@@ -254,12 +245,12 @@ public final class ZipUtils {
     }
 
     /**
-     * 解压文件
+     * Unzip the file.
      *
-     * @param zipFile 待解压文件
-     * @param destDir 目标目录
-     * @return 文件链表
-     * @throws IOException IO 错误时抛出
+     * @param zipFile The ZIP file.
+     * @param destDir The destination directory.
+     * @return the unzipped files
+     * @throws IOException if unzip unsuccessfully
      */
     public static List<File> unzipFile(final File zipFile,
                                        final File destDir)
@@ -268,13 +259,13 @@ public final class ZipUtils {
     }
 
     /**
-     * 解压带有关键字的文件
+     * Unzip the file by keyword.
      *
-     * @param zipFilePath 待解压文件路径
-     * @param destDirPath 目标目录路径
-     * @param keyword     关键字
-     * @return 返回带有关键字的文件链表
-     * @throws IOException IO 错误时抛出
+     * @param zipFilePath The path of ZIP file.
+     * @param destDirPath The path of destination directory.
+     * @param keyword     The keyboard.
+     * @return the unzipped files
+     * @throws IOException if unzip unsuccessfully
      */
     public static List<File> unzipFileByKeyword(final String zipFilePath,
                                                 final String destDirPath,
@@ -284,13 +275,13 @@ public final class ZipUtils {
     }
 
     /**
-     * 解压带有关键字的文件
+     * Unzip the file by keyword.
      *
-     * @param zipFile 待解压文件
-     * @param destDir 目标目录
-     * @param keyword 关键字
-     * @return 返回带有关键字的文件链表
-     * @throws IOException IO 错误时抛出
+     * @param zipFile The ZIP file.
+     * @param destDir The destination directory.
+     * @param keyword The keyboard.
+     * @return the unzipped files
+     * @throws IOException if unzip unsuccessfully
      */
     public static List<File> unzipFileByKeyword(final File zipFile,
                                                 final File destDir,
@@ -304,12 +295,20 @@ public final class ZipUtils {
             while (entries.hasMoreElements()) {
                 ZipEntry entry = ((ZipEntry) entries.nextElement());
                 String entryName = entry.getName();
+                if (entryName.contains("../")) {
+                    Log.e("ZipUtils", "it's dangerous!");
+                    return files;
+                }
                 if (!unzipChildFile(destDir, files, zf, entry, entryName)) return files;
             }
         } else {
             while (entries.hasMoreElements()) {
                 ZipEntry entry = ((ZipEntry) entries.nextElement());
                 String entryName = entry.getName();
+                if (entryName.contains("../")) {
+                    Log.e("ZipUtils", "it's dangerous!");
+                    return files;
+                }
                 if (entryName.contains(keyword)) {
                     if (!unzipChildFile(destDir, files, zf, entry, entryName)) return files;
                 }
@@ -341,18 +340,23 @@ public final class ZipUtils {
                     out.write(buffer, 0, len);
                 }
             } finally {
-                CloseUtils.closeIO(in, out);
+                if (in != null) {
+                    in.close();
+                }
+                if (out != null) {
+                    out.close();
+                }
             }
         }
         return true;
     }
 
     /**
-     * 获取压缩文件中的文件路径链表
+     * Return the files' path in ZIP file.
      *
-     * @param zipFilePath 压缩文件路径
-     * @return 压缩文件中的文件路径链表
-     * @throws IOException IO 错误时抛出
+     * @param zipFilePath The path of ZIP file.
+     * @return the files' path in ZIP file
+     * @throws IOException if an I/O error has occurred
      */
     public static List<String> getFilesPath(final String zipFilePath)
             throws IOException {
@@ -360,11 +364,11 @@ public final class ZipUtils {
     }
 
     /**
-     * 获取压缩文件中的文件路径链表
+     * Return the files' path in ZIP file.
      *
-     * @param zipFile 压缩文件
-     * @return 压缩文件中的文件路径链表
-     * @throws IOException IO 错误时抛出
+     * @param zipFile The ZIP file.
+     * @return the files' path in ZIP file
+     * @throws IOException if an I/O error has occurred
      */
     public static List<String> getFilesPath(final File zipFile)
             throws IOException {
@@ -378,11 +382,11 @@ public final class ZipUtils {
     }
 
     /**
-     * 获取压缩文件中的注释链表
+     * Return the files' comment in ZIP file.
      *
-     * @param zipFilePath 压缩文件路径
-     * @return 压缩文件中的注释链表
-     * @throws IOException IO 错误时抛出
+     * @param zipFilePath The path of ZIP file.
+     * @return the files' comment in ZIP file
+     * @throws IOException if an I/O error has occurred
      */
     public static List<String> getComments(final String zipFilePath)
             throws IOException {
@@ -390,11 +394,11 @@ public final class ZipUtils {
     }
 
     /**
-     * 获取压缩文件中的注释链表
+     * Return the files' comment in ZIP file.
      *
-     * @param zipFile 压缩文件
-     * @return 压缩文件中的注释链表
-     * @throws IOException IO 错误时抛出
+     * @param zipFile The ZIP file.
+     * @return the files' comment in ZIP file
+     * @throws IOException if an I/O error has occurred
      */
     public static List<String> getComments(final File zipFile)
             throws IOException {

@@ -4,6 +4,7 @@ package me.ibore.libs.util;
  */
 
 import android.content.Context;
+import android.os.Environment;
 import android.os.storage.StorageManager;
 
 import java.lang.reflect.Array;
@@ -22,27 +23,46 @@ import java.util.List;
  * </pre>
  */
 public final class SDCardUtils {
-
     private SDCardUtils() {
         throw new UnsupportedOperationException("u can't instantiate me...");
     }
 
     /**
-     * 判断 SD 卡是否可用
+     * Return whether sdcard is enabled by environment.
      *
-     * @return true : 可用<br>false : 不可用
+     * @return true : enabled<br>false : disabled
+     */
+    public static boolean isSDCardEnableByEnvironment() {
+        return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
+    }
+
+    /**
+     * Return the path of sdcard by environment.
+     *
+     * @return the path of sdcard by environment
+     */
+    public static String getSDCardPathByEnvironment() {
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+            return Environment.getExternalStorageDirectory().getAbsolutePath();
+        }
+        return "";
+    }
+
+    /**
+     * Return whether sdcard is enabled.
+     *
+     * @return true : enabled<br>false : disabled
      */
     public static boolean isSDCardEnable() {
         return !getSDCardPaths().isEmpty();
     }
 
     /**
-     * 获取 SD 卡路径
+     * Return the paths of sdcard.
      *
-     * @param removable true : 外置 SD 卡<br>false : 内置 SD 卡
-     * @return SD 卡路径
+     * @param removable True to return the paths of removable sdcard, false otherwise.
+     * @return the paths of sdcard
      */
-    @SuppressWarnings("TryWithIdenticalCatches")
     public static List<String> getSDCardPaths(final boolean removable) {
         List<String> paths = new ArrayList<>();
         StorageManager sm =
@@ -75,11 +95,10 @@ public final class SDCardUtils {
     }
 
     /**
-     * 获取 SD 卡路径
+     * Return the paths of sdcard.
      *
-     * @return SD 卡路径
+     * @return the paths of sdcard
      */
-    @SuppressWarnings("TryWithIdenticalCatches")
     public static List<String> getSDCardPaths() {
         StorageManager storageManager = (StorageManager) Utils.getApp()
                 .getSystemService(Context.STORAGE_SERVICE);

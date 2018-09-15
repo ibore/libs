@@ -19,7 +19,7 @@ public final class CloseUtils {
     }
 
     /**
-     * 关闭 IO
+     * Close the io stream.
      *
      * @param closeables closeables
      */
@@ -37,7 +37,7 @@ public final class CloseUtils {
     }
 
     /**
-     * 安静关闭 IO
+     * Close the io stream quietly.
      *
      * @param closeables closeables
      */

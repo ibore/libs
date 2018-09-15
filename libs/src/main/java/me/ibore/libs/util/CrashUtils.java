@@ -9,16 +9,25 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresPermission;
+import android.util.Log;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 /**
  * <pre>
@@ -29,20 +38,14 @@ import java.util.concurrent.Executors;
  * </pre>
  */
 public final class CrashUtils {
-
-
     private static String defaultDir;
     private static String dir;
     private static String versionName;
     private static int    versionCode;
 
-    private static ExecutorService sExecutor;
-
     private static final String FILE_SEP = System.getProperty("file.separator");
     @SuppressLint("SimpleDateFormat")
     private static final Format FORMAT   = new SimpleDateFormat("MM-dd HH-mm-ss");
-
-    private static final String CRASH_HEAD;
 
     private static final Thread.UncaughtExceptionHandler DEFAULT_UNCAUGHT_EXCEPTION_HANDLER;
     private static final Thread.UncaughtExceptionHandler UNCAUGHT_EXCEPTION_HANDLER;
@@ -61,16 +64,6 @@ public final class CrashUtils {
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
-
-        CRASH_HEAD = "************* Crash Log Head ****************" +
-                "\nDevice Manufacturer: " + Build.MANUFACTURER +// 设备厂商
-                "\nDevice Model       : " + Build.MODEL +// 设备型号
-                "\nAndroid Version    : " + Build.VERSION.RELEASE +// 系统版本
-                "\nAndroid SDK        : " + Build.VERSION.SDK_INT +// SDK 版本
-                "\nApp VersionName    : " + versionName +
-                "\nApp VersionCode    : " + versionCode +
-                "\n************* Crash Log Head ****************\n\n";
-
         DEFAULT_UNCAUGHT_EXCEPTION_HANDLER = Thread.getDefaultUncaughtExceptionHandler();
 
         UNCAUGHT_EXCEPTION_HANDLER = new Thread.UncaughtExceptionHandler() {
@@ -85,38 +78,41 @@ public final class CrashUtils {
                     }
                     return;
                 }
+
+                final String time = FORMAT.format(new Date(System.currentTimeMillis()));
+                final StringBuilder sb = new StringBuilder();
+                final String head = "************* Log Head ****************" +
+                        "\nTime Of Crash      : " + time +
+                        "\nDevice Manufacturer: " + Build.MANUFACTURER +
+                        "\nDevice Model       : " + Build.MODEL +
+                        "\nAndroid Version    : " + Build.VERSION.RELEASE +
+                        "\nAndroid SDK        : " + Build.VERSION.SDK_INT +
+                        "\nApp VersionName    : " + versionName +
+                        "\nApp VersionCode    : " + versionCode +
+                        "\n************* Log Head ****************\n\n";
+                sb.append(head);
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                e.printStackTrace(pw);
+                Throwable cause = e.getCause();
+                while (cause != null) {
+                    cause.printStackTrace(pw);
+                    cause = cause.getCause();
+                }
+                pw.flush();
+                sb.append(sw.toString());
+                final String crashInfo = sb.toString();
+                final String fullPath = (dir == null ? defaultDir : dir) + time + ".txt";
+                if (createOrExistsFile(fullPath)) {
+                    input2File(crashInfo, fullPath);
+                } else {
+                    Log.e("CrashUtils", "create " + fullPath + " failed!");
+                }
+
                 if (sOnCrashListener != null) {
-                    sOnCrashListener.onCrash(e);
+                    sOnCrashListener.onCrash(crashInfo, e);
                 }
-                Date now = new Date(System.currentTimeMillis());
-                String fileName = FORMAT.format(now) + ".txt";
-                final String fullPath = (dir == null ? defaultDir : dir) + fileName;
-                if (!createOrExistsFile(fullPath)) return;
-                if (sExecutor == null) {
-                    sExecutor = Executors.newSingleThreadExecutor();
-                }
-                sExecutor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        PrintWriter pw = null;
-                        try {
-                            pw = new PrintWriter(new FileWriter(fullPath, false));
-                            pw.write(CRASH_HEAD);
-                            e.printStackTrace(pw);
-                            Throwable cause = e.getCause();
-                            while (cause != null) {
-                                cause.printStackTrace(pw);
-                                cause = cause.getCause();
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        } finally {
-                            if (pw != null) {
-                                pw.close();
-                            }
-                        }
-                    }
-                });
+
                 if (DEFAULT_UNCAUGHT_EXCEPTION_HANDLER != null) {
                     DEFAULT_UNCAUGHT_EXCEPTION_HANDLER.uncaughtException(t, e);
                 }
@@ -129,66 +125,78 @@ public final class CrashUtils {
     }
 
     /**
-     * 初始化
-     * <p>需添加权限 {@code <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}</p>
+     * Initialization.
+     * <p>Must hold
+     * {@code <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}</p>
      */
+    @RequiresPermission(WRITE_EXTERNAL_STORAGE)
     public static void init() {
         init("");
     }
 
     /**
-     * 初始化
-     * <p>需添加权限 {@code <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}</p>
+     * Initialization
+     * <p>Must hold
+     * {@code <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}</p>
      *
-     * @param crashDir 崩溃文件存储目录
+     * @param crashDir The directory of saving crash information.
      */
+    @RequiresPermission(WRITE_EXTERNAL_STORAGE)
     public static void init(@NonNull final File crashDir) {
         init(crashDir.getAbsolutePath(), null);
     }
 
     /**
-     * 初始化
-     * <p>需添加权限 {@code <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}</p>
+     * Initialization
+     * <p>Must hold
+     * {@code <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}</p>
      *
-     * @param crashDir 崩溃文件存储目录
+     * @param crashDirPath The directory's path of saving crash information.
      */
-    public static void init(final String crashDir) {
-        init(crashDir, null);
+    @RequiresPermission(WRITE_EXTERNAL_STORAGE)
+    public static void init(final String crashDirPath) {
+        init(crashDirPath, null);
     }
 
     /**
-     * 初始化
-     * <p>需添加权限 {@code <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}</p>
+     * Initialization
+     * <p>Must hold
+     * {@code <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}</p>
      *
-     * @param onCrashListener 崩溃监听事件
+     * @param onCrashListener The crash listener.
      */
+    @RequiresPermission(WRITE_EXTERNAL_STORAGE)
     public static void init(final OnCrashListener onCrashListener) {
         init("", onCrashListener);
     }
 
     /**
-     * 初始化
-     * <p>需添加权限 {@code <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}</p>
+     * Initialization
+     * <p>Must hold
+     * {@code <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}</p>
      *
-     * @param crashDir        崩溃文件存储目录
-     * @param onCrashListener 崩溃监听事件
+     * @param crashDir        The directory of saving crash information.
+     * @param onCrashListener The crash listener.
      */
+    @RequiresPermission(WRITE_EXTERNAL_STORAGE)
     public static void init(@NonNull final File crashDir, final OnCrashListener onCrashListener) {
         init(crashDir.getAbsolutePath(), onCrashListener);
     }
 
     /**
-     * 初始化
-     * <p>需添加权限 {@code <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}</p>
+     * Initialization
+     * <p>Must hold
+     * {@code <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}</p>
      *
-     * @param crashDir        崩溃文件存储目录
-     * @param onCrashListener 崩溃监听事件
+     * @param crashDirPath    The directory's path of saving crash information.
+     * @param onCrashListener The crash listener.
      */
-    public static void init(final String crashDir, final OnCrashListener onCrashListener) {
-        if (isSpace(crashDir)) {
+    @RequiresPermission(WRITE_EXTERNAL_STORAGE)
+    public static void init(final String crashDirPath, final OnCrashListener onCrashListener) {
+        if (isSpace(crashDirPath)) {
             dir = null;
         } else {
-            dir = crashDir.endsWith(FILE_SEP) ? crashDir : crashDir + FILE_SEP;
+            dir = crashDirPath.endsWith(FILE_SEP) ? crashDirPath : crashDirPath + FILE_SEP;
         }
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())
                 && Utils.getApp().getExternalCacheDir() != null)
@@ -198,6 +206,51 @@ public final class CrashUtils {
         }
         sOnCrashListener = onCrashListener;
         Thread.setDefaultUncaughtExceptionHandler(UNCAUGHT_EXCEPTION_HANDLER);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // interface
+    ///////////////////////////////////////////////////////////////////////////
+
+    public interface OnCrashListener {
+        void onCrash(String crashInfo, Throwable e);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // other utils methods
+    ///////////////////////////////////////////////////////////////////////////
+
+    private static void input2File(final String input, final String filePath) {
+        Future<Boolean> submit = Executors.newSingleThreadExecutor().submit(new Callable<Boolean>() {
+            @Override
+            public Boolean call() {
+                BufferedWriter bw = null;
+                try {
+                    bw = new BufferedWriter(new FileWriter(filePath, true));
+                    bw.write(input);
+                    return true;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return false;
+                } finally {
+                    try {
+                        if (bw != null) {
+                            bw.close();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        try {
+            if (submit.get()) return;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        Log.e("CrashUtils", "write crash info to " + filePath + " failed!");
     }
 
     private static boolean createOrExistsFile(final String filePath) {
@@ -224,9 +277,5 @@ public final class CrashUtils {
             }
         }
         return true;
-    }
-
-    public interface OnCrashListener {
-        void onCrash(Throwable e);
     }
 }

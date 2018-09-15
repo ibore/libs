@@ -29,59 +29,62 @@ import java.util.List;
  * </pre>
  */
 public final class ActivityUtils {
+
     private ActivityUtils() {
         throw new UnsupportedOperationException("u can't instantiate me...");
     }
 
     /**
-     * 判断 Activity 是否存在
+     * Return whether the activity exists.
      *
-     * @param packageName 包名
-     * @param className   activity 全路径类名
-     * @return {@code true}: 是<br>{@code false}: 否
+     * @param pkg The name of the package.
+     * @param cls The name of the class.
+     * @return {@code true}: yes<br>{@code false}: no
      */
-    public static boolean isActivityExists(@NonNull final String packageName,
-                                           @NonNull final String className) {
+    public static boolean isActivityExists(@NonNull final String pkg,
+                                           @NonNull final String cls) {
         Intent intent = new Intent();
-        intent.setClassName(packageName, className);
+        intent.setClassName(pkg, cls);
         return !(Utils.getApp().getPackageManager().resolveActivity(intent, 0) == null ||
                 intent.resolveActivity(Utils.getApp().getPackageManager()) == null ||
                 Utils.getApp().getPackageManager().queryIntentActivities(intent, 0).size() == 0);
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param clz Activity 类
+     * @param clz The activity class.
      */
-    public static void startActivity(@NonNull final Class<?> clz) {
-        Context context = getActivityOrApp();
+    public static void startActivity(@NonNull final Class<? extends Activity> clz) {
+        Context context = Utils.getTopActivityOrApp();
         startActivity(context, null, context.getPackageName(), clz.getName(), null);
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param clz     Activity 类
-     * @param options 跳转动画
+     * @param clz     The activity class.
+     * @param options Additional options for how the Activity should be started.
      */
-    public static void startActivity(@NonNull final Class<?> clz,
-                                     @NonNull final Bundle options) {
-        Context context = getActivityOrApp();
+    public static void startActivity(@NonNull final Class<? extends Activity> clz,
+                                     final Bundle options) {
+        Context context = Utils.getTopActivityOrApp();
         startActivity(context, null, context.getPackageName(), clz.getName(), options);
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param clz       Activity 类
-     * @param enterAnim 入场动画
-     * @param exitAnim  出场动画
+     * @param clz       The activity class.
+     * @param enterAnim A resource ID of the animation resource to use for the
+     *                  incoming activity.
+     * @param exitAnim  A resource ID of the animation resource to use for the
+     *                  outgoing activity.
      */
-    public static void startActivity(@NonNull final Class<?> clz,
+    public static void startActivity(@NonNull final Class<? extends Activity> clz,
                                      @AnimRes final int enterAnim,
                                      @AnimRes final int exitAnim) {
-        Context context = getActivityOrApp();
+        Context context = Utils.getTopActivityOrApp();
         startActivity(context, null, context.getPackageName(), clz.getName(),
                 getOptionsBundle(context, enterAnim, exitAnim));
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN && context instanceof Activity) {
@@ -90,56 +93,58 @@ public final class ActivityUtils {
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param activity activity
-     * @param clz      Activity 类
+     * @param activity The activity.
+     * @param clz      The activity class.
      */
     public static void startActivity(@NonNull final Activity activity,
-                                     @NonNull final Class<?> clz) {
+                                     @NonNull final Class<? extends Activity> clz) {
         startActivity(activity, null, activity.getPackageName(), clz.getName(), null);
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param activity activity
-     * @param clz      Activity 类
-     * @param options  跳转动画
+     * @param activity The activity.
+     * @param clz      The activity class.
+     * @param options  Additional options for how the Activity should be started.
      */
     public static void startActivity(@NonNull final Activity activity,
-                                     @NonNull final Class<?> clz,
-                                     @NonNull final Bundle options) {
+                                     @NonNull final Class<? extends Activity> clz,
+                                     final Bundle options) {
         startActivity(activity, null, activity.getPackageName(), clz.getName(), options);
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param activity       activity
-     * @param clz            Activity 类
-     * @param sharedElements 共享元素
+     * @param activity       The activity.
+     * @param clz            The activity class.
+     * @param sharedElements The names of the shared elements to transfer to the called
+     *                       Activity and their associated Views.
      */
     public static void startActivity(@NonNull final Activity activity,
-                                     @NonNull final Class<?> clz,
-                                     @NonNull final View... sharedElements) {
+                                     @NonNull final Class<? extends Activity> clz,
+                                     final View... sharedElements) {
         startActivity(activity, null, activity.getPackageName(), clz.getName(),
                 getOptionsBundle(activity, sharedElements));
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param activity  activity
-     * @param clz       Activity 类
-     * @param enterAnim 入场动画
-     * @param exitAnim  出场动画
+     * @param activity  The activity.
+     * @param clz       The activity class.
+     * @param enterAnim A resource ID of the animation resource to use for the
+     *                  incoming activity.
+     * @param exitAnim  A resource ID of the animation resource to use for the
+     *                  outgoing activity.
      */
     public static void startActivity(@NonNull final Activity activity,
-                                     @NonNull final Class<?> clz,
+                                     @NonNull final Class<? extends Activity> clz,
                                      @AnimRes final int enterAnim,
                                      @AnimRes final int exitAnim) {
-
         startActivity(activity, null, activity.getPackageName(), clz.getName(),
                 getOptionsBundle(activity, enterAnim, exitAnim));
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
@@ -148,44 +153,46 @@ public final class ActivityUtils {
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param extras extras
-     * @param clz    Activity 类
+     * @param extras The Bundle of extras to add to this intent.
+     * @param clz    The activity class.
      */
     public static void startActivity(@NonNull final Bundle extras,
-                                     @NonNull final Class<?> clz) {
-        Context context = getActivityOrApp();
+                                     @NonNull final Class<? extends Activity> clz) {
+        Context context = Utils.getTopActivityOrApp();
         startActivity(context, extras, context.getPackageName(), clz.getName(), null);
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param extras  extras
-     * @param clz     Activity 类
-     * @param options 跳转动画
+     * @param extras  The Bundle of extras to add to this intent.
+     * @param clz     The activity class.
+     * @param options Additional options for how the Activity should be started.
      */
     public static void startActivity(@NonNull final Bundle extras,
-                                     @NonNull final Class<?> clz,
+                                     @NonNull final Class<? extends Activity> clz,
                                      @NonNull final Bundle options) {
-        Context context = getActivityOrApp();
+        Context context = Utils.getTopActivityOrApp();
         startActivity(context, extras, context.getPackageName(), clz.getName(), options);
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param extras    extras
-     * @param clz       Activity 类
-     * @param enterAnim 入场动画
-     * @param exitAnim  出场动画
+     * @param extras    The Bundle of extras to add to this intent.
+     * @param clz       The activity class.
+     * @param enterAnim A resource ID of the animation resource to use for the
+     *                  incoming activity.
+     * @param exitAnim  A resource ID of the animation resource to use for the
+     *                  outgoing activity.
      */
     public static void startActivity(@NonNull final Bundle extras,
-                                     @NonNull final Class<?> clz,
+                                     @NonNull final Class<? extends Activity> clz,
                                      @AnimRes final int enterAnim,
                                      @AnimRes final int exitAnim) {
-        Context context = getActivityOrApp();
+        Context context = Utils.getTopActivityOrApp();
         startActivity(context, extras, context.getPackageName(), clz.getName(),
                 getOptionsBundle(context, enterAnim, exitAnim));
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN && context instanceof Activity) {
@@ -194,61 +201,64 @@ public final class ActivityUtils {
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param extras   extras
-     * @param activity activity
-     * @param clz      Activity 类
+     * @param extras   The Bundle of extras to add to this intent.
+     * @param activity The activity.
+     * @param clz      The activity class.
      */
     public static void startActivity(@NonNull final Bundle extras,
                                      @NonNull final Activity activity,
-                                     @NonNull final Class<?> clz) {
+                                     @NonNull final Class<? extends Activity> clz) {
         startActivity(activity, extras, activity.getPackageName(), clz.getName(), null);
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param extras   extras
-     * @param activity activity
-     * @param clz      Activity 类
-     * @param options  跳转动画
+     * @param extras   The Bundle of extras to add to this intent.
+     * @param activity The activity.
+     * @param clz      The activity class.
+     * @param options  Additional options for how the Activity should be started.
      */
     public static void startActivity(@NonNull final Bundle extras,
                                      @NonNull final Activity activity,
-                                     @NonNull final Class<?> clz,
+                                     @NonNull final Class<? extends Activity> clz,
                                      @NonNull final Bundle options) {
         startActivity(activity, extras, activity.getPackageName(), clz.getName(), options);
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param extras         extras
-     * @param activity       activity
-     * @param clz            Activity 类
-     * @param sharedElements 共享元素
+     * @param extras         The Bundle of extras to add to this intent.
+     * @param activity       The activity.
+     * @param clz            The activity class.
+     * @param sharedElements The names of the shared elements to transfer to the called
+     *                       Activity and their associated Views.
      */
     public static void startActivity(@NonNull final Bundle extras,
                                      @NonNull final Activity activity,
-                                     @NonNull final Class<?> clz,
-                                     @NonNull final View... sharedElements) {
+                                     @NonNull final Class<? extends Activity> clz,
+                                     final View... sharedElements) {
         startActivity(activity, extras, activity.getPackageName(), clz.getName(),
                 getOptionsBundle(activity, sharedElements));
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param extras    extras
-     * @param activity  activity
-     * @param clz       Activity 类
-     * @param enterAnim 入场动画
-     * @param exitAnim  出场动画
+     * @param extras    The Bundle of extras to add to this intent.
+     * @param activity  The activity.
+     * @param clz       The activity class.
+     * @param enterAnim A resource ID of the animation resource to use for the
+     *                  incoming activity.
+     * @param exitAnim  A resource ID of the animation resource to use for the
+     *                  outgoing activity.
      */
     public static void startActivity(@NonNull final Bundle extras,
                                      @NonNull final Activity activity,
-                                     @NonNull final Class<?> clz,
+                                     @NonNull final Class<? extends Activity> clz,
                                      @AnimRes final int enterAnim,
                                      @AnimRes final int exitAnim) {
         startActivity(activity, extras, activity.getPackageName(), clz.getName(),
@@ -259,42 +269,44 @@ public final class ActivityUtils {
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param pkg 包名
-     * @param cls 全类名
+     * @param pkg The name of the package.
+     * @param cls The name of the class.
      */
     public static void startActivity(@NonNull final String pkg,
                                      @NonNull final String cls) {
-        startActivity(getActivityOrApp(), null, pkg, cls, null);
+        startActivity(Utils.getTopActivityOrApp(), null, pkg, cls, null);
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param pkg     包名
-     * @param cls     全类名
-     * @param options 动画
+     * @param pkg     The name of the package.
+     * @param cls     The name of the class.
+     * @param options Additional options for how the Activity should be started.
      */
     public static void startActivity(@NonNull final String pkg,
                                      @NonNull final String cls,
-                                     @NonNull final Bundle options) {
-        startActivity(getActivityOrApp(), null, pkg, cls, options);
+                                     final Bundle options) {
+        startActivity(Utils.getTopActivityOrApp(), null, pkg, cls, options);
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param pkg       包名
-     * @param cls       全类名
-     * @param enterAnim 入场动画
-     * @param exitAnim  出场动画
+     * @param pkg       The name of the package.
+     * @param cls       The name of the class.
+     * @param enterAnim A resource ID of the animation resource to use for the
+     *                  incoming activity.
+     * @param exitAnim  A resource ID of the animation resource to use for the
+     *                  outgoing activity.
      */
     public static void startActivity(@NonNull final String pkg,
                                      @NonNull final String cls,
                                      @AnimRes final int enterAnim,
                                      @AnimRes final int exitAnim) {
-        Context context = getActivityOrApp();
+        Context context = Utils.getTopActivityOrApp();
         startActivity(context, null, pkg, cls, getOptionsBundle(context, enterAnim, exitAnim));
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN && context instanceof Activity) {
             ((Activity) context).overridePendingTransition(enterAnim, exitAnim);
@@ -302,11 +314,11 @@ public final class ActivityUtils {
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param activity activity
-     * @param pkg      包名
-     * @param cls      全类名
+     * @param activity The activity.
+     * @param pkg      The name of the package.
+     * @param cls      The name of the class.
      */
     public static void startActivity(@NonNull final Activity activity,
                                      @NonNull final String pkg,
@@ -315,43 +327,46 @@ public final class ActivityUtils {
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param activity activity
-     * @param pkg      包名
-     * @param cls      全类名
-     * @param options  动画
+     * @param activity The activity.
+     * @param pkg      The name of the package.
+     * @param cls      The name of the class.
+     * @param options  Additional options for how the Activity should be started.
      */
     public static void startActivity(@NonNull final Activity activity,
                                      @NonNull final String pkg,
                                      @NonNull final String cls,
-                                     @NonNull final Bundle options) {
+                                     final Bundle options) {
         startActivity(activity, null, pkg, cls, options);
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param activity       activity
-     * @param pkg            包名
-     * @param cls            全类名
-     * @param sharedElements 共享元素
+     * @param activity       The activity.
+     * @param pkg            The name of the package.
+     * @param cls            The name of the class.
+     * @param sharedElements The names of the shared elements to transfer to the called
+     *                       Activity and their associated Views.
      */
     public static void startActivity(@NonNull final Activity activity,
                                      @NonNull final String pkg,
                                      @NonNull final String cls,
-                                     @NonNull final View... sharedElements) {
+                                     final View... sharedElements) {
         startActivity(activity, null, pkg, cls, getOptionsBundle(activity, sharedElements));
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param activity  activity
-     * @param pkg       包名
-     * @param cls       全类名
-     * @param enterAnim 入场动画
-     * @param exitAnim  出场动画
+     * @param activity  The activity.
+     * @param pkg       The name of the package.
+     * @param cls       The name of the class.
+     * @param enterAnim A resource ID of the animation resource to use for the
+     *                  incoming activity.
+     * @param exitAnim  A resource ID of the animation resource to use for the
+     *                  outgoing activity.
      */
     public static void startActivity(@NonNull final Activity activity,
                                      @NonNull final String pkg,
@@ -365,48 +380,50 @@ public final class ActivityUtils {
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param extras extras
-     * @param pkg    包名
-     * @param cls    全类名
+     * @param extras The Bundle of extras to add to this intent.
+     * @param pkg    The name of the package.
+     * @param cls    The name of the class.
      */
     public static void startActivity(@NonNull final Bundle extras,
                                      @NonNull final String pkg,
                                      @NonNull final String cls) {
-        startActivity(getActivityOrApp(), extras, pkg, cls, null);
+        startActivity(Utils.getTopActivityOrApp(), extras, pkg, cls, null);
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param extras  extras
-     * @param pkg     包名
-     * @param cls     全类名
-     * @param options 动画
+     * @param extras  The Bundle of extras to add to this intent.
+     * @param pkg     The name of the package.
+     * @param cls     The name of the class.
+     * @param options Additional options for how the Activity should be started.
      */
     public static void startActivity(@NonNull final Bundle extras,
                                      @NonNull final String pkg,
                                      @NonNull final String cls,
-                                     @NonNull final Bundle options) {
-        startActivity(getActivityOrApp(), extras, pkg, cls, options);
+                                     final Bundle options) {
+        startActivity(Utils.getTopActivityOrApp(), extras, pkg, cls, options);
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param extras    extras
-     * @param pkg       包名
-     * @param cls       全类名
-     * @param enterAnim 入场动画
-     * @param exitAnim  出场动画
+     * @param extras    The Bundle of extras to add to this intent.
+     * @param pkg       The name of the package.
+     * @param cls       The name of the class.
+     * @param enterAnim A resource ID of the animation resource to use for the
+     *                  incoming activity.
+     * @param exitAnim  A resource ID of the animation resource to use for the
+     *                  outgoing activity.
      */
     public static void startActivity(@NonNull final Bundle extras,
                                      @NonNull final String pkg,
                                      @NonNull final String cls,
                                      @AnimRes final int enterAnim,
                                      @AnimRes final int exitAnim) {
-        Context context = getActivityOrApp();
+        Context context = Utils.getTopActivityOrApp();
         startActivity(context, extras, pkg, cls, getOptionsBundle(context, enterAnim, exitAnim));
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN && context instanceof Activity) {
             ((Activity) context).overridePendingTransition(enterAnim, exitAnim);
@@ -414,12 +431,12 @@ public final class ActivityUtils {
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param activity activity
-     * @param extras   extras
-     * @param pkg      包名
-     * @param cls      全类名
+     * @param activity The activity.
+     * @param extras   The Bundle of extras to add to this intent.
+     * @param pkg      The name of the package.
+     * @param cls      The name of the class.
      */
     public static void startActivity(@NonNull final Bundle extras,
                                      @NonNull final Activity activity,
@@ -429,47 +446,50 @@ public final class ActivityUtils {
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param extras   extras
-     * @param activity activity
-     * @param pkg      包名
-     * @param cls      全类名
-     * @param options  动画
+     * @param extras   The Bundle of extras to add to this intent.
+     * @param activity The activity.
+     * @param pkg      The name of the package.
+     * @param cls      The name of the class.
+     * @param options  Additional options for how the Activity should be started.
      */
     public static void startActivity(@NonNull final Bundle extras,
                                      @NonNull final Activity activity,
                                      @NonNull final String pkg,
                                      @NonNull final String cls,
-                                     @NonNull final Bundle options) {
+                                     final Bundle options) {
         startActivity(activity, extras, pkg, cls, options);
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param extras         extras
-     * @param activity       activity
-     * @param pkg            包名
-     * @param cls            全类名
-     * @param sharedElements 共享元素
+     * @param extras         The Bundle of extras to add to this intent.
+     * @param activity       The activity.
+     * @param pkg            The name of the package.
+     * @param cls            The name of the class.
+     * @param sharedElements The names of the shared elements to transfer to the called
+     *                       Activity and their associated Views.
      */
     public static void startActivity(@NonNull final Bundle extras,
                                      @NonNull final Activity activity,
                                      @NonNull final String pkg,
                                      @NonNull final String cls,
-                                     @NonNull final View... sharedElements) {
+                                     final View... sharedElements) {
         startActivity(activity, extras, pkg, cls, getOptionsBundle(activity, sharedElements));
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param extras    extras
-     * @param pkg       包名
-     * @param cls       全类名
-     * @param enterAnim 入场动画
-     * @param exitAnim  出场动画
+     * @param extras    The Bundle of extras to add to this intent.
+     * @param pkg       The name of the package.
+     * @param cls       The name of the class.
+     * @param enterAnim A resource ID of the animation resource to use for the
+     *                  incoming activity.
+     * @param exitAnim  A resource ID of the animation resource to use for the
+     *                  outgoing activity.
      */
     public static void startActivity(@NonNull final Bundle extras,
                                      @NonNull final Activity activity,
@@ -484,36 +504,38 @@ public final class ActivityUtils {
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param intent 意图
+     * @param intent The description of the activity to start.
      */
     public static void startActivity(@NonNull final Intent intent) {
-        startActivity(intent, getActivityOrApp(), null);
+        startActivity(intent, Utils.getTopActivityOrApp(), null);
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param intent  意图
-     * @param options 跳转动画
+     * @param intent  The description of the activity to start.
+     * @param options Additional options for how the Activity should be started.
      */
     public static void startActivity(@NonNull final Intent intent,
                                      @NonNull final Bundle options) {
-        startActivity(intent, getActivityOrApp(), options);
+        startActivity(intent, Utils.getTopActivityOrApp(), options);
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param intent    意图
-     * @param enterAnim 入场动画
-     * @param exitAnim  出场动画
+     * @param intent    The description of the activity to start.
+     * @param enterAnim A resource ID of the animation resource to use for the
+     *                  incoming activity.
+     * @param exitAnim  A resource ID of the animation resource to use for the
+     *                  outgoing activity.
      */
     public static void startActivity(@NonNull final Intent intent,
                                      @AnimRes final int enterAnim,
                                      @AnimRes final int exitAnim) {
-        Context context = getActivityOrApp();
+        Context context = Utils.getTopActivityOrApp();
         startActivity(intent, context, getOptionsBundle(context, enterAnim, exitAnim));
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN && context instanceof Activity) {
             ((Activity) context).overridePendingTransition(enterAnim, exitAnim);
@@ -521,10 +543,10 @@ public final class ActivityUtils {
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param activity activity
-     * @param intent   意图
+     * @param activity The activity.
+     * @param intent   The description of the activity to start.
      */
     public static void startActivity(@NonNull final Activity activity,
                                      @NonNull final Intent intent) {
@@ -532,38 +554,41 @@ public final class ActivityUtils {
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param activity activity
-     * @param intent   意图
-     * @param options  跳转动画
+     * @param activity The activity.
+     * @param intent   The description of the activity to start.
+     * @param options  Additional options for how the Activity should be started.
      */
     public static void startActivity(@NonNull final Activity activity,
                                      @NonNull final Intent intent,
-                                     @NonNull final Bundle options) {
+                                     final Bundle options) {
         startActivity(intent, activity, options);
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param activity       activity
-     * @param intent         意图
-     * @param sharedElements 共享元素
+     * @param activity       The activity.
+     * @param intent         The description of the activity to start.
+     * @param sharedElements The names of the shared elements to transfer to the called
+     *                       Activity and their associated Views.
      */
     public static void startActivity(@NonNull final Activity activity,
                                      @NonNull final Intent intent,
-                                     @NonNull final View... sharedElements) {
+                                     final View... sharedElements) {
         startActivity(intent, activity, getOptionsBundle(activity, sharedElements));
     }
 
     /**
-     * 启动 Activity
+     * Start the activity.
      *
-     * @param activity  activity
-     * @param intent    意图
-     * @param enterAnim 入场动画
-     * @param exitAnim  出场动画
+     * @param activity  The activity.
+     * @param intent    The description of the activity to start.
+     * @param enterAnim A resource ID of the animation resource to use for the
+     *                  incoming activity.
+     * @param exitAnim  A resource ID of the animation resource to use for the
+     *                  outgoing activity.
      */
     public static void startActivity(@NonNull final Activity activity,
                                      @NonNull final Intent intent,
@@ -576,36 +601,353 @@ public final class ActivityUtils {
     }
 
     /**
-     * 启动多个 Activity
+     * Start the activity.
      *
-     * @param intents 意图
+     * @param activity    The activity.
+     * @param clz         The activity class.
+     * @param requestCode if &gt;= 0, this code will be returned in
+     *                    onActivityResult() when the activity exits.
+     */
+    public static void startActivityForResult(@NonNull final Activity activity,
+                                              @NonNull final Class<? extends Activity> clz,
+                                              final int requestCode) {
+        startActivityForResult(activity, null, activity.getPackageName(), clz.getName(),
+                requestCode, null);
+    }
+
+    /**
+     * Start the activity.
+     *
+     * @param activity    The activity.
+     * @param clz         The activity class.
+     * @param requestCode if &gt;= 0, this code will be returned in
+     *                    onActivityResult() when the activity exits.
+     * @param options     Additional options for how the Activity should be started.
+     */
+    public static void startActivityForResult(@NonNull final Activity activity,
+                                              @NonNull final Class<? extends Activity> clz,
+                                              final int requestCode,
+                                              final Bundle options) {
+        startActivityForResult(activity, null, activity.getPackageName(), clz.getName(),
+                requestCode, options);
+    }
+
+    /**
+     * Start the activity.
+     *
+     * @param activity       The activity.
+     * @param clz            The activity class.
+     * @param requestCode    if &gt;= 0, this code will be returned in
+     *                       onActivityResult() when the activity exits.
+     * @param sharedElements The names of the shared elements to transfer to the called
+     *                       Activity and their associated Views.
+     */
+    public static void startActivityForResult(@NonNull final Activity activity,
+                                              @NonNull final Class<? extends Activity> clz,
+                                              final int requestCode,
+                                              final View... sharedElements) {
+        startActivityForResult(activity, null, activity.getPackageName(), clz.getName(),
+                requestCode, getOptionsBundle(activity, sharedElements));
+    }
+
+    /**
+     * Start the activity.
+     *
+     * @param activity    The activity.
+     * @param clz         The activity class.
+     * @param requestCode if &gt;= 0, this code will be returned in
+     *                    onActivityResult() when the activity exits.
+     * @param enterAnim   A resource ID of the animation resource to use for the
+     *                    incoming activity.
+     * @param exitAnim    A resource ID of the animation resource to use for the
+     *                    outgoing activity.
+     */
+    public static void startActivityForResult(@NonNull final Activity activity,
+                                              @NonNull final Class<? extends Activity> clz,
+                                              final int requestCode,
+                                              @AnimRes final int enterAnim,
+                                              @AnimRes final int exitAnim) {
+        startActivityForResult(activity, null, activity.getPackageName(), clz.getName(),
+                requestCode, getOptionsBundle(activity, enterAnim, exitAnim));
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            activity.overridePendingTransition(enterAnim, exitAnim);
+        }
+    }
+
+    /**
+     * Start the activity.
+     *
+     * @param extras      The Bundle of extras to add to this intent.
+     * @param activity    The activity.
+     * @param clz         The activity class.
+     * @param requestCode if &gt;= 0, this code will be returned in
+     *                    onActivityResult() when the activity exits.
+     */
+    public static void startActivityForResult(@NonNull final Bundle extras,
+                                              @NonNull final Activity activity,
+                                              @NonNull final Class<? extends Activity> clz,
+                                              final int requestCode) {
+        startActivityForResult(activity, extras, activity.getPackageName(), clz.getName(),
+                requestCode, null);
+    }
+
+    /**
+     * Start the activity.
+     *
+     * @param extras      The Bundle of extras to add to this intent.
+     * @param activity    The activity.
+     * @param clz         The activity class.
+     * @param requestCode if &gt;= 0, this code will be returned in
+     *                    onActivityResult() when the activity exits.
+     * @param options     Additional options for how the Activity should be started.
+     */
+    public static void startActivityForResult(@NonNull final Bundle extras,
+                                              @NonNull final Activity activity,
+                                              @NonNull final Class<? extends Activity> clz,
+                                              final int requestCode,
+                                              @NonNull final Bundle options) {
+        startActivityForResult(activity, extras, activity.getPackageName(), clz.getName(),
+                requestCode, options);
+    }
+
+    /**
+     * Start the activity.
+     *
+     * @param extras         The Bundle of extras to add to this intent.
+     * @param activity       The activity.
+     * @param clz            The activity class.
+     * @param requestCode    if &gt;= 0, this code will be returned in
+     *                       onActivityResult() when the activity exits.
+     * @param sharedElements The names of the shared elements to transfer to the called
+     *                       Activity and their associated Views.
+     */
+    public static void startActivityForResult(@NonNull final Bundle extras,
+                                              @NonNull final Activity activity,
+                                              @NonNull final Class<? extends Activity> clz,
+                                              final int requestCode,
+                                              final View... sharedElements) {
+        startActivityForResult(activity, extras, activity.getPackageName(), clz.getName(),
+                requestCode, getOptionsBundle(activity, sharedElements));
+    }
+
+    /**
+     * Start the activity.
+     *
+     * @param extras      The Bundle of extras to add to this intent.
+     * @param activity    The activity.
+     * @param clz         The activity class.
+     * @param requestCode if &gt;= 0, this code will be returned in
+     *                    onActivityResult() when the activity exits.
+     * @param enterAnim   A resource ID of the animation resource to use for the
+     *                    incoming activity.
+     * @param exitAnim    A resource ID of the animation resource to use for the
+     *                    outgoing activity.
+     */
+    public static void startActivityForResult(@NonNull final Bundle extras,
+                                              @NonNull final Activity activity,
+                                              @NonNull final Class<? extends Activity> clz,
+                                              final int requestCode,
+                                              @AnimRes final int enterAnim,
+                                              @AnimRes final int exitAnim) {
+        startActivityForResult(activity, extras, activity.getPackageName(), clz.getName(),
+                requestCode, getOptionsBundle(activity, enterAnim, exitAnim));
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            activity.overridePendingTransition(enterAnim, exitAnim);
+        }
+    }
+
+    /**
+     * Start the activity for result.
+     *
+     * @param activity    The activity.
+     * @param extras      The Bundle of extras to add to this intent.
+     * @param pkg         The name of the package.
+     * @param cls         The name of the class.
+     * @param requestCode if &gt;= 0, this code will be returned in
+     *                    onActivityResult() when the activity exits.
+     */
+    public static void startActivityForResult(@NonNull final Bundle extras,
+                                              @NonNull final Activity activity,
+                                              @NonNull final String pkg,
+                                              @NonNull final String cls,
+                                              final int requestCode) {
+        startActivityForResult(activity, extras, pkg, cls, requestCode, null);
+    }
+
+    /**
+     * Start the activity for result.
+     *
+     * @param extras      The Bundle of extras to add to this intent.
+     * @param activity    The activity.
+     * @param pkg         The name of the package.
+     * @param cls         The name of the class.
+     * @param requestCode if &gt;= 0, this code will be returned in
+     *                    onActivityResult() when the activity exits.
+     * @param options     Additional options for how the Activity should be started.
+     */
+    public static void startActivityForResult(@NonNull final Bundle extras,
+                                              @NonNull final Activity activity,
+                                              @NonNull final String pkg,
+                                              @NonNull final String cls,
+                                              final int requestCode,
+                                              final Bundle options) {
+        startActivityForResult(activity, extras, pkg, cls, requestCode, options);
+    }
+
+    /**
+     * Start the activity for result.
+     *
+     * @param extras         The Bundle of extras to add to this intent.
+     * @param activity       The activity.
+     * @param pkg            The name of the package.
+     * @param cls            The name of the class.
+     * @param requestCode    if &gt;= 0, this code will be returned in
+     *                       onActivityResult() when the activity exits.
+     * @param sharedElements The names of the shared elements to transfer to the called
+     *                       Activity and their associated Views.
+     */
+    public static void startActivityForResult(@NonNull final Bundle extras,
+                                              @NonNull final Activity activity,
+                                              @NonNull final String pkg,
+                                              @NonNull final String cls,
+                                              final int requestCode,
+                                              final View... sharedElements) {
+        startActivityForResult(activity, extras, pkg, cls,
+                requestCode, getOptionsBundle(activity, sharedElements));
+    }
+
+    /**
+     * Start the activity for result.
+     *
+     * @param extras      The Bundle of extras to add to this intent.
+     * @param pkg         The name of the package.
+     * @param cls         The name of the class.
+     * @param requestCode if &gt;= 0, this code will be returned in
+     *                    onActivityResult() when the activity exits.
+     * @param enterAnim   A resource ID of the animation resource to use for the
+     *                    incoming activity.
+     * @param exitAnim    A resource ID of the animation resource to use for the
+     *                    outgoing activity.
+     */
+    public static void startActivityForResult(@NonNull final Bundle extras,
+                                              @NonNull final Activity activity,
+                                              @NonNull final String pkg,
+                                              @NonNull final String cls,
+                                              final int requestCode,
+                                              @AnimRes final int enterAnim,
+                                              @AnimRes final int exitAnim) {
+        startActivityForResult(activity, extras, pkg, cls,
+                requestCode, getOptionsBundle(activity, enterAnim, exitAnim));
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            activity.overridePendingTransition(enterAnim, exitAnim);
+        }
+    }
+
+    /**
+     * Start the activity for result.
+     *
+     * @param activity    The activity.
+     * @param intent      The description of the activity to start.
+     * @param requestCode if &gt;= 0, this code will be returned in
+     *                    onActivityResult() when the activity exits.
+     */
+    public static void startActivityForResult(@NonNull final Activity activity,
+                                              @NonNull final Intent intent,
+                                              final int requestCode) {
+        startActivityForResult(intent, activity, requestCode, null);
+    }
+
+    /**
+     * Start the activity for result.
+     *
+     * @param activity    The activity.
+     * @param intent      The description of the activity to start.
+     * @param requestCode if &gt;= 0, this code will be returned in
+     *                    onActivityResult() when the activity exits.
+     * @param options     Additional options for how the Activity should be started.
+     */
+    public static void startActivityForResult(@NonNull final Activity activity,
+                                              @NonNull final Intent intent,
+                                              final int requestCode,
+                                              final Bundle options) {
+        startActivityForResult(intent, activity, requestCode, options);
+    }
+
+    /**
+     * Start the activity for result.
+     *
+     * @param activity       The activity.
+     * @param intent         The description of the activity to start.
+     * @param requestCode    if &gt;= 0, this code will be returned in
+     *                       onActivityResult() when the activity exits.
+     * @param sharedElements The names of the shared elements to transfer to the called
+     *                       Activity and their associated Views.
+     */
+    public static void startActivityForResult(@NonNull final Activity activity,
+                                              @NonNull final Intent intent,
+                                              final int requestCode,
+                                              final View... sharedElements) {
+        startActivityForResult(intent, activity,
+                requestCode, getOptionsBundle(activity, sharedElements));
+    }
+
+    /**
+     * Start the activity for result.
+     *
+     * @param activity    The activity.
+     * @param intent      The description of the activity to start.
+     * @param requestCode if &gt;= 0, this code will be returned in
+     *                    onActivityResult() when the activity exits.
+     * @param enterAnim   A resource ID of the animation resource to use for the
+     *                    incoming activity.
+     * @param exitAnim    A resource ID of the animation resource to use for the
+     *                    outgoing activity.
+     */
+    public static void startActivityForResult(@NonNull final Activity activity,
+                                              @NonNull final Intent intent,
+                                              final int requestCode,
+                                              @AnimRes final int enterAnim,
+                                              @AnimRes final int exitAnim) {
+        startActivityForResult(intent, activity,
+                requestCode, getOptionsBundle(activity, enterAnim, exitAnim));
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            activity.overridePendingTransition(enterAnim, exitAnim);
+        }
+    }
+
+    /**
+     * Start activities.
+     *
+     * @param intents The descriptions of the activities to start.
      */
     public static void startActivities(@NonNull final Intent[] intents) {
-        startActivities(intents, getActivityOrApp(), null);
+        startActivities(intents, Utils.getTopActivityOrApp(), null);
     }
 
     /**
-     * 启动多个 Activity
+     * Start activities.
      *
-     * @param intents 意图
-     * @param options 跳转动画
+     * @param intents The descriptions of the activities to start.
+     * @param options Additional options for how the Activity should be started.
      */
     public static void startActivities(@NonNull final Intent[] intents,
-                                       @NonNull final Bundle options) {
-        startActivities(intents, getActivityOrApp(), options);
+                                       final Bundle options) {
+        startActivities(intents, Utils.getTopActivityOrApp(), options);
     }
 
     /**
-     * 启动多个 Activity
+     * Start activities.
      *
-     * @param intents   意图
-     * @param enterAnim 入场动画
-     * @param exitAnim  出场动画
+     * @param intents   The descriptions of the activities to start.
+     * @param enterAnim A resource ID of the animation resource to use for the
+     *                  incoming activity.
+     * @param exitAnim  A resource ID of the animation resource to use for the
+     *                  outgoing activity.
      */
     public static void startActivities(@NonNull final Intent[] intents,
                                        @AnimRes final int enterAnim,
                                        @AnimRes final int exitAnim) {
-        Context context = getActivityOrApp();
+        Context context = Utils.getTopActivityOrApp();
         startActivities(intents, context, getOptionsBundle(context, enterAnim, exitAnim));
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN && context instanceof Activity) {
             ((Activity) context).overridePendingTransition(enterAnim, exitAnim);
@@ -613,10 +955,10 @@ public final class ActivityUtils {
     }
 
     /**
-     * 启动多个 Activity
+     * Start activities.
      *
-     * @param activity activity
-     * @param intents  意图
+     * @param activity The activity.
+     * @param intents  The descriptions of the activities to start.
      */
     public static void startActivities(@NonNull final Activity activity,
                                        @NonNull final Intent[] intents) {
@@ -624,25 +966,27 @@ public final class ActivityUtils {
     }
 
     /**
-     * 启动多个 Activity
+     * Start activities.
      *
-     * @param activity activity
-     * @param intents  意图
-     * @param options  跳转动画
+     * @param activity The activity.
+     * @param intents  The descriptions of the activities to start.
+     * @param options  Additional options for how the Activity should be started.
      */
     public static void startActivities(@NonNull final Activity activity,
                                        @NonNull final Intent[] intents,
-                                       @NonNull final Bundle options) {
+                                       final Bundle options) {
         startActivities(intents, activity, options);
     }
 
     /**
-     * 启动多个 Activity
+     * Start activities.
      *
-     * @param activity  activity
-     * @param intents   意图
-     * @param enterAnim 入场动画
-     * @param exitAnim  出场动画
+     * @param activity  The activity.
+     * @param intents   The descriptions of the activities to start.
+     * @param enterAnim A resource ID of the animation resource to use for the
+     *                  incoming activity.
+     * @param exitAnim  A resource ID of the animation resource to use for the
+     *                  outgoing activity.
      */
     public static void startActivities(@NonNull final Activity activity,
                                        @NonNull final Intent[] intents,
@@ -655,7 +999,7 @@ public final class ActivityUtils {
     }
 
     /**
-     * 回到桌面
+     * Start home activity.
      */
     public static void startHomeActivity() {
         Intent homeIntent = new Intent(Intent.ACTION_MAIN);
@@ -664,68 +1008,60 @@ public final class ActivityUtils {
     }
 
     /**
-     * 获取 Activity 栈链表
+     * Return the list of activity.
      *
-     * @return Activity 栈链表
+     * @return the list of activity
      */
     public static List<Activity> getActivityList() {
-        return Utils.sActivityList;
+        return Utils.getActivityList();
     }
 
     /**
-     * 获取启动项 Activity
+     * Return the name of launcher activity.
      *
-     * @return 启动项 Activity
+     * @return the name of launcher activity
      */
     public static String getLauncherActivity() {
         return getLauncherActivity(Utils.getApp().getPackageName());
     }
 
     /**
-     * 获取启动项 Activity
+     * Return the name of launcher activity.
      *
-     * @param packageName 包名
-     * @return 启动项 Activity
+     * @param pkg The name of the package.
+     * @return the name of launcher activity
      */
-    public static String getLauncherActivity(@NonNull final String packageName) {
+    public static String getLauncherActivity(@NonNull final String pkg) {
         Intent intent = new Intent(Intent.ACTION_MAIN, null);
         intent.addCategory(Intent.CATEGORY_LAUNCHER);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         PackageManager pm = Utils.getApp().getPackageManager();
         List<ResolveInfo> info = pm.queryIntentActivities(intent, 0);
         for (ResolveInfo aInfo : info) {
-            if (aInfo.activityInfo.packageName.equals(packageName)) {
+            if (aInfo.activityInfo.packageName.equals(pkg)) {
                 return aInfo.activityInfo.name;
             }
         }
-        return "no " + packageName;
+        return "no " + pkg;
     }
 
     /**
-     * 获取栈顶 Activity
+     * Return the top activity in activity's stack.
      *
-     * @return 栈顶 Activity
+     * @return the top activity in activity's stack
      */
     public static Activity getTopActivity() {
-        if (Utils.sTopActivityWeakRef != null) {
-            Activity activity = Utils.sTopActivityWeakRef.get();
-            if (activity != null) {
-                return activity;
-            }
-        }
-        List<Activity> activities = Utils.sActivityList;
-        int size = activities.size();
-        return size > 0 ? activities.get(size - 1) : null;
+        return Utils.getActivityLifecycle().getTopActivity();
     }
 
     /**
-     * 判断 Activity 是否存在栈中
+     * Return whether the activity exists in activity's stack.
      *
-     * @param activity activity
-     * @return {@code true}: 存在<br>{@code false}: 不存在
+     * @param activity The activity.
+     * @return {@code true}: yes<br>{@code false}: no
      */
     public static boolean isActivityExistsInStack(@NonNull final Activity activity) {
-        List<Activity> activities = Utils.sActivityList;
+        List<Activity> activities = Utils.getActivityList();
         for (Activity aActivity : activities) {
             if (aActivity.equals(activity)) {
                 return true;
@@ -735,13 +1071,13 @@ public final class ActivityUtils {
     }
 
     /**
-     * 判断 Activity 是否存在栈中
+     * Return whether the activity exists in activity's stack.
      *
-     * @param clz Activity 类
-     * @return {@code true}: 存在<br>{@code false}: 不存在
+     * @param clz The activity class.
+     * @return {@code true}: yes<br>{@code false}: no
      */
-    public static boolean isActivityExistsInStack(@NonNull final Class<?> clz) {
-        List<Activity> activities = Utils.sActivityList;
+    public static boolean isActivityExistsInStack(@NonNull final Class<? extends Activity> clz) {
+        List<Activity> activities = Utils.getActivityList();
         for (Activity aActivity : activities) {
             if (aActivity.getClass().equals(clz)) {
                 return true;
@@ -751,19 +1087,19 @@ public final class ActivityUtils {
     }
 
     /**
-     * 结束 Activity
+     * Finish the activity.
      *
-     * @param activity activity
+     * @param activity The activity.
      */
     public static void finishActivity(@NonNull final Activity activity) {
         finishActivity(activity, false);
     }
 
     /**
-     * 结束 Activity
+     * Finish the activity.
      *
-     * @param activity   activity
-     * @param isLoadAnim 是否启动动画
+     * @param activity   The activity.
+     * @param isLoadAnim True to use animation for the outgoing activity, false otherwise.
      */
     public static void finishActivity(@NonNull final Activity activity, final boolean isLoadAnim) {
         activity.finish();
@@ -773,11 +1109,13 @@ public final class ActivityUtils {
     }
 
     /**
-     * 结束 Activity
+     * Finish the activity.
      *
-     * @param activity  activity
-     * @param enterAnim 入场动画
-     * @param exitAnim  出场动画
+     * @param activity  The activity.
+     * @param enterAnim A resource ID of the animation resource to use for the
+     *                  incoming activity.
+     * @param exitAnim  A resource ID of the animation resource to use for the
+     *                  outgoing activity.
      */
     public static void finishActivity(@NonNull final Activity activity,
                                       @AnimRes final int enterAnim,
@@ -787,22 +1125,23 @@ public final class ActivityUtils {
     }
 
     /**
-     * 结束 Activity
+     * Finish the activity.
      *
-     * @param clz Activity 类
+     * @param clz The activity class.
      */
-    public static void finishActivity(@NonNull final Class<?> clz) {
+    public static void finishActivity(@NonNull final Class<? extends Activity> clz) {
         finishActivity(clz, false);
     }
 
     /**
-     * 结束 Activity
+     * Finish the activity.
      *
-     * @param clz        Activity 类
-     * @param isLoadAnim 是否启动动画
+     * @param clz        The activity class.
+     * @param isLoadAnim True to use animation for the outgoing activity, false otherwise.
      */
-    public static void finishActivity(@NonNull final Class<?> clz, final boolean isLoadAnim) {
-        List<Activity> activities = Utils.sActivityList;
+    public static void finishActivity(@NonNull final Class<? extends Activity> clz,
+                                      final boolean isLoadAnim) {
+        List<Activity> activities = Utils.getActivityList();
         for (Activity activity : activities) {
             if (activity.getClass().equals(clz)) {
                 activity.finish();
@@ -814,16 +1153,18 @@ public final class ActivityUtils {
     }
 
     /**
-     * 结束 Activity
+     * Finish the activity.
      *
-     * @param clz       Activity 类
-     * @param enterAnim 入场动画
-     * @param exitAnim  出场动画
+     * @param clz       The activity class.
+     * @param enterAnim A resource ID of the animation resource to use for the
+     *                  incoming activity.
+     * @param exitAnim  A resource ID of the animation resource to use for the
+     *                  outgoing activity.
      */
-    public static void finishActivity(@NonNull final Class<?> clz,
+    public static void finishActivity(@NonNull final Class<? extends Activity> clz,
                                       @AnimRes final int enterAnim,
                                       @AnimRes final int exitAnim) {
-        List<Activity> activities = Utils.sActivityList;
+        List<Activity> activities = Utils.getActivityList();
         for (Activity activity : activities) {
             if (activity.getClass().equals(clz)) {
                 activity.finish();
@@ -833,10 +1174,10 @@ public final class ActivityUtils {
     }
 
     /**
-     * 结束到指定 Activity
+     * Finish to the activity.
      *
-     * @param activity      activity
-     * @param isIncludeSelf 是否结束该 activity 自己
+     * @param activity      The activity.
+     * @param isIncludeSelf True to include the activity, false otherwise.
      */
     public static boolean finishToActivity(@NonNull final Activity activity,
                                            final boolean isIncludeSelf) {
@@ -844,16 +1185,16 @@ public final class ActivityUtils {
     }
 
     /**
-     * 结束到指定 Activity
+     * Finish to the activity.
      *
-     * @param activity      activity
-     * @param isIncludeSelf 是否结束该 activity 自己
-     * @param isLoadAnim    是否启动动画
+     * @param activity      The activity.
+     * @param isIncludeSelf True to include the activity, false otherwise.
+     * @param isLoadAnim    True to use animation for the outgoing activity, false otherwise.
      */
     public static boolean finishToActivity(@NonNull final Activity activity,
                                            final boolean isIncludeSelf,
                                            final boolean isLoadAnim) {
-        List<Activity> activities = Utils.sActivityList;
+        List<Activity> activities = Utils.getActivityList();
         for (int i = activities.size() - 1; i >= 0; --i) {
             Activity aActivity = activities.get(i);
             if (aActivity.equals(activity)) {
@@ -868,18 +1209,20 @@ public final class ActivityUtils {
     }
 
     /**
-     * 结束到指定 Activity
+     * Finish to the activity.
      *
-     * @param activity      activity
-     * @param isIncludeSelf 是否结束该 activity 自己
-     * @param enterAnim     入场动画
-     * @param exitAnim      出场动画
+     * @param activity      The activity.
+     * @param isIncludeSelf True to include the activity, false otherwise.
+     * @param enterAnim     A resource ID of the animation resource to use for the
+     *                      incoming activity.
+     * @param exitAnim      A resource ID of the animation resource to use for the
+     *                      outgoing activity.
      */
     public static boolean finishToActivity(@NonNull final Activity activity,
                                            final boolean isIncludeSelf,
                                            @AnimRes final int enterAnim,
                                            @AnimRes final int exitAnim) {
-        List<Activity> activities = Utils.sActivityList;
+        List<Activity> activities = Utils.getActivityList();
         for (int i = activities.size() - 1; i >= 0; --i) {
             Activity aActivity = activities.get(i);
             if (aActivity.equals(activity)) {
@@ -894,27 +1237,27 @@ public final class ActivityUtils {
     }
 
     /**
-     * 结束到指定 Activity
+     * Finish to the activity.
      *
-     * @param clz           Activity 类
-     * @param isIncludeSelf 是否结束该 activity 自己
+     * @param clz           The activity class.
+     * @param isIncludeSelf True to include the activity, false otherwise.
      */
-    public static boolean finishToActivity(@NonNull final Class<?> clz,
+    public static boolean finishToActivity(@NonNull final Class<? extends Activity> clz,
                                            final boolean isIncludeSelf) {
         return finishToActivity(clz, isIncludeSelf, false);
     }
 
     /**
-     * 结束到指定 Activity
+     * Finish to the activity.
      *
-     * @param clz           Activity 类
-     * @param isIncludeSelf 是否结束该 activity 自己
-     * @param isLoadAnim    是否启动动画
+     * @param clz           The activity class.
+     * @param isIncludeSelf True to include the activity, false otherwise.
+     * @param isLoadAnim    True to use animation for the outgoing activity, false otherwise.
      */
-    public static boolean finishToActivity(@NonNull final Class<?> clz,
+    public static boolean finishToActivity(@NonNull final Class<? extends Activity> clz,
                                            final boolean isIncludeSelf,
                                            final boolean isLoadAnim) {
-        List<Activity> activities = Utils.sActivityList;
+        List<Activity> activities = Utils.getActivityList();
         for (int i = activities.size() - 1; i >= 0; --i) {
             Activity aActivity = activities.get(i);
             if (aActivity.getClass().equals(clz)) {
@@ -929,18 +1272,20 @@ public final class ActivityUtils {
     }
 
     /**
-     * 结束到指定 Activity
+     * Finish to the activity.
      *
-     * @param clz           Activity 类
-     * @param isIncludeSelf 是否结束该 activity 自己
-     * @param enterAnim     入场动画
-     * @param exitAnim      出场动画
+     * @param clz           The activity class.
+     * @param isIncludeSelf True to include the activity, false otherwise.
+     * @param enterAnim     A resource ID of the animation resource to use for the
+     *                      incoming activity.
+     * @param exitAnim      A resource ID of the animation resource to use for the
+     *                      outgoing activity.
      */
-    public static boolean finishToActivity(@NonNull final Class<?> clz,
+    public static boolean finishToActivity(@NonNull final Class<? extends Activity> clz,
                                            final boolean isIncludeSelf,
                                            @AnimRes final int enterAnim,
                                            @AnimRes final int exitAnim) {
-        List<Activity> activities = Utils.sActivityList;
+        List<Activity> activities = Utils.getActivityList();
         for (int i = activities.size() - 1; i >= 0; --i) {
             Activity aActivity = activities.get(i);
             if (aActivity.getClass().equals(clz)) {
@@ -955,82 +1300,71 @@ public final class ActivityUtils {
     }
 
     /**
-     * 结束所有其他类型的 Activity
+     * Finish the activities whose type not equals the activity class.
      *
-     * @param clz Activity 类
+     * @param clz The activity class.
      */
-    public static void finishOtherActivities(@NonNull final Class<?> clz) {
+    public static void finishOtherActivities(@NonNull final Class<? extends Activity> clz) {
         finishOtherActivities(clz, false);
     }
 
 
     /**
-     * 结束所有其他类型的 Activity
+     * Finish the activities whose type not equals the activity class.
      *
-     * @param clz        Activity 类
-     * @param isLoadAnim 是否启动动画
+     * @param clz        The activity class.
+     * @param isLoadAnim True to use animation for the outgoing activity, false otherwise.
      */
-    public static void finishOtherActivities(@NonNull final Class<?> clz,
+    public static void finishOtherActivities(@NonNull final Class<? extends Activity> clz,
                                              final boolean isLoadAnim) {
-        List<Activity> activities = Utils.sActivityList;
-        boolean flag = false;
+        List<Activity> activities = Utils.getActivityList();
         for (int i = activities.size() - 1; i >= 0; i--) {
             Activity activity = activities.get(i);
-            if (activity.getClass().equals(clz)) {
-                if (flag) {
-                    finishActivity(activity, isLoadAnim);
-                } else {
-                    flag = true;
-                }
-            } else {
+            if (!activity.getClass().equals(clz)) {
                 finishActivity(activity, isLoadAnim);
             }
         }
     }
 
     /**
-     * 结束所有其他类型的 Activity
+     * Finish the activities whose type not equals the activity class.
      *
-     * @param clz       Activity 类
-     * @param enterAnim 入场动画
-     * @param exitAnim  出场动画
+     * @param clz       The activity class.
+     * @param enterAnim A resource ID of the animation resource to use for the
+     *                  incoming activity.
+     * @param exitAnim  A resource ID of the animation resource to use for the
+     *                  outgoing activity.
      */
-    public static void finishOtherActivities(@NonNull final Class<?> clz,
+    public static void finishOtherActivities(@NonNull final Class<? extends Activity> clz,
                                              @AnimRes final int enterAnim,
                                              @AnimRes final int exitAnim) {
-        List<Activity> activities = Utils.sActivityList;
-        boolean flag = false;
+        List<Activity> activities = Utils.getActivityList();
         for (int i = activities.size() - 1; i >= 0; i--) {
             Activity activity = activities.get(i);
-            if (activity.getClass().equals(clz)) {
-                if (flag) {
-                    finishActivity(activity, enterAnim, exitAnim);
-                } else {
-                    flag = true;
-                }
-            } else {
+            if (!activity.getClass().equals(clz)) {
                 finishActivity(activity, enterAnim, exitAnim);
             }
         }
     }
 
     /**
-     * 结束所有 Activity
+     * Finish all of activities.
      */
     public static void finishAllActivities() {
         finishAllActivities(false);
     }
 
     /**
-     * 结束所有 Activity
+     * Finish all of activities.
      *
-     * @param isLoadAnim 是否启动动画
+     * @param isLoadAnim True to use animation for the outgoing activity, false otherwise.
      */
     public static void finishAllActivities(final boolean isLoadAnim) {
-        List<Activity> activityList = Utils.sActivityList;
-        for (int i = activityList.size() - 1; i >= 0; --i) {// 从栈顶开始移除
+        List<Activity> activityList = Utils.getActivityList();
+        for (int i = activityList.size() - 1; i >= 0; --i) {// remove from top
             Activity activity = activityList.get(i);
-            activity.finish();// 在 onActivityDestroyed 发生 remove
+            // sActivityList remove the index activity at onActivityDestroyed
+            activity.finish();
             if (!isLoadAnim) {
                 activity.overridePendingTransition(0, 0);
             }
@@ -1038,73 +1372,86 @@ public final class ActivityUtils {
     }
 
     /**
-     * 结束所有 Activity
+     * Finish all of activities.
      *
-     * @param enterAnim 入场动画
-     * @param exitAnim  出场动画
+     * @param enterAnim A resource ID of the animation resource to use for the
+     *                  incoming activity.
+     * @param exitAnim  A resource ID of the animation resource to use for the
+     *                  outgoing activity.
      */
     public static void finishAllActivities(@AnimRes final int enterAnim,
                                            @AnimRes final int exitAnim) {
-        List<Activity> activityList = Utils.sActivityList;
-        for (int i = activityList.size() - 1; i >= 0; --i) {// 从栈顶开始移除
+        List<Activity> activityList = Utils.getActivityList();
+        for (int i = activityList.size() - 1; i >= 0; --i) {// remove from top
             Activity activity = activityList.get(i);
-            activity.finish();// 在 onActivityDestroyed 发生 remove
+            // sActivityList remove the index activity at onActivityDestroyed
+            activity.finish();
             activity.overridePendingTransition(enterAnim, exitAnim);
         }
     }
 
     /**
-     * 结束除最新之外的所有 Activity
+     * Finish all of activities except the newest activity.
      */
     public static void finishAllActivitiesExceptNewest() {
         finishAllActivitiesExceptNewest(false);
     }
 
     /**
-     * 结束除最新之外的所有 Activity
+     * Finish all of activities except the newest activity.
      *
-     * @param isLoadAnim 是否启动动画
+     * @param isLoadAnim True to use animation for the outgoing activity, false otherwise.
      */
     public static void finishAllActivitiesExceptNewest(final boolean isLoadAnim) {
-        List<Activity> activities = Utils.sActivityList;
-        boolean flag = false;
+        List<Activity> activities = Utils.getActivityList();
         for (int i = activities.size() - 2; i >= 0; i--) {
             finishActivity(activities.get(i), isLoadAnim);
         }
     }
 
     /**
-     * 结束除最新之外的所有 Activity
+     * Finish all of activities except the newest activity.
      *
-     * @param enterAnim 入场动画
-     * @param exitAnim  出场动画
+     * @param enterAnim A resource ID of the animation resource to use for the
+     *                  incoming activity.
+     * @param exitAnim  A resource ID of the animation resource to use for the
+     *                  outgoing activity.
      */
     public static void finishAllActivitiesExceptNewest(@AnimRes final int enterAnim,
                                                        @AnimRes final int exitAnim) {
-        List<Activity> activities = Utils.sActivityList;
-        boolean flag = false;
+        List<Activity> activities = Utils.getActivityList();
         for (int i = activities.size() - 2; i >= 0; i--) {
             finishActivity(activities.get(i), enterAnim, exitAnim);
         }
     }
 
     /**
-     * 获取 Activity 图标
+     * Return the icon of activity.
      *
-     * @param clz Activity 类
-     * @return Activity 图标
+     * @param activity The activity.
+     * @return the icon of activity
      */
-    public static Drawable getActivityIcon(final Class<?> clz) {
+    public static Drawable getActivityIcon(@NonNull final Activity activity) {
+        return getActivityIcon(activity.getComponentName());
+    }
+
+    /**
+     * Return the icon of activity.
+     *
+     * @param clz The activity class.
+     * @return the icon of activity
+     */
+    public static Drawable getActivityIcon(@NonNull final Class<? extends Activity> clz) {
         return getActivityIcon(new ComponentName(Utils.getApp(), clz));
     }
 
     /**
-     * 获取 Activity 图标
+     * Return the icon of activity.
      *
-     * @param activityName activityName
-     * @return Activity 图标
+     * @param activityName The name of activity.
+     * @return the icon of activity
      */
-    public static Drawable getActivityIcon(final ComponentName activityName) {
+    public static Drawable getActivityIcon(@NonNull final ComponentName activityName) {
         PackageManager pm = Utils.getApp().getPackageManager();
         try {
             return pm.getActivityIcon(activityName);
@@ -1115,22 +1462,32 @@ public final class ActivityUtils {
     }
 
     /**
-     * 获取 Activity Logo
+     * Return the logo of activity.
      *
-     * @param clz Activity 类
-     * @return Activity Logo
+     * @param activity The activity.
+     * @return the logo of activity
      */
-    public static Drawable getActivityLogo(final Class<?> clz) {
+    public static Drawable getActivityLogo(@NonNull final Activity activity) {
+        return getActivityLogo(activity.getComponentName());
+    }
+
+    /**
+     * Return the logo of activity.
+     *
+     * @param clz The activity class.
+     * @return the logo of activity
+     */
+    public static Drawable getActivityLogo(@NonNull final Class<? extends Activity> clz) {
         return getActivityLogo(new ComponentName(Utils.getApp(), clz));
     }
 
     /**
-     * 获取 Activity Logo
+     * Return the logo of activity.
      *
-     * @param activityName activityName
-     * @return Activity Logo
+     * @param activityName The name of activity.
+     * @return the logo of activity
      */
-    public static Drawable getActivityLogo(final ComponentName activityName) {
+    public static Drawable getActivityLogo(@NonNull final ComponentName activityName) {
         PackageManager pm = Utils.getApp().getPackageManager();
         try {
             return pm.getActivityLogo(activityName);
@@ -1138,12 +1495,6 @@ public final class ActivityUtils {
             e.printStackTrace();
             return null;
         }
-    }
-
-
-    private static Context getActivityOrApp() {
-        Activity topActivity = getTopActivity();
-        return topActivity == null ? Utils.getApp() : topActivity;
     }
 
     private static void startActivity(final Context context,
@@ -1170,6 +1521,29 @@ public final class ActivityUtils {
         }
     }
 
+    private static void startActivityForResult(final Activity activity,
+                                               final Bundle extras,
+                                               final String pkg,
+                                               final String cls,
+                                               final int requestCode,
+                                               final Bundle options) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        if (extras != null) intent.putExtras(extras);
+        intent.setComponent(new ComponentName(pkg, cls));
+        startActivityForResult(intent, activity, requestCode, options);
+    }
+
+    private static void startActivityForResult(final Intent intent,
+                                               final Activity activity,
+                                               final int requestCode,
+                                               final Bundle options) {
+        if (options != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            activity.startActivityForResult(intent, requestCode, options);
+        } else {
+            activity.startActivityForResult(intent, requestCode);
+        }
+    }
+
     private static void startActivities(final Intent[] intents,
                                         final Context context,
                                         final Bundle options) {
@@ -1193,15 +1567,15 @@ public final class ActivityUtils {
 
     private static Bundle getOptionsBundle(final Activity activity,
                                            final View[] sharedElements) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            int len = sharedElements.length;
-            @SuppressWarnings("unchecked")
-            Pair<View, String>[] pairs = new Pair[len];
-            for (int i = 0; i < len; i++) {
-                pairs[i] = Pair.create(sharedElements[i], sharedElements[i].getTransitionName());
-            }
-            return ActivityOptionsCompat.makeSceneTransitionAnimation(activity, pairs).toBundle();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return null;
+        if (sharedElements == null) return null;
+        int len = sharedElements.length;
+        if (len <= 0) return null;
+        @SuppressWarnings("unchecked")
+        Pair<View, String>[] pairs = new Pair[len];
+        for (int i = 0; i < len; i++) {
+            pairs[i] = Pair.create(sharedElements[i], sharedElements[i].getTransitionName());
         }
-        return ActivityOptionsCompat.makeSceneTransitionAnimation(activity, null, null).toBundle();
+        return ActivityOptionsCompat.makeSceneTransitionAnimation(activity, pairs).toBundle();
     }
 }

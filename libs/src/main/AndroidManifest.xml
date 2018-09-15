@@ -1,14 +1,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="me.ibore.libs" >
+    package="me.ibore.libs">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
-    <application >
+    <application>
 
         <activity
+            android:name=".util.PermissionUtils$PermissionActivity"
             android:label="权限申请"
-            android:name=".util.PermissionUtils$PermissionActivity" />
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.Transparent" />
 
     </application>
 </manifest>

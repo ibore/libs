@@ -6,14 +6,17 @@ package me.ibore.libs.util;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <pre>
@@ -43,11 +46,11 @@ public final class ReflectUtils {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * 设置要反射的类
+     * Reflect the class.
      *
-     * @param className 完整类名
-     * @return {@link ReflectUtils}
-     * @throws ReflectException 反射异常
+     * @param className The name of class.
+     * @return the single {@link ReflectUtils} instance
+     * @throws ReflectException if reflect unsuccessfully
      */
     public static ReflectUtils reflect(final String className)
             throws ReflectException {
@@ -55,12 +58,12 @@ public final class ReflectUtils {
     }
 
     /**
-     * 设置要反射的类
+     * Reflect the class.
      *
-     * @param className   完整类名
-     * @param classLoader 类加载器
-     * @return {@link ReflectUtils}
-     * @throws ReflectException 反射异常
+     * @param className   The name of class.
+     * @param classLoader The loader of class.
+     * @return the single {@link ReflectUtils} instance
+     * @throws ReflectException if reflect unsuccessfully
      */
     public static ReflectUtils reflect(final String className, final ClassLoader classLoader)
             throws ReflectException {
@@ -68,11 +71,11 @@ public final class ReflectUtils {
     }
 
     /**
-     * 设置要反射的类
+     * Reflect the class.
      *
-     * @param clazz 类的类型
-     * @return {@link ReflectUtils}
-     * @throws ReflectException 反射异常
+     * @param clazz The class.
+     * @return the single {@link ReflectUtils} instance
+     * @throws ReflectException if reflect unsuccessfully
      */
     public static ReflectUtils reflect(final Class<?> clazz)
             throws ReflectException {
@@ -80,11 +83,11 @@ public final class ReflectUtils {
     }
 
     /**
-     * 设置要反射的类
+     * Reflect the class.
      *
-     * @param object 类对象
-     * @return {@link ReflectUtils}
-     * @throws ReflectException 反射异常
+     * @param object The object.
+     * @return the single {@link ReflectUtils} instance
+     * @throws ReflectException if reflect unsuccessfully
      */
     public static ReflectUtils reflect(final Object object)
             throws ReflectException {
@@ -112,19 +115,19 @@ public final class ReflectUtils {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * 实例化反射对象
+     * Create and initialize a new instance.
      *
-     * @return {@link ReflectUtils}
+     * @return the single {@link ReflectUtils} instance
      */
     public ReflectUtils newInstance() {
         return newInstance(new Object[0]);
     }
 
     /**
-     * 实例化反射对象
+     * Create and initialize a new instance.
      *
-     * @param args 实例化需要的参数
-     * @return {@link ReflectUtils}
+     * @param args The args.
+     * @return the single {@link ReflectUtils} instance
      */
     public ReflectUtils newInstance(Object... args) {
         Class<?>[] types = getArgsType(args);
@@ -194,10 +197,10 @@ public final class ReflectUtils {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * 设置反射的字段
+     * Get the field.
      *
-     * @param name 字段名
-     * @return {@link ReflectUtils}
+     * @param name The name of field.
+     * @return the single {@link ReflectUtils} instance
      */
     public ReflectUtils field(final String name) {
         try {
@@ -209,11 +212,11 @@ public final class ReflectUtils {
     }
 
     /**
-     * 设置反射的字段
+     * Set the field.
      *
-     * @param name  字段名
-     * @param value 字段值
-     * @return {@link ReflectUtils}
+     * @param name  The name of field.
+     * @param value The value.
+     * @return the single {@link ReflectUtils} instance
      */
     public ReflectUtils field(String name, Object value) {
         try {
@@ -267,23 +270,23 @@ public final class ReflectUtils {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * 设置反射的方法
+     * Invoke the method.
      *
-     * @param name 方法名
-     * @return {@link ReflectUtils}
-     * @throws ReflectException 反射异常
+     * @param name The name of method.
+     * @return the single {@link ReflectUtils} instance
+     * @throws ReflectException if reflect unsuccessfully
      */
     public ReflectUtils method(final String name) throws ReflectException {
         return method(name, new Object[0]);
     }
 
     /**
-     * 设置反射的方法
+     * Invoke the method.
      *
-     * @param name 方法名
-     * @param args 方法需要的参数
-     * @return {@link ReflectUtils}
-     * @throws ReflectException 反射异常
+     * @param name The name of method.
+     * @param args The args.
+     * @return the single {@link ReflectUtils} instance
+     * @throws ReflectException if reflect unsuccessfully
      */
     public ReflectUtils method(final String name, final Object... args) throws ReflectException {
         Class<?>[] types = getArgsType(args);
@@ -417,6 +420,66 @@ public final class ReflectUtils {
         return accessible;
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // proxy
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Create a proxy for the wrapped object allowing to typesafely invoke
+     * methods on it using a custom interface.
+     *
+     * @param proxyType The interface type that is implemented by the proxy.
+     * @return a proxy for the wrapped object
+     */
+    @SuppressWarnings("unchecked")
+    public <P> P proxy(final Class<P> proxyType) {
+        final boolean isMap = (object instanceof Map);
+        final InvocationHandler handler = new InvocationHandler() {
+            @Override
+            @SuppressWarnings("null")
+            public Object invoke(Object proxy, Method method, Object[] args) {
+                String name = method.getName();
+                try {
+                    return reflect(object).method(name, args).get();
+                }
+                catch (ReflectException e) {
+                    if (isMap) {
+                        Map<String, Object> map = (Map<String, Object>) object;
+                        int length = (args == null ? 0 : args.length);
+
+                        if (length == 0 && name.startsWith("get")) {
+                            return map.get(property(name.substring(3)));
+                        } else if (length == 0 && name.startsWith("is")) {
+                            return map.get(property(name.substring(2)));
+                        } else if (length == 1 && name.startsWith("set")) {
+                            map.put(property(name.substring(3)), args[0]);
+                            return null;
+                        }
+                    }
+                    throw e;
+                }
+            }
+        };
+        return (P) Proxy.newProxyInstance(proxyType.getClassLoader(),
+                new Class[]{proxyType},
+                handler);
+    }
+
+    /**
+     * Get the POJO property name of an getter/setter
+     */
+    private static String property(String string) {
+        int length = string.length();
+
+        if (length == 0) {
+            return "";
+        } else if (length == 1) {
+            return string.toLowerCase();
+        } else {
+            return string.substring(0, 1).toLowerCase() + string.substring(1);
+        }
+    }
+
     private Class<?> type() {
         return type;
     }
@@ -449,10 +512,10 @@ public final class ReflectUtils {
     }
 
     /**
-     * 获取反射想要获取的
+     * Get the result.
      *
-     * @param <T> 返回的范型
-     * @return 反射想要获取的
+     * @param <T> The value type.
+     * @return the result
      */
     @SuppressWarnings("unchecked")
     public <T> T get() {

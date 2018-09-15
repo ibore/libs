@@ -3,13 +3,17 @@ package me.ibore.libs.util;
  * Created by Administrator on 2018/1/19.
  */
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.Build;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.FrameLayout;
 
 import java.lang.reflect.Field;
 
@@ -23,36 +27,38 @@ import java.lang.reflect.Field;
  */
 public final class KeyboardUtils {
 
-    private static int sContentViewInvisibleHeightPre;
+    private static int                        sContentViewInvisibleHeightPre;
+    private static ViewTreeObserver.OnGlobalLayoutListener onGlobalLayoutListener;
+    private static OnSoftInputChangedListener onSoftInputChangedListener;
+    private static int                        sContentViewInvisibleHeightPre5497;
 
     private KeyboardUtils() {
         throw new UnsupportedOperationException("u can't instantiate me...");
     }
 
-    /*
-      避免输入法面板遮挡
-      <p>在 manifest.xml 中 activity 中设置</p>
-      <p>android:windowSoftInputMode="adjustPan"</p>
-     */
-
     /**
-     * 动态显示软键盘
+     * Show the soft input.
      *
-     * @param activity activity
+     * @param activity The activity.
      */
     public static void showSoftInput(final Activity activity) {
         InputMethodManager imm =
                 (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
         if (imm == null) return;
         View view = activity.getCurrentFocus();
-        if (view == null) view = new View(activity);
+        if (view == null) {
+            view = new View(activity);
+            view.setFocusable(true);
+            view.setFocusableInTouchMode(true);
+            view.requestFocus();
+        }
         imm.showSoftInput(view, InputMethodManager.SHOW_FORCED);
     }
 
     /**
-     * 动态显示软键盘
+     * Show the soft input.
      *
-     * @param view 视图
+     * @param view The view.
      */
     public static void showSoftInput(final View view) {
         InputMethodManager imm =
@@ -65,9 +71,9 @@ public final class KeyboardUtils {
     }
 
     /**
-     * 动态隐藏软键盘
+     * Hide the soft input.
      *
-     * @param activity activity
+     * @param activity The activity.
      */
     public static void hideSoftInput(final Activity activity) {
         InputMethodManager imm =
@@ -79,9 +85,9 @@ public final class KeyboardUtils {
     }
 
     /**
-     * 动态隐藏软键盘
+     * Hide the soft input.
      *
-     * @param view 视图
+     * @param view The view.
      */
     public static void hideSoftInput(final View view) {
         InputMethodManager imm =
@@ -91,7 +97,7 @@ public final class KeyboardUtils {
     }
 
     /**
-     * 切换软键盘显示与否状态
+     * Toggle the soft input display or not.
      */
     public static void toggleSoftInput() {
         InputMethodManager imm =
@@ -101,22 +107,22 @@ public final class KeyboardUtils {
     }
 
     /**
-     * 判断软键盘是否可见
-     * <p>默认软键盘最小高度为 200</p>
+     * Return whether soft input is visible.
+     * <p>The minimum height is 200</p>
      *
-     * @param activity activity
-     * @return {@code true}: 可见<br>{@code false}: 不可见
+     * @param activity The activity.
+     * @return {@code true}: yes<br>{@code false}: no
      */
     public static boolean isSoftInputVisible(final Activity activity) {
-        return getContentViewInvisibleHeight(activity) >= 200;
+        return isSoftInputVisible(activity, 200);
     }
 
     /**
-     * 判断软键盘是否可见
+     * Return whether soft input is visible.
      *
-     * @param activity             activity
-     * @param minHeightOfSoftInput 软键盘最小高度
-     * @return {@code true}: 可见<br>{@code false}: 不可见
+     * @param activity             The activity.
+     * @param minHeightOfSoftInput The minimum height of soft input.
+     * @return {@code true}: yes<br>{@code false}: no
      */
     public static boolean isSoftInputVisible(final Activity activity,
                                              final int minHeightOfSoftInput) {
@@ -124,41 +130,96 @@ public final class KeyboardUtils {
     }
 
     private static int getContentViewInvisibleHeight(final Activity activity) {
-        final View contentView = activity.findViewById(android.R.id.content);
-        Rect r = new Rect();
-        contentView.getWindowVisibleDisplayFrame(r);
-        return contentView.getBottom() - r.bottom;
+        final FrameLayout contentView = activity.findViewById(android.R.id.content);
+        final View contentViewChild = contentView.getChildAt(0);
+        final Rect outRect = new Rect();
+        contentViewChild.getWindowVisibleDisplayFrame(outRect);
+        Log.d("KeyboardUtils", "getContentViewInvisibleHeight: "
+                + (contentViewChild.getBottom() - outRect.bottom));
+        return contentViewChild.getBottom() - outRect.bottom;
     }
 
     /**
-     * 注册软键盘改变监听器
+     * Register soft input changed listener.
      *
-     * @param activity activity
-     * @param listener listener
+     * @param activity The activity.
+     * @param listener The soft input changed listener.
      */
     public static void registerSoftInputChangedListener(final Activity activity,
                                                         final OnSoftInputChangedListener listener) {
-        final View contentView = activity.findViewById(android.R.id.content);
+        final int flags = activity.getWindow().getAttributes().flags;
+        if ((flags & WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS) != 0) {
+            activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        }
+        final FrameLayout contentView = activity.findViewById(android.R.id.content);
         sContentViewInvisibleHeightPre = getContentViewInvisibleHeight(activity);
-        contentView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+        onSoftInputChangedListener = listener;
+        onGlobalLayoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                if (listener != null) {
+                if (onSoftInputChangedListener != null) {
                     int height = getContentViewInvisibleHeight(activity);
                     if (sContentViewInvisibleHeightPre != height) {
-                        listener.onSoftInputChanged(height);
+                        onSoftInputChangedListener.onSoftInputChanged(height);
                         sContentViewInvisibleHeightPre = height;
                     }
                 }
             }
-        });
+        };
+        contentView.getViewTreeObserver()
+                .addOnGlobalLayoutListener(onGlobalLayoutListener);
     }
 
     /**
-     * 修复软键盘内存泄漏
-     * <p>在{@link Activity#onDestroy()}中使用</p>
+     * Register soft input changed listener.
      *
-     * @param context context
+     * @param activity The activity.
+     */
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    public static void unregisterSoftInputChangedListener(final Activity activity) {
+        final View contentView = activity.findViewById(android.R.id.content);
+        contentView.getViewTreeObserver().removeOnGlobalLayoutListener(onGlobalLayoutListener);
+        onSoftInputChangedListener = null;
+        onGlobalLayoutListener = null;
+    }
+
+    /**
+     * Fix the bug of 5497 in Android.
+     *
+     * @param activity The activity.
+     */
+    public static void fixAndroidBug5497(final Activity activity) {
+        final int flags = activity.getWindow().getAttributes().flags;
+        if ((flags & WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS) != 0) {
+            activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        }
+        final FrameLayout contentView = activity.findViewById(android.R.id.content);
+        final View contentViewChild = contentView.getChildAt(0);
+        final int paddingBottom = contentViewChild.getPaddingBottom();
+        sContentViewInvisibleHeightPre5497 = getContentViewInvisibleHeight(activity);
+        contentView.getViewTreeObserver()
+                .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        int height = getContentViewInvisibleHeight(activity);
+                        if (sContentViewInvisibleHeightPre5497 != height) {
+                            contentViewChild.setPadding(
+                                    contentViewChild.getPaddingLeft(),
+                                    contentViewChild.getPaddingTop(),
+                                    contentViewChild.getPaddingRight(),
+                                    paddingBottom + height
+                            );
+                            sContentViewInvisibleHeightPre5497 = height;
+                        }
+                    }
+                });
+    }
+
+    /**
+     * Fix the leaks of soft input.
+     * <p>Call the function in {@link Activity#onDestroy()}.</p>
+     *
+     * @param context The context.
      */
     public static void fixSoftInputLeaks(final Context context) {
         if (context == null) return;
@@ -188,10 +249,8 @@ public final class KeyboardUtils {
     }
 
     /**
-     * 点击屏幕空白区域隐藏软键盘
-     * <p>根据 EditText 所在坐标和用户点击的坐标相对比，来判断是否隐藏键盘</p>
-     * <p>需重写 dispatchTouchEvent</p>
-     * <p>参照以下注释代码</p>
+     * Click blankj area to hide soft input.
+     * <p>Copy the following code in ur activity.</p>
      */
     public static void clickBlankArea2HideSoftInput() {
         Log.i("KeyboardUtils", "Please refer to the following code.");
@@ -211,7 +270,7 @@ public final class KeyboardUtils {
             return super.dispatchTouchEvent(ev);
         }
 
-        // 根据 EditText 所在坐标和用户点击的坐标相对比，来判断是否隐藏键盘
+        // Return whether touch the view.
         private boolean isShouldHideKeyboard(View v, MotionEvent event) {
             if (v != null && (v instanceof EditText)) {
                 int[] l = {0, 0};
@@ -228,8 +287,11 @@ public final class KeyboardUtils {
         */
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // interface
+    ///////////////////////////////////////////////////////////////////////////
+
     public interface OnSoftInputChangedListener {
         void onSoftInputChanged(int height);
     }
-
 }

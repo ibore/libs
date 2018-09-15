@@ -15,8 +15,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,26 +46,26 @@ public final class PermissionUtils {
     private SimpleCallback      mSimpleCallback;
     private FullCallback        mFullCallback;
     private ThemeCallback       mThemeCallback;
-    private Set<String> mPermissions;
+    private Set<String>         mPermissions;
     private List<String>        mPermissionsRequest;
     private List<String>        mPermissionsGranted;
     private List<String>        mPermissionsDenied;
     private List<String>        mPermissionsDeniedForever;
 
     /**
-     * 获取应用权限
+     * Return the permissions used in application.
      *
-     * @return 清单文件中的权限列表
+     * @return the permissions used in application
      */
     public static List<String> getPermissions() {
         return getPermissions(Utils.getApp().getPackageName());
     }
 
     /**
-     * 获取应用权限
+     * Return the permissions used in application.
      *
-     * @param packageName 包名
-     * @return 清单文件中的权限列表
+     * @param packageName The name of the package.
+     * @return the permissions used in application
      */
     public static List<String> getPermissions(final String packageName) {
         PackageManager pm = Utils.getApp().getPackageManager();
@@ -78,10 +81,10 @@ public final class PermissionUtils {
     }
 
     /**
-     * 判断权限是否被授予
+     * Return whether <em>you</em> have granted the permissions.
      *
-     * @param permissions 权限
-     * @return {@code true}: 是<br>{@code false}: 否
+     * @param permissions The permissions.
+     * @return {@code true}: yes<br>{@code false}: no
      */
     public static boolean isGranted(final String... permissions) {
         for (String permission : permissions) {
@@ -99,19 +102,19 @@ public final class PermissionUtils {
     }
 
     /**
-     * 打开应用具体设置
+     * Launch the application's details settings.
      */
-    public static void openAppSettings() {
+    public static void launchAppDetailsSettings() {
         Intent intent = new Intent("android.settings.APPLICATION_DETAILS_SETTINGS");
         intent.setData(Uri.parse("package:" + Utils.getApp().getPackageName()));
         Utils.getApp().startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
 
     /**
-     * 设置请求权限
+     * Set the permissions.
      *
-     * @param permissions 要请求的权限
-     * @return {@link PermissionUtils}
+     * @param permissions The permissions.
+     * @return the single {@link PermissionUtils} instance
      */
     public static PermissionUtils permission(@PermissionConstants.Permission final String... permissions) {
         return new PermissionUtils(permissions);
@@ -130,10 +133,10 @@ public final class PermissionUtils {
     }
 
     /**
-     * 设置拒绝权限后再次请求的回调接口
+     * Set rationale listener.
      *
-     * @param listener 拒绝权限后再次请求的回调接口
-     * @return {@link PermissionUtils}
+     * @param listener The rationale listener.
+     * @return the single {@link PermissionUtils} instance
      */
     public PermissionUtils rationale(final OnRationaleListener listener) {
         mOnRationaleListener = listener;
@@ -141,10 +144,10 @@ public final class PermissionUtils {
     }
 
     /**
-     * 设置回调
+     * Set the simple call back.
      *
-     * @param callback 简单回调接口
-     * @return {@link PermissionUtils}
+     * @param callback the simple call back
+     * @return the single {@link PermissionUtils} instance
      */
     public PermissionUtils callback(final SimpleCallback callback) {
         mSimpleCallback = callback;
@@ -152,10 +155,10 @@ public final class PermissionUtils {
     }
 
     /**
-     * 设置回调
+     * Set the full call back.
      *
-     * @param callback 完整回调接口
-     * @return {@link PermissionUtils}
+     * @param callback the full call back
+     * @return the single {@link PermissionUtils} instance
      */
     public PermissionUtils callback(final FullCallback callback) {
         mFullCallback = callback;
@@ -163,10 +166,10 @@ public final class PermissionUtils {
     }
 
     /**
-     * 设置主题
+     * Set the theme callback.
      *
-     * @param callback 主题回调接口
-     * @return {@link PermissionUtils}
+     * @param callback The theme callback.
+     * @return the single {@link PermissionUtils} instance
      */
     public PermissionUtils theme(final ThemeCallback callback) {
         mThemeCallback = callback;
@@ -174,7 +177,7 @@ public final class PermissionUtils {
     }
 
     /**
-     * 开始请求
+     * Start request.
      */
     public void request() {
         mPermissionsGranted = new ArrayList<>();
@@ -276,6 +279,7 @@ public final class PermissionUtils {
         requestCallback();
     }
 
+
     @RequiresApi(api = Build.VERSION_CODES.M)
     public static class PermissionActivity extends Activity {
 
@@ -287,17 +291,17 @@ public final class PermissionUtils {
 
         @Override
         protected void onCreate(@Nullable Bundle savedInstanceState) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                    | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);
+            if (sInstance == null) {
+                super.onCreate(savedInstanceState);
+                Log.e("PermissionUtils", "request permissions failed");
+                finish();
+                return;
+            }
             if (sInstance.mThemeCallback != null) {
                 sInstance.mThemeCallback.onActivityCreate(this);
-            } else {
-                Window window = getWindow();
-                window.setBackgroundDrawable(null);
-                int option = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
-                window.getDecorView().setSystemUiVisibility(option);
-                window.setStatusBarColor(Color.TRANSPARENT);
             }
-
             super.onCreate(savedInstanceState);
 
             if (sInstance.rationale(this)) {
@@ -306,6 +310,10 @@ public final class PermissionUtils {
             }
             if (sInstance.mPermissionsRequest != null) {
                 int size = sInstance.mPermissionsRequest.size();
+                if (size <= 0) {
+                    finish();
+                    return;
+                }
                 requestPermissions(sInstance.mPermissionsRequest.toArray(new String[size]), 1);
             }
         }
@@ -317,7 +325,17 @@ public final class PermissionUtils {
             sInstance.onRequestPermissionsResult(this);
             finish();
         }
+
+        @Override
+        public boolean dispatchTouchEvent(MotionEvent ev) {
+            finish();
+            return true;
+        }
     }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // interface
+    ///////////////////////////////////////////////////////////////////////////
 
     public interface OnRationaleListener {
 
@@ -343,4 +361,5 @@ public final class PermissionUtils {
     public interface ThemeCallback {
         void onActivityCreate(Activity activity);
     }
+
 }

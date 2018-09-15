@@ -10,6 +10,7 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
+import java.io.Reader;
 import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -24,134 +25,110 @@ import java.util.Map;
  * website: ibore.me
  */
 
-public class GsonUtils {
+public final class GsonUtils {
 
-    private static Gson gson = null;
+    private static final Gson GSON = createGson(true);
+
+    private static final Gson GSON_NO_NULLS = createGson(false);
 
     private GsonUtils() {
         throw new UnsupportedOperationException("u can't instantiate me...");
     }
 
-    static {
-        if (gson == null) {
-            gson = new Gson();
-        }
+    /**
+     * Gets pre-configured {@link Gson} instance.
+     *
+     * @return {@link Gson} instance.
+     */
+    public static Gson getGson() {
+        return getGson(true);
     }
 
-    public static String object2Json(Object obj) {
-        String jsonStr = null;
-        if (gson != null) {
-            jsonStr = gson.toJson(obj);
-        }
-        return jsonStr;
+    /**
+     * Gets pre-configured {@link Gson} instance.
+     *
+     * @param serializeNulls determines if nulls will be serialized.
+     * @return {@link Gson} instance.
+     */
+    public static Gson getGson(final boolean serializeNulls) {
+        return serializeNulls ? GSON_NO_NULLS : GSON;
     }
 
-
-    public static String object2Json(Object obj, Type type) {
-        String jsonStr = null;
-        if (gson != null) {
-            jsonStr = gson.toJson(obj, type);
-        }
-        return jsonStr;
+    /**
+     * Serializes an object into json.
+     *
+     * @param object the object to serialize.
+     * @return object serialized into json.
+     */
+    public static String toJson(final Object object) {
+        return toJson(object, true);
     }
 
-
-    public static String objectToJsonDateSerializer(Object ts, final String dateformat) {
-        String jsonStr = null;
-        gson = new GsonBuilder()
-                .registerTypeHierarchyAdapter(Date.class,
-                        new JsonSerializer<Date>() {
-                            public JsonElement serialize(Date src,
-                                                         Type typeOfSrc,
-                                                         JsonSerializationContext context) {
-                                SimpleDateFormat format = new SimpleDateFormat(dateformat);
-                                return new JsonPrimitive(format.format(src));
-                            }
-                        }).setDateFormat(dateformat).create();
-        if (gson != null) {
-            jsonStr = gson.toJson(ts);
-        }
-        return jsonStr;
-    }
-
-
-    public static List<?> json2List(String jsonStr) {
-        List<?> objList = null;
-        if (gson != null) {
-            Type type = new com.google.gson.reflect.TypeToken<List<?>>() {
-            }.getType();
-            objList = gson.fromJson(jsonStr, type);
-        }
-        return objList;
+    /**
+     * Serializes an object into json.
+     *
+     * @param object       the object to serialize.
+     * @param includeNulls determines if nulls will be included.
+     * @return object serialized into json.
+     */
+    public static String toJson(final Object object, final boolean includeNulls) {
+        return includeNulls ? GSON.toJson(object) : GSON_NO_NULLS.toJson(object);
     }
 
 
-    public static List<?> json2List(String jsonStr, Type type) {
-        List<?> objList = null;
-        if (gson != null) {
-            objList = gson.fromJson(jsonStr, type);
-        }
-        return objList;
+    /**
+     * Converts {@link String} to given type.
+     *
+     * @param json the json to convert.
+     * @param type type type json will be converted to.
+     * @return instance of type
+     */
+    public static <T> T fromJson(final String json, final Class<T> type) {
+        return GSON.fromJson(json, type);
     }
 
-
-    public static Map<?, ?> json2Map(String jsonStr) {
-        Map<?, ?> objMap = null;
-        if (gson != null) {
-            Type type = new com.google.gson.reflect.TypeToken<Map<?, ?>>() {
-            }.getType();
-            objMap = gson.fromJson(jsonStr, type);
-        }
-        return objMap;
+    /**
+     * Converts {@link String} to given type.
+     *
+     * @param json the json to convert.
+     * @param type type type json will be converted to.
+     * @return instance of type
+     */
+    public static <T> T fromJson(final String json, final Type type) {
+        return GSON.fromJson(json, type);
     }
 
-    public static Object json2Bean(String jsonStr, Class<?> cl) {
-        Object obj = null;
-        if (gson != null) {
-            obj = gson.fromJson(jsonStr, cl);
-        }
-        return obj;
+    /**
+     * Converts {@link Reader} to given type.
+     *
+     * @param reader the reader to convert.
+     * @param type   type type json will be converted to.
+     * @return instance of type
+     */
+    public static <T> T fromJson(final Reader reader, final Class<T> type) {
+        return GSON.fromJson(reader, type);
     }
 
-    public static Object json2Bean(String jsonStr, Type type) {
-        Object obj = null;
-        if (gson != null) {
-            obj = gson.fromJson(jsonStr, type);
-        }
-        return obj;
+    /**
+     * Converts {@link Reader} to given type.
+     *
+     * @param reader the reader to convert.
+     * @param type   type type json will be converted to.
+     * @return instance of type
+     */
+    public static <T> T fromJson(final Reader reader, final Type type) {
+        return GSON.fromJson(reader, type);
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> T jsonToBeanDateSerializer(String jsonStr, Class<T> cl, final String pattern) {
-        Object obj = null;
-        gson = new GsonBuilder()
-                .registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
-                    public Date deserialize(JsonElement json, Type typeOfT,
-                                            JsonDeserializationContext context)
-                            throws JsonParseException {
-                        SimpleDateFormat format = new SimpleDateFormat(pattern);
-                        String dateStr = json.getAsString();
-                        try {
-                            return format.parse(dateStr);
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
-                        return null;
-                    }
-                }).setDateFormat(pattern).create();
-        if (gson != null) {
-            obj = gson.fromJson(jsonStr, cl);
-        }
-        return (T) obj;
-    }
-
-
-    public static Object getJsonValue(String jsonStr, String key) {
-        Object rulsObj = null;
-        Map<?, ?> rulsMap = json2Map(jsonStr);
-        if (rulsMap != null && rulsMap.size() > 0) {
-            rulsObj = rulsMap.get(key);
-        }
-        return rulsObj;
+    /**
+     * Create a pre-configured {@link Gson} instance.
+     *
+     * @param serializeNulls determines if nulls will be serialized.
+     * @return {@link Gson} instance.
+     */
+    private static Gson createGson(final boolean serializeNulls) {
+        final GsonBuilder builder = new GsonBuilder();
+        if (serializeNulls) builder.serializeNulls();
+        return builder.create();
     }
 }

@@ -28,27 +28,27 @@ public final class ServiceUtils {
     }
 
     /**
-     * 获取所有运行的服务
+     * Return all of the services are running.
      *
-     * @return 服务名集合
+     * @return all of the services are running
      */
-    public static Set getAllRunningService() {
-        android.app.ActivityManager am =
-                (android.app.ActivityManager) Utils.getApp().getSystemService(Context.ACTIVITY_SERVICE);
+    public static Set getAllRunningServices() {
+        ActivityManager am =
+                (ActivityManager) Utils.getApp().getSystemService(Context.ACTIVITY_SERVICE);
         if (am == null) return Collections.emptySet();
-        List<android.app.ActivityManager.RunningServiceInfo> info = am.getRunningServices(0x7FFFFFFF);
+        List<ActivityManager.RunningServiceInfo> info = am.getRunningServices(0x7FFFFFFF);
         Set<String> names = new HashSet<>();
         if (info == null || info.size() == 0) return null;
-        for (android.app.ActivityManager.RunningServiceInfo aInfo : info) {
+        for (ActivityManager.RunningServiceInfo aInfo : info) {
             names.add(aInfo.service.getClassName());
         }
         return names;
     }
 
     /**
-     * 启动服务
+     * Start the service.
      *
-     * @param className 完整包名的服务类名
+     * @param className The name of class.
      */
     public static void startService(final String className) {
         try {
@@ -59,9 +59,9 @@ public final class ServiceUtils {
     }
 
     /**
-     * 启动服务
+     * Start the service.
      *
-     * @param cls 服务类
+     * @param cls The service class.
      */
     public static void startService(final Class<?> cls) {
         Intent intent = new Intent(Utils.getApp(), cls);
@@ -69,10 +69,10 @@ public final class ServiceUtils {
     }
 
     /**
-     * 停止服务
+     * Stop the service.
      *
-     * @param className 完整包名的服务类名
-     * @return {@code true}: 停止成功<br>{@code false}: 停止失败
+     * @param className The name of class.
+     * @return {@code true}: success<br>{@code false}: fail
      */
     public static boolean stopService(final String className) {
         try {
@@ -84,10 +84,10 @@ public final class ServiceUtils {
     }
 
     /**
-     * 停止服务
+     * Stop the service.
      *
-     * @param cls 服务类
-     * @return {@code true}: 停止成功<br>{@code false}: 停止失败
+     * @param cls The name of class.
+     * @return {@code true}: success<br>{@code false}: fail
      */
     public static boolean stopService(final Class<?> cls) {
         Intent intent = new Intent(Utils.getApp(), cls);
@@ -95,12 +95,13 @@ public final class ServiceUtils {
     }
 
     /**
-     * 绑定服务
+     * Bind the service.
      *
-     * @param className 完整包名的服务类名
-     * @param conn      服务连接对象
-     * @param flags     绑定选项
+     * @param className The name of class.
+     * @param conn      The ServiceConnection object.
+     * @param flags     Operation options for the binding.
      *                  <ul>
+     *                  <li>0</li>
      *                  <li>{@link Context#BIND_AUTO_CREATE}</li>
      *                  <li>{@link Context#BIND_DEBUG_UNBIND}</li>
      *                  <li>{@link Context#BIND_NOT_FOREGROUND}</li>
@@ -120,12 +121,13 @@ public final class ServiceUtils {
     }
 
     /**
-     * 绑定服务
+     * Bind the service.
      *
-     * @param cls   服务类
-     * @param conn  服务连接对象
-     * @param flags 绑定选项
+     * @param cls   The service class.
+     * @param conn  The ServiceConnection object.
+     * @param flags Operation options for the binding.
      *              <ul>
+     *              <li>0</li>
      *              <li>{@link Context#BIND_AUTO_CREATE}</li>
      *              <li>{@link Context#BIND_DEBUG_UNBIND}</li>
      *              <li>{@link Context#BIND_NOT_FOREGROUND}</li>
@@ -142,23 +144,33 @@ public final class ServiceUtils {
     }
 
     /**
-     * 解绑服务
+     * Unbind the service.
      *
-     * @param conn 服务连接对象
+     * @param conn The ServiceConnection object.
      */
     public static void unbindService(final ServiceConnection conn) {
         Utils.getApp().unbindService(conn);
     }
 
     /**
-     * 判断服务是否运行
+     * Return whether service is running.
      *
-     * @param className 完整包名的服务类名
-     * @return {@code true}: 是<br>{@code false}: 否
+     * @param cls The service class.
+     * @return {@code true}: yes<br>{@code false}: no
+     */
+    public static boolean isServiceRunning(final Class<?> cls) {
+        return isServiceRunning(cls.getName());
+    }
+
+    /**
+     * Return whether service is running.
+     *
+     * @param className The name of class.
+     * @return {@code true}: yes<br>{@code false}: no
      */
     public static boolean isServiceRunning(final String className) {
-        android.app.ActivityManager am =
-                (android.app.ActivityManager) Utils.getApp().getSystemService(Context.ACTIVITY_SERVICE);
+        ActivityManager am =
+                (ActivityManager) Utils.getApp().getSystemService(Context.ACTIVITY_SERVICE);
         if (am == null) return false;
         List<ActivityManager.RunningServiceInfo> info = am.getRunningServices(0x7FFFFFFF);
         if (info == null || info.size() == 0) return false;

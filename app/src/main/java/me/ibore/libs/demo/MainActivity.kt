@@ -1,97 +1,36 @@
 package me.ibore.libs.demo
 
 import android.os.Bundle
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
-import me.ibore.http.*
+import me.ibore.libs.constant.PermissionConstants
+import me.ibore.libs.util.PermissionUtils
 import me.ibore.libs.util.ToastUtils
-import okhttp3.OkHttpClient
-
 
 class MainActivity : AppCompatActivity() {
 
-    var mDownloadUrl: String? = "https://raw.githubusercontent.com/JessYanCoding/MVPArmsTemplate/master/art/MVPArms.gif"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        PermissionUtils
+                .permission(PermissionConstants.STORAGE)
+                .callback(object : PermissionUtils.Callback {
+                    override fun onGranted(permissionsGranted: MutableList<String>?) {
+                        ToastUtils.showShort("权限通过")
+                    }
 
-//        xImageView.setImageResource(R.mipmap.sunset)
-//        ViewShadow.setElevation(xImageView, 20F, resources.getColor(R.color.shadow))
-
-        val httpInterceptor = HttpInterceptor("HTTP")
-        httpInterceptor.setPrintLevel(HttpInterceptor.Level.BODY)
-        val mOkHttpClient : OkHttpClient = OkHttpClient.Builder().addInterceptor(httpInterceptor).build()
-        XHttp.init(applicationContext, mOkHttpClient, 3 , 300)
-        XHttp.download("http:\\/\\/test.persons.net.cn\\/img\\/20180211\\/ymapp__ff0d3ba92e687c335f72a456860da5cb09b6ef5067c6-wUMlou_fw658_s.jpg", cacheDir, object : DownloadObserver(){
-            override fun onSuccess(t: DownloadInfo?) {
-                Log.d("---", t!!.file.absolutePath)
-            }
-
-//            override fun onSuccess(t: StringInfo?) {
-////                xImageView.setImageBitmap(BitmapFactory.decodeStream(ByteArrayInputStream(t!!.data.toByteArray())))
-//            }
-//
-//            override fun onSuccess(t: DownloadInfo?) {
-//                xImageView.setImageBitmap(BitmapFactory.decodeFile(t!!.file.absolutePath))
-//            }
-
-            override fun onError(e: HttpException?) {
-                e!!.printStackTrace()
-                ToastUtils.showShort(e.message)
-            }
-
-            override fun onProgress(progressInfo: ProgressInfo?) {
-                Log.d("----", progressInfo.toString())
-            }
-        })
-//        Log.d("----", DeviceUtils.getDeviceUuid().toString())
-//        roundImageView.setImageResource(R.mipmap.head)
-//        var transformation = RoundedCornersTransformation(10, 0)
-//        var transformation = RoundedCornersTransformation(10, 0)
-//        Glide.with(roundImageView).load(R.mipmap.head).apply(RequestOptions.bitmapTransform(transformation)).into(roundImageView)
-//        val imagePicker = ImagePicker.getInstance()
-//        imagePicker.imageLoader = ImageLoader()   //设置图片加载器
-//        imagePicker.isShowCamera = true                      //显示拍照按钮
-//        imagePicker.isCrop = true                           //允许裁剪（单选才有效）
-//        imagePicker.isSaveRectangle = true                   //是否按矩形区域保存
-//        imagePicker.selectLimit = 1              //选中数量限制
-//        imagePicker.style = CropImageView.Style.RECTANGLE  //裁剪框的形状
-//        imagePicker.focusWidth = 800                       //裁剪框的宽度。单位像素（圆形自动取宽高最小值）
-//        imagePicker.focusHeight = 800                      //裁剪框的高度。单位像素（圆形自动取宽高最小值）
-//        imagePicker.outPutX = 1000                         //保存文件的宽度。单位像素
-//        imagePicker.outPutY = 1000                         //保存文件的高度。单位像素
-//
-//
-//        ImagePicker.getInstance().selectLimit = 1
-//        val intent = Intent(this, ImageGridActivity::class.java)
-//        intent.putExtra(ImageGridActivity.EXTRAS_TAKE_PICKERS, true) // 是否是直接打开相机
-//        startActivityForResult(intent, 1)
-
-        //Okhttp/Retofit 下载监听
-//        val mHttpInterceptor = HttpInterceptor("DEMO")
-//        mHttpInterceptor.setPrintLevel(HttpInterceptor.Level.BODY)
-
-//        val mOkHttpClient = ProgressManager.getInstance().with(OkHttpClient.Builder().addInterceptor(mHttpInterceptor)).build()
-//
-//        val file = File(cacheDir, "download")
-//        val fileCallback = object : FileCallback(file) {
-//            override fun onSuccess(t: File?) {
-//
-//            }
-//
-//            override fun onProgress(progressInfo: ProgressInfo?) {
-//                Log.d("----", progressInfo.toString())
-//
-//            }
-//            override fun onError(e: HttpException?) {
-//
-//            }
-//        }
-//        ProgressManager.getInstance().addResponseListener(mDownloadUrl, fileCallback)
-//        val request = Request.Builder()
-//                .url(mDownloadUrl)
-//                .build()
-//        mOkHttpClient.newCall(request).enqueue(fileCallback)
+                    override fun onDenied(permissionsDeniedForever: MutableList<String>?, permissionsDenied: MutableList<String>?) {
+                        AlertDialog.Builder(this@MainActivity)
+                                .setMessage("dddddddddd")
+                                .setPositiveButton("确认") { dialog, _ ->
+                                    dialog.dismiss()
+                                    PermissionUtils.openAppSettings()
+                                }
+                                .setNegativeButton("取消") { dialog, _ -> dialog.dismiss() }
+                                .create().show()
+                    }
+                })
+                .request()
 
     }
 }
