@@ -10,7 +10,6 @@ import android.content.SharedPreferences;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
-import android.os.Environment;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.support.annotation.RequiresPermission;
@@ -18,22 +17,13 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Enumeration;
-import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
-
-import javax.crypto.spec.IvParameterSpec;
 
 import static android.Manifest.permission.ACCESS_WIFI_STATE;
 import static android.Manifest.permission.INTERNET;
@@ -141,6 +131,41 @@ public final class DeviceUtils {
             return macAddress;
         }
         return "";
+    }
+
+    private static String uuid;
+
+    /**
+     * Gets the unique identifier
+     *
+     * @return UUID
+     */
+    @SuppressLint({"HardwareIds", "MissingPermission"})
+    public synchronized static String getUuid() {
+        if (uuid == null) {
+            final SharedPreferences prefs = Utils.getApp().getSharedPreferences("device_id.xml", Context.MODE_PRIVATE);
+            final String id = prefs.getString("device_id", null);
+
+            if (id != null) {
+                uuid = id;
+            } else {
+
+                final String androidId = Settings.Secure.getString(Utils.getApp().getContentResolver(), Settings.Secure.ANDROID_ID);
+                try {
+                    if (!"9774d56d682e549c".equals(androidId)) {
+                        uuid = UUID.nameUUIDFromBytes(androidId.getBytes("utf8")).toString();
+                    } else {
+                        final String deviceId = ((TelephonyManager) Objects.requireNonNull(Utils.getApp().getSystemService(Context.TELEPHONY_SERVICE))).getDeviceId();
+                        uuid = deviceId != null ? UUID.nameUUIDFromBytes(deviceId.getBytes("utf8")).toString() : UUID.randomUUID().toString();
+                    }
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException(e);
+                }
+                // Write the value out to the prefs file
+                prefs.edit().putString("device_id", uuid).apply();
+            }
+        }
+        return uuid;
     }
 
     private static boolean isAddressNotInExcepts(final String address, final String... excepts) {
@@ -358,4 +383,6 @@ public final class DeviceUtils {
     public static void reboot2Bootloader() {
         ShellUtils.execCmd("reboot bootloader", true);
     }
+
+
 }
