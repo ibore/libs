@@ -105,7 +105,6 @@ public final class AudioRecord {
         this.mListener = listener;
     }
 
-
     public void setMaxVol(int mMaxVol) {
         this.mMaxVol = mMaxVol;
     }

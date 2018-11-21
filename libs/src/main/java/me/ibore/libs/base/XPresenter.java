@@ -7,7 +7,9 @@ import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
+import me.ibore.libs.util.DisposablesUtils;
 
 /**
  * description:
@@ -17,36 +19,35 @@ import io.reactivex.schedulers.Schedulers;
  */
 public abstract class XPresenter<V extends XView> {
 
-    protected V getView() {
-        return view;
+    protected final V getView() {
+        return mView;
     }
 
-    private V view;
-
-    private CompositeDisposable compositeDisposable = new CompositeDisposable();
+    protected V mView;
 
     protected void onAttach(@NonNull V view) {
-        if (this.view != null)
-            throw new IllegalStateException("View " + this.view + " is already attached. Cannot attach " + view);
-        this.view = view;
+        if (this.mView != null)
+            throw new IllegalStateException("View " + this.mView + " is already attached. Cannot attach " + view);
+        this.mView = view;
     }
 
     protected void onDetach() {
-        compositeDisposable.clear();
-        if (this.view == null)
-            throw new IllegalStateException("View is already detached");
-        view = null;
+        DisposablesUtils.clear(this);
+        if (this.mView == null) throw new IllegalStateException("View is already detached");
+        mView = null;
     }
 
-    protected void addDisposable(Disposable disposable) {
-        compositeDisposable.add(disposable);
+    protected final Disposable addDisposable(Disposable disposable) {
+        return DisposablesUtils.add(this, disposable);
     }
 
-    protected void addDisposable(Observable observable, Observer observer) {
-        addDisposable((Disposable) observable
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(observer));
+    protected final Disposable addDisposable(Observable observable, DisposableObserver observer) {
+        return DisposablesUtils.add(this, observable, observer);
     }
+
+    protected final boolean removeDisposable(Disposable disposable) {
+        return DisposablesUtils.remove(this, disposable);
+    }
+
 }
 

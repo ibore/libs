@@ -1,9 +1,9 @@
-package me.ibore.libs;
+package me.ibore.libs.base;
 
 import android.app.Application;
-import android.content.Context;
 
 import me.ibore.libs.util.Utils;
+import me.ibore.widget.UIUtils;
 
 /**
  * description:
@@ -14,17 +14,11 @@ import me.ibore.libs.util.Utils;
 
 public class XApplication extends Application {
 
-    private static Context mContext;
-
     @Override
     public void onCreate() {
         super.onCreate();
-        mContext = getApplicationContext();
         Utils.init(this);
-    }
-
-    public static Context getContext() {
-        return mContext;
+        UIUtils.init(this);
     }
 
 }

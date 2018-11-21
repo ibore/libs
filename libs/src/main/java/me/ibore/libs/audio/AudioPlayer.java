@@ -28,7 +28,6 @@ import static android.os.Build.VERSION_CODES.M;
  */
 public final class AudioPlayer {
 
-
     private static MediaPlayer mMediaPlayer;
     private static final Handler mHander = new Handler();
 

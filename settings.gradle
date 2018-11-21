@@ -1,6 +1,1 @@
-//include ':libs'
 include ':app', ':libs'
-//include ':app', ':libs', ':imageloader', ':http'
-//include ':app', ':libs', ':imageloader', ':http'
-//include ':social'
-//include ':video'

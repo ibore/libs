@@ -2,20 +2,26 @@ package me.ibore.libs.base;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.annotation.LayoutRes;
+import android.support.annotation.ColorRes;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
+import android.support.v4.content.ContextCompat;
 import android.view.WindowManager;
 
+import com.bumptech.glide.load.engine.Resource;
+
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 import io.reactivex.Observable;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
+import io.reactivex.observers.DisposableObserver;
+import me.ibore.libs.rxbus.RxBus;
+import me.ibore.libs.util.DisposablesUtils;
 
 /**
  * description:
@@ -26,57 +32,67 @@ import io.reactivex.schedulers.Schedulers;
 
 public abstract class XDialog extends Dialog {
 
-    private CompositeDisposable compositeDisposable;
-
-    public XDialog(@NonNull Context context) {
-        super(context, 0);
+    public XDialog(Context context) {
+        this(context, 0);
     }
 
     public XDialog(Context context, int themeResId) {
         super(context, themeResId);
     }
 
-    protected XDialog(Context context, boolean cancelable, OnCancelListener cancelListener) {
-        super(context, cancelable, cancelListener);
-    }
+    protected abstract int getLayoutId();
 
-    public void setGravity(int gravity) {
-        getWindow().setGravity(gravity);
-    }
+    protected abstract void onBindView(Bundle savedInstanceState);
 
-    public void setFullScreen() {
-        getWindow().setBackgroundDrawable(new ColorDrawable(0x00000000));
-        getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
-    }
+    private Unbinder unBinder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(getLayoutId());
-        ButterKnife.bind(this);
+        unBinder = ButterKnife.bind(this, this);
         onBindView(savedInstanceState);
+        RxBus.get().register(this);
     }
 
     @Override
     public void dismiss() {
-        if (null != compositeDisposable) compositeDisposable.clear();
+        RxBus.get().unRegister(this);
+        DisposablesUtils.clear(this);
+        unBinder.unbind();
         super.dismiss();
     }
 
-    protected abstract @LayoutRes int getLayoutId();
-
-    protected abstract void onBindView(Bundle savedInstanceState);
-
-    protected void addDisposable(Disposable disposable) {
-        if (null == compositeDisposable) compositeDisposable = new CompositeDisposable();
-        compositeDisposable.add(disposable);
+    protected final void setGravity(int gravity) {
+        getWindow().setGravity(gravity);
     }
 
-    protected void addDisposable(Observable observable, Observer observer) {
-        addDisposable((Disposable) observable
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(observer));
+    protected final void setFullScreen() {
+        getWindow().setBackgroundDrawable(new ColorDrawable(0x00000000));
+        getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.WRAP_CONTENT);
     }
+
+    protected final int getColorX(@ColorRes int colorId) {
+        return ContextCompat.getColor(getContext(), colorId);
+    }
+
+    protected final Drawable getDrawableX(@DrawableRes int drawableId) {
+        return ContextCompat.getDrawable(getContext(), drawableId);
+    }
+
+    protected final Disposable addDisposable(Disposable disposable) {
+        return DisposablesUtils.add(this, disposable);
+    }
+
+    protected final Disposable addDisposable(Observable observable, DisposableObserver observer) {
+        return DisposablesUtils.add(this, observable, observer);
+    }
+
+    protected final boolean removeDisposable(Disposable disposable) {
+        return DisposablesUtils.remove(this, disposable);
+    }
+
+
 }
 

@@ -2,6 +2,9 @@ package me.ibore.libs.base;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.ColorRes;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -17,8 +20,11 @@ import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 import me.ibore.libs.rxbus.RxBus;
+import me.ibore.libs.util.DisposablesUtils;
+import me.ibore.widget.LoadLayout;
 
 /**
  * description:
@@ -27,71 +33,65 @@ import me.ibore.libs.rxbus.RxBus;
  * website: ibore.me
  */
 
-public abstract class XFragment extends Fragment implements XView {
+public abstract class XFragment extends Fragment {
 
-    protected final String TAG = getClass().getSimpleName();
-    protected Unbinder unBinder;
-    private CompositeDisposable compositeDisposable;
+    protected abstract int getLayoutId();
+
+    protected abstract void onBindView(Bundle savedInstanceState);
+
+    private Unbinder unBinder;
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View rootView =  getLayoutView(getLayoutId());
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View rootView = getLayoutView(getLayoutId());
         unBinder = ButterKnife.bind(this, rootView);
         return rootView;
     }
 
-    protected abstract int getLayoutId();
+    private View getLayoutView(int layoutId) {
+        View rootView = getLayoutInflater().inflate(layoutId, null);
+        rootView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+        return rootView;
+    }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         onBindView(savedInstanceState);
         RxBus.get().register(this);
     }
 
-    protected abstract void onBindView(Bundle savedInstanceState);
-
     @Override
     public void onDestroyView() {
-        if (null != compositeDisposable) compositeDisposable.clear();
+        RxBus.get().unRegister(this);
+        DisposablesUtils.clear(this);
         unBinder.unbind();
         super.onDestroyView();
     }
 
-    public View getLayoutView(int layoutId) {
-        View view = getLayoutInflater().inflate(layoutId, null);
-        view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT));
-        return view;
+    public Boolean onBackPressed() {
+        return true;
     }
 
-    public int getColorX(int colorId) {
+    protected final int getColorX(@ColorRes int colorId) {
         return ContextCompat.getColor(getContext(), colorId);
     }
 
-    public Drawable getDrawableX(int drawableId) {
+    protected final Drawable getDrawableX(@DrawableRes int drawableId) {
         return ContextCompat.getDrawable(getContext(), drawableId);
     }
 
-    @Override
-    public void showToast(int resId) {
-        Toast.makeText(getContext(), resId, Toast.LENGTH_SHORT).show();
+    protected final Disposable addDisposable(Disposable disposable) {
+        return DisposablesUtils.add(this, disposable);
     }
 
-    @Override
-    public void showToast(String message) {
-        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+    protected final Disposable addDisposable(Observable observable, DisposableObserver observer) {
+        return DisposablesUtils.add(this, observable, observer);
     }
 
-    protected void addDisposable(Disposable disposable) {
-        if (null == compositeDisposable) compositeDisposable = new CompositeDisposable();
-        compositeDisposable.add(disposable);
-    }
-
-    protected void addDisposable(Observable observable, Observer observer) {
-        addDisposable((Disposable) observable
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(observer));
+    protected final boolean removeDisposable(Disposable disposable) {
+        return DisposablesUtils.remove(this, disposable);
     }
 }

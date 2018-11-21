@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.StringRes;
 
+import me.ibore.widget.LoadLayout;
+
 /**
  * description:
  * author: Ibore Xie
@@ -14,8 +16,8 @@ import android.support.annotation.StringRes;
 public interface XView {
 
     Activity getActivity();
-    Context getContext();
-    void showToast(@StringRes int resId);
-    void showToast(String message);
 
+    Context getContext();
+
+    LoadLayout loadLayout();
 }

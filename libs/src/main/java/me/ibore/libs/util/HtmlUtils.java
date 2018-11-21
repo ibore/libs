@@ -42,6 +42,7 @@ public final class HtmlUtils {
     public static class URLImageGetter implements Html.ImageGetter {
 
         private TextView textView;
+
         public URLImageGetter(TextView textView) {
             this.textView = textView;
         }
@@ -53,32 +54,34 @@ public final class HtmlUtils {
                     .apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.ALL))
                     .load(source)
                     .into(new SimpleTarget<Bitmap>() {
-                @Override
-                public void onResourceReady(Bitmap bitmap, Transition<? super Bitmap> transition) {
-                    try {
-                        Drawable drawable = new BitmapDrawable(bitmap);
-                        drawable.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
-                        urlDrawable.setDrawable(drawable);
-                        urlDrawable.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
-                        textView.invalidate();
-                        textView.setText(textView.getText());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
+                        @Override
+                        public void onResourceReady(Bitmap bitmap, Transition<? super Bitmap> transition) {
+                            try {
+                                Drawable drawable = new BitmapDrawable(bitmap);
+                                drawable.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
+                                urlDrawable.setDrawable(drawable);
+                                urlDrawable.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
+                                textView.invalidate();
+                                textView.setText(textView.getText());
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
             return urlDrawable;
         }
     }
 
     public static class URLDrawable extends BitmapDrawable {
         private Drawable drawable;
+
         @Override
         public void draw(Canvas canvas) {
             if (drawable != null) {
                 drawable.draw(canvas);
             }
         }
+
         public void setDrawable(Drawable drawable) {
             this.drawable = drawable;
         }
