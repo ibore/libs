@@ -72,6 +72,8 @@ public abstract class XActivity<P extends XPresenter> extends AppCompatActivity 
     protected View getLayoutView(int layoutId) {
         rootView = new RelativeLayout(this);
         loadLayout = new LoadLayout(this);
+        bottomBarView = getBottomBarView();
+        actionBarView = getActionBarView();
         loadLayout.setLoadView(R.layout.layout_loading, R.layout.layout_empty, R.layout.layout_error);
         loadLayout.setContentView(layoutId);
         loadLayout.setOnLoadingClickListener(new LoadLayout.OnLoadClickListener() {
@@ -86,18 +88,12 @@ public abstract class XActivity<P extends XPresenter> extends AppCompatActivity 
         });
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        actionBarView = getActionBarView();
-        bottomBarView = getBottomBarView();
-        if (null != actionBarView) {
-            rootView.addView(actionBarView);
-            layoutParams.addRule(RelativeLayout.BELOW, actionBarView.getId());
-        }
-        if (null != bottomBarView) {
-            rootView.addView(bottomBarView);
-            layoutParams.addRule(RelativeLayout.ABOVE, bottomBarView.getId());
-        }
+        if (null != actionBarView) layoutParams.addRule(RelativeLayout.BELOW, actionBarView.getId());
+        if (null != bottomBarView) layoutParams.addRule(RelativeLayout.ABOVE, bottomBarView.getId());
         loadLayout.setLayoutParams(layoutParams);
         rootView.addView(loadLayout);
+        if (null != bottomBarView) rootView.addView(bottomBarView);
+        if (null != actionBarView) rootView.addView(actionBarView);
         return rootView;
     }
 
