@@ -35,7 +35,7 @@ import me.ibore.widget.LoadLayout;
 public abstract class XActivity<P extends XPresenter> extends AppCompatActivity implements XView {
 
     protected LoadLayout loadLayout;
-    protected RelativeLayout rootView;
+    protected ViewGroup rootView;
     protected View actionBarView;
     protected View bottomBarView;
     protected P mPresenter;
