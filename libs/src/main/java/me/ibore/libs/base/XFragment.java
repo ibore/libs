@@ -11,20 +11,14 @@ import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import io.reactivex.Observable;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
-import io.reactivex.schedulers.Schedulers;
 import me.ibore.libs.rxbus.RxBus;
 import me.ibore.libs.util.DisposablesUtils;
-import me.ibore.widget.LoadLayout;
 
 /**
  * description:
@@ -35,9 +29,18 @@ import me.ibore.widget.LoadLayout;
 
 public abstract class XFragment extends Fragment {
 
+    private boolean isPrepared;
+    private boolean isVisible;
+    private boolean isInitialized;
+
     protected abstract int getLayoutId();
 
     protected abstract void onBindView(Bundle savedInstanceState);
+
+    /**
+     * 这个是懒加载模式的
+     */
+    protected void onBindData() { }
 
     private Unbinder unBinder;
 
@@ -57,10 +60,25 @@ public abstract class XFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        this.isVisible = isVisibleToUser;
+        if (isVisible && isPrepared && !isInitialized) {
+            isInitialized = true;
+            onBindData();
+        }
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
         onBindView(savedInstanceState);
         RxBus.get().register(this);
+        isPrepared = true;
+        if (isVisible && !isInitialized) {
+            isInitialized = true;
+            onBindData();
+        }
     }
 
     @Override
