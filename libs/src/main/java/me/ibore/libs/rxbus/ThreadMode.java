@@ -8,6 +8,7 @@ package me.ibore.libs.rxbus;
  */
 
 public enum ThreadMode {
+
     /**
      * current thread
      */

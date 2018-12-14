@@ -224,11 +224,9 @@ public class RxBus {
             case MAIN:
                 scheduler = AndroidSchedulers.mainThread();
                 break;
-
             case NEW_THREAD:
                 scheduler = Schedulers.newThread();
                 break;
-
             case CURRENT_THREAD:
                 scheduler = Schedulers.trampoline();
                 break;

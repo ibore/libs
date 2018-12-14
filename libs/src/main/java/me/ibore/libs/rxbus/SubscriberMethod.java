@@ -9,15 +9,15 @@ import java.lang.reflect.Method;
  * date: 2018-01-18 23:56
  * website: ibore.me
  */
+class SubscriberMethod {
 
-public class SubscriberMethod {
-    public Method method;
-    public ThreadMode threadMode;
-    public Class<?> eventType;
-    public Object subscriber;
+    Method method;
+    ThreadMode threadMode;
+    Class<?> eventType;
+    Object subscriber;
     public int code;
 
-    public SubscriberMethod(Object subscriber, Method method, Class<?> eventType, int code, ThreadMode threadMode) {
+    SubscriberMethod(Object subscriber, Method method, Class<?> eventType, int code, ThreadMode threadMode) {
         this.method = method;
         this.threadMode = threadMode;
         this.eventType = eventType;
@@ -30,7 +30,7 @@ public class SubscriberMethod {
      * 调用方法
      * @param o 参数
      */
-    public void invoke(Object o){
+    void invoke(Object o){
         try {
             Class[] parameterType = method.getParameterTypes();
             if(parameterType != null && parameterType.length == 1){
