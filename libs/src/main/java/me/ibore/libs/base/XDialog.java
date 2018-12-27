@@ -50,7 +50,7 @@ public abstract class XDialog extends Dialog {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(getLayoutId());
-        unBinder = ButterKnife.bind(this, this);
+        unBinder = ButterKnife.bind(this);
         onBindView(savedInstanceState);
         RxBus.get().register(this);
     }
