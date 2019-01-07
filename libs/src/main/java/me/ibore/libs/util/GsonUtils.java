@@ -131,4 +131,49 @@ public final class GsonUtils {
         if (serializeNulls) builder.serializeNulls();
         return builder.create();
     }
+
+    public static String object2Json(Object obj) {
+        return GSON.toJson(obj);
+    }
+
+
+    public static String object2Json(Object obj, Type type) {
+        return GSON.toJson(obj, type);
+    }
+
+
+    /*public static String objectToJsonDateSerializer(Object ts, final String dateformat) {
+        String jsonStr = null;
+        gson = new GsonBuilder()
+                .registerTypeHierarchyAdapter(Date.class,
+                        new JsonSerializer<Date>() {
+                            public JsonElement serialize(Date src,
+                                                         Type typeOfSrc,
+                                                         JsonSerializationContext context) {
+                                SimpleDateFormat format = new SimpleDateFormat(dateformat);
+                                return new JsonPrimitive(format.format(src));
+                            }
+                        }).setDateFormat(dateformat).create();
+        if (gson != null) {
+            jsonStr = GSON.toJson(ts);
+        }
+        return jsonStr;
+    }*/
+
+
+    public static List<?> json2List(String jsonStr) {
+        Type type = new com.google.gson.reflect.TypeToken<List<?>>() {}.getType();
+        return GSON.fromJson(jsonStr, type);
+    }
+
+
+    public static List<?> json2List(String jsonStr, Type type) {
+        return GSON.fromJson(jsonStr, type);
+    }
+
+
+    public static Map<?, ?> json2Map(String jsonStr) {
+        Type type = new com.google.gson.reflect.TypeToken<Map<?, ?>>() {}.getType();
+        return GSON.fromJson(jsonStr, type);
+    }
 }
