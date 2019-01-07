@@ -18,7 +18,6 @@ public class XApplication extends Application {
     public void onCreate() {
         super.onCreate();
         Utils.init(this);
-        UIUtils.init(this);
     }
 
 }
