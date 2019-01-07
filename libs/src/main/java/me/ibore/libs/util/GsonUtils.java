@@ -142,27 +142,23 @@ public final class GsonUtils {
     }
 
 
-    /*public static String objectToJsonDateSerializer(Object ts, final String dateformat) {
-        String jsonStr = null;
-        gson = new GsonBuilder()
-                .registerTypeHierarchyAdapter(Date.class,
-                        new JsonSerializer<Date>() {
-                            public JsonElement serialize(Date src,
-                                                         Type typeOfSrc,
-                                                         JsonSerializationContext context) {
-                                SimpleDateFormat format = new SimpleDateFormat(dateformat);
-                                return new JsonPrimitive(format.format(src));
-                            }
-                        }).setDateFormat(dateformat).create();
-        if (gson != null) {
-            jsonStr = GSON.toJson(ts);
-        }
-        return jsonStr;
-    }*/
+    public static String objectToJsonDateSerializer(Object ts, final String dateformat) {
+        Gson gson = new GsonBuilder()
+                .registerTypeHierarchyAdapter(Date.class, new JsonSerializer<Date>() {
+                    public JsonElement serialize(Date src,
+                                                 Type typeOfSrc,
+                                                 JsonSerializationContext context) {
+                        SimpleDateFormat format = new SimpleDateFormat(dateformat);
+                        return new JsonPrimitive(format.format(src));
+                    }
+                }).setDateFormat(dateformat).create();
+        return gson.toJson(ts);
+    }
 
 
     public static List<?> json2List(String jsonStr) {
-        Type type = new com.google.gson.reflect.TypeToken<List<?>>() {}.getType();
+        Type type = new com.google.gson.reflect.TypeToken<List<?>>() {
+        }.getType();
         return GSON.fromJson(jsonStr, type);
     }
 
@@ -173,7 +169,46 @@ public final class GsonUtils {
 
 
     public static Map<?, ?> json2Map(String jsonStr) {
-        Type type = new com.google.gson.reflect.TypeToken<Map<?, ?>>() {}.getType();
+        Type type = new com.google.gson.reflect.TypeToken<Map<?, ?>>() {
+        }.getType();
         return GSON.fromJson(jsonStr, type);
+    }
+
+    public static Object json2Bean(String jsonStr, Class<?> cl) {
+        return GSON.fromJson(jsonStr, cl);
+    }
+
+    public static Object json2Bean(String jsonStr, Type type) {
+        return GSON.fromJson(jsonStr, type);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T jsonToBeanDateSerializer(String jsonStr, Class<T> cl, final String pattern) {
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
+                    public Date deserialize(JsonElement json, Type typeOfT,
+                                            JsonDeserializationContext context)
+                            throws JsonParseException {
+                        SimpleDateFormat format = new SimpleDateFormat(pattern);
+                        String dateStr = json.getAsString();
+                        try {
+                            return format.parse(dateStr);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                        return null;
+                    }
+                }).setDateFormat(pattern).create();
+        return gson.fromJson(jsonStr, cl);
+    }
+
+
+    public static Object getJsonValue(String jsonStr, String key) {
+        Object ruleObj = null;
+        Map<?, ?> ruleMap = json2Map(jsonStr);
+        if (ruleMap != null && ruleMap.size() > 0) {
+            ruleObj = ruleMap.get(key);
+        }
+        return ruleObj;
     }
 }
