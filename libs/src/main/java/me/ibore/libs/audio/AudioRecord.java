@@ -4,15 +4,12 @@ package me.ibore.libs.audio;
  */
 
 
-import android.media.AudioManager;
 import android.media.MediaRecorder;
 import android.os.Handler;
 import android.support.annotation.UiThread;
-import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.UUID;
 
 /**
  * <pre>
@@ -28,7 +25,7 @@ public final class AudioRecord {
     private static final int RECORDING_SAMPLING = 16000;
     private MediaRecorder mRecorder;
     private Handler mHandler = new Handler();
-    private Runnable mHandlerRunable;
+    private Runnable mHandlerRunnable;
     private File mRecordFile;
     private boolean isRecording = false;
     private OnRecordListener mListener;
@@ -64,13 +61,13 @@ public final class AudioRecord {
     }
 
     private void initTimer() {
-        mHandlerRunable = () -> {
+        mHandlerRunnable = () -> {
             if (mListener != null){
                 mListener.onRecord(isRecording()? mRecorder.getMaxAmplitude() * mMaxVol / 0x7FFF : 0, (mCount++) * 100);
-                mHandler.postDelayed(mHandlerRunable, 100);
+                mHandler.postDelayed(mHandlerRunnable, 100);
             }
         };
-        mHandler.postDelayed(mHandlerRunable, 100);
+        mHandler.postDelayed(mHandlerRunnable, 100);
     }
 
     public File stopRecord() {
@@ -79,7 +76,7 @@ public final class AudioRecord {
         mRecorder = null;
         isRecording = false;
         mCount = 0;
-        mHandler.removeCallbacks(mHandlerRunable);
+        mHandler.removeCallbacks(mHandlerRunnable);
         return mRecordFile;
     }
 
@@ -90,7 +87,7 @@ public final class AudioRecord {
             isRecording = false;
         }
         mCount = 0;
-        mHandler.removeCallbacks(mHandlerRunable);
+        mHandler.removeCallbacks(mHandlerRunnable);
     }
 
     public File getRecordFile() {

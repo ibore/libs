@@ -28,8 +28,8 @@ import static android.os.Build.VERSION_CODES.M;
  */
 public final class AudioPlayer {
 
-    private static MediaPlayer mMediaPlayer;
-    private static final Handler mHander = new Handler();
+    private MediaPlayer mMediaPlayer;
+    private Handler mHander = new Handler();
 
     private SeekBar mSeekBar;
     private TextView mCurrentTime;
@@ -292,7 +292,7 @@ public final class AudioPlayer {
     }
 
     private static String unitFormat(int i) {
-        String retStr = null;
+        String retStr;
         if (i >= 0 && i < 10)
             retStr = "0" + Integer.toString(i);
         else
