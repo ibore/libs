@@ -17,7 +17,11 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Subscribe {
+
     int code() default -1;
 
     ThreadMode threadMode() default ThreadMode.CURRENT_THREAD;
+
+    boolean sticky() default false;
+
 }

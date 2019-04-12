@@ -16,26 +16,29 @@ class SubscriberMethod {
     Class<?> eventType;
     Object subscriber;
     public int code;
+    public boolean sticky;
 
-    SubscriberMethod(Object subscriber, Method method, Class<?> eventType, int code, ThreadMode threadMode) {
+    SubscriberMethod(Object subscriber, Method method, Class<?> eventType, int code, ThreadMode threadMode, boolean sticky) {
         this.method = method;
         this.threadMode = threadMode;
         this.eventType = eventType;
         this.subscriber = subscriber;
         this.code = code;
+        this.sticky = sticky;
     }
 
 
     /**
      * 调用方法
+     *
      * @param o 参数
      */
-    void invoke(Object o){
+    void invoke(Object o) {
         try {
             Class[] parameterType = method.getParameterTypes();
-            if(parameterType != null && parameterType.length == 1){
+            if (parameterType != null && parameterType.length == 1) {
                 method.invoke(subscriber, o);
-            }else if(parameterType == null || parameterType.length == 0){
+            } else if (parameterType == null || parameterType.length == 0) {
                 method.invoke(subscriber);
             }
         } catch (IllegalAccessException e) {

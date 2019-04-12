@@ -1,14 +1,20 @@
 package me.ibore.libs.rxbus;
 
+import org.reactivestreams.Subscriber;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -35,6 +41,9 @@ public class RxBus {
     private Map<Object, List<Class>> eventTypesBySubscriber = new HashMap<>();
 
     private Map<Class, List<SubscriberMethod>> subscriberMethodByEventType = new HashMap<>();
+
+    /*stick数据*/
+    private final Map<Class<?>, Object> stickyEvent =new ConcurrentHashMap<>();
 
     private final Subject<Object> bus;
 
@@ -88,6 +97,29 @@ public class RxBus {
     }
 
     /**
+     * 根据传递的 eventType 类型返回特定类型(eventType)的 被观察者
+     */
+    public <T> Observable<T> toObservableSticky(final Class<T> eventType) {
+        synchronized (stickyEvent) {
+
+            Observable<T> observable = bus.ofType(eventType);
+            final Object event = stickyEvent.get(eventType);
+
+            if (event != null) {
+                return observable.mergeWith(Observable.create(new ObservableOnSubscribe<T>() {
+                    @Override
+                    public void subscribe(ObservableEmitter<T> emitter) throws Exception {
+                        emitter.onNext(eventType.cast(event));
+                    }
+
+                }));
+            } else {
+                return observable;
+            }
+        }
+    }
+
+    /**
      * 注册
      *
      * @param subscriber 订阅者
@@ -101,30 +133,24 @@ public class RxBus {
                 Class[] parameterType = method.getParameterTypes();
                 //参数不为空 且参数个数为1
                 if (parameterType != null && parameterType.length == 1) {
-
                     Class eventType = parameterType[0];
-
                     addEventTypeToMap(subscriber, eventType);
                     Subscribe sub = method.getAnnotation(Subscribe.class);
                     int code = sub.code();
                     ThreadMode threadMode = sub.threadMode();
-
-                    SubscriberMethod subscriberMethod = new SubscriberMethod(subscriber, method, eventType, code, threadMode);
+                    boolean sticky = sub.sticky();
+                    SubscriberMethod subscriberMethod = new SubscriberMethod(subscriber, method, eventType, code, threadMode, sticky);
                     addSubscriberToMap(eventType, subscriberMethod);
-
                     addSubscriber(subscriberMethod);
                 } else if (parameterType == null || parameterType.length == 0) {
-
                     Class eventType = BusData.class;
-
                     addEventTypeToMap(subscriber, eventType);
                     Subscribe sub = method.getAnnotation(Subscribe.class);
                     int code = sub.code();
                     ThreadMode threadMode = sub.threadMode();
-
-                    SubscriberMethod subscriberMethod = new SubscriberMethod(subscriber, method, eventType, code, threadMode);
+                    boolean sticky = sub.sticky();
+                    SubscriberMethod subscriberMethod = new SubscriberMethod(subscriber, method, eventType, code, threadMode, sticky);
                     addSubscriberToMap(eventType, subscriberMethod);
-
                     addSubscriber(subscriberMethod);
 
                 }
