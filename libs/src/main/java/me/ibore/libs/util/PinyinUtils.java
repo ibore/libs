@@ -3,7 +3,7 @@ package me.ibore.libs.util;
  * Created by Administrator on 2018/1/19.
  */
 
-import android.support.v4.util.SimpleArrayMap;
+import androidx.collection.SimpleArrayMap;
 
 /**
  * <pre>

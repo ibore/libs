@@ -19,7 +19,6 @@ public enum ThreadMode {
      */
     MAIN,
 
-
     /**
      * new thread
      */

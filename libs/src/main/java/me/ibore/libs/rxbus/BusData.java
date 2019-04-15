@@ -8,9 +8,12 @@ package me.ibore.libs.rxbus;
  */
 
 public class BusData {
-    private String id;
+
+    private String id = "1";
     private String status;
+
     public BusData() {}
+
     public BusData(String id, String status) {
         this.id = id;
         this.status = status;

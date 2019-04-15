@@ -2,19 +2,14 @@ package me.ibore.libs.base;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.annotation.ColorRes;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.StringRes;
-import android.support.v4.content.ContextCompat;
 import android.view.WindowManager;
 
-import com.bumptech.glide.load.engine.Resource;
-
+import androidx.annotation.ColorRes;
+import androidx.annotation.DrawableRes;
+import androidx.core.content.ContextCompat;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import io.reactivex.Observable;
@@ -64,13 +59,30 @@ public abstract class XDialog extends Dialog {
     }
 
     protected final void setGravity(int gravity) {
-        getWindow().setGravity(gravity);
+        if (null != getWindow()) {
+            getWindow().setGravity(gravity);
+        }
     }
 
+    @Deprecated
     protected final void setFullScreen() {
-        getWindow().setBackgroundDrawable(new ColorDrawable(0x00000000));
-        getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.WRAP_CONTENT);
+        if (null != getWindow()) {
+            getWindow().setBackgroundDrawable(new ColorDrawable(0x00000000));
+            getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.WRAP_CONTENT);
+        }
+    }
+
+    protected final void setTransBackground() {
+        if (null != getWindow()) {
+            getWindow().setBackgroundDrawable(new ColorDrawable(0x00000000));
+        }
+    }
+
+    protected final void setLayout(int width, int height) {
+        if (null != getWindow()){
+            getWindow().setLayout(width, height);
+        }
     }
 
     protected final int getColorX(@ColorRes int colorId) {

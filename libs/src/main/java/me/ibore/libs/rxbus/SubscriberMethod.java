@@ -47,4 +47,17 @@ class SubscriberMethod {
             e.printStackTrace();
         }
     }
+
+
+    @Override
+    public String toString() {
+        return "SubscriberMethod{" +
+                "method=" + method +
+                ", threadMode=" + threadMode +
+                ", eventType=" + eventType +
+                ", subscriber=" + subscriber +
+                ", code=" + code +
+                ", sticky=" + sticky +
+                '}';
+    }
 }

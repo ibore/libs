@@ -6,7 +6,7 @@ package me.ibore.libs.audio;
 
 import android.media.MediaRecorder;
 import android.os.Handler;
-import android.support.annotation.UiThread;
+import androidx.annotation.UiThread;
 
 import java.io.File;
 import java.io.IOException;

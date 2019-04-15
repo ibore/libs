@@ -1,5 +1,6 @@
 package me.ibore.libs.rxbus;
 
+import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
 import java.lang.reflect.Method;
@@ -12,9 +13,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
-import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -43,7 +41,7 @@ public class RxBus {
     private Map<Class, List<SubscriberMethod>> subscriberMethodByEventType = new HashMap<>();
 
     /*stick数据*/
-    private final Map<Class<?>, Object> stickyEvent =new ConcurrentHashMap<>();
+    private final Map<Class<?>, Object> stickyEvent = new ConcurrentHashMap<>();
 
     private final Subject<Object> bus;
 
@@ -71,7 +69,7 @@ public class RxBus {
      * @param eventType 事件类型
      * @return return
      */
-    private <T> Flowable<T> toObservable(Class<T> eventType) {
+    private <T> Flowable<T> toFlowable(Class<T> eventType) {
         return bus.toFlowable(BackpressureStrategy.BUFFER).ofType(eventType);
     }
 
@@ -81,7 +79,7 @@ public class RxBus {
      * @param code      事件code
      * @param eventType 事件类型
      */
-    private <T> Flowable<T> toObservable(final int code, final Class<T> eventType) {
+    private <T> Flowable<T> toFlowable(final int code, final Class<T> eventType) {
         return bus.toFlowable(BackpressureStrategy.BUFFER).ofType(Message.class)
                 .filter(new Predicate<Message>() {
                     @Override
@@ -99,22 +97,19 @@ public class RxBus {
     /**
      * 根据传递的 eventType 类型返回特定类型(eventType)的 被观察者
      */
-    public <T> Observable<T> toObservableSticky(final Class<T> eventType) {
+    public <T> Flowable<T> toFlowableSticky(final Class<T> eventType) {
         synchronized (stickyEvent) {
-
-            Observable<T> observable = bus.ofType(eventType);
+            Flowable<T> flowable = bus.toFlowable(BackpressureStrategy.BUFFER).ofType(eventType);
             final Object event = stickyEvent.get(eventType);
-
             if (event != null) {
-                return observable.mergeWith(Observable.create(new ObservableOnSubscribe<T>() {
+                return flowable.mergeWith(new Publisher<T>() {
                     @Override
-                    public void subscribe(ObservableEmitter<T> emitter) throws Exception {
-                        emitter.onNext(eventType.cast(event));
+                    public void subscribe(Subscriber<? super T> s) {
+                        s.onNext(eventType.cast(event));
                     }
-
-                }));
+                });
             } else {
-                return observable;
+                return flowable;
             }
         }
     }
@@ -131,31 +126,50 @@ public class RxBus {
             if (method.isAnnotationPresent(Subscribe.class)) {
                 //获得参数类型
                 Class[] parameterType = method.getParameterTypes();
+                Class eventType = null;
                 //参数不为空 且参数个数为1
                 if (parameterType != null && parameterType.length == 1) {
-                    Class eventType = parameterType[0];
-                    addEventTypeToMap(subscriber, eventType);
-                    Subscribe sub = method.getAnnotation(Subscribe.class);
-                    int code = sub.code();
-                    ThreadMode threadMode = sub.threadMode();
-                    boolean sticky = sub.sticky();
-                    SubscriberMethod subscriberMethod = new SubscriberMethod(subscriber, method, eventType, code, threadMode, sticky);
-                    addSubscriberToMap(eventType, subscriberMethod);
-                    addSubscriber(subscriberMethod);
+                    eventType = parameterType[0];
                 } else if (parameterType == null || parameterType.length == 0) {
-                    Class eventType = BusData.class;
+                    eventType = BusData.class;
+                }
+                if (null != eventType) {
                     addEventTypeToMap(subscriber, eventType);
                     Subscribe sub = method.getAnnotation(Subscribe.class);
                     int code = sub.code();
                     ThreadMode threadMode = sub.threadMode();
                     boolean sticky = sub.sticky();
                     SubscriberMethod subscriberMethod = new SubscriberMethod(subscriber, method, eventType, code, threadMode, sticky);
-                    addSubscriberToMap(eventType, subscriberMethod);
-                    addSubscriber(subscriberMethod);
-
+                    if (isAdd(eventType, subscriberMethod)) {
+                        addSubscriberToMap(eventType, subscriberMethod);
+                        addSubscriber(subscriberMethod);
+                    }
                 }
             }
         }
+    }
+
+    /**
+     * 检查是否已经添加过sub事件
+     *
+     * @param eventType
+     * @param subscriberMethod
+     * @return
+     */
+    private boolean isAdd(Class eventType, SubscriberMethod subscriberMethod) {
+        boolean resulte = true;
+        List<SubscriberMethod> subscriberMethods = subscriberMethodByEventType.get(eventType);
+        if (subscriberMethods != null && subscriberMethods.size() > 0) {
+            for (SubscriberMethod subscriberMethod1 : subscriberMethods) {
+                if (subscriberMethod1.code == subscriberMethod.code && subscriberMethod.subscriber == subscriberMethod1.subscriber) {
+                    resulte = false;
+                }
+                if (subscriberMethod1.eventType == subscriberMethod.eventType && subscriberMethod.subscriber == subscriberMethod1.subscriber) {
+                    resulte = false;
+                }
+            }
+        }
+        return resulte;
     }
 
 
@@ -171,7 +185,6 @@ public class RxBus {
             eventTypes = new ArrayList<>();
             eventTypesBySubscriber.put(subscriber, eventTypes);
         }
-
         if (!eventTypes.contains(eventType)) {
             eventTypes.add(eventType);
         }
@@ -189,7 +202,6 @@ public class RxBus {
             subscriberMethods = new ArrayList<>();
             subscriberMethodByEventType.put(eventType, subscriberMethods);
         }
-
         if (!subscriberMethods.contains(subscriberMethod)) {
             subscriberMethods.add(subscriberMethod);
         }
@@ -207,7 +219,6 @@ public class RxBus {
             disposables = new ArrayList<>();
             subscriptionsByEventType.put(eventType, disposables);
         }
-
         if (!disposables.contains(disposable)) {
             disposables.add(disposable);
         }
@@ -220,12 +231,18 @@ public class RxBus {
      */
     @SuppressWarnings("unchecked")
     private void addSubscriber(final SubscriberMethod subscriberMethod) {
+
         Flowable flowable;
-        if (subscriberMethod.code == -1) {
-            flowable = toObservable(subscriberMethod.eventType);
+        if (subscriberMethod.sticky) {
+            flowable = toFlowableSticky(subscriberMethod.eventType);
         } else {
-            flowable = toObservable(subscriberMethod.code, subscriberMethod.eventType);
+            if (subscriberMethod.code == -1) {
+                flowable = toFlowable(subscriberMethod.eventType);
+            } else {
+                flowable = toFlowable(subscriberMethod.code, subscriberMethod.eventType);
+            }
         }
+
         Disposable subscription = postToObservable(flowable, subscriberMethod)
                 .subscribe(new Consumer<Object>() {
                     @Override
@@ -337,11 +354,36 @@ public class RxBus {
         }
     }
 
+    /**
+     * 移除指定eventType的Sticky事件
+     */
+    public <T> T removeStickyEvent(Class<T> eventType) {
+        synchronized (stickyEvent) {
+            return eventType.cast(stickyEvent.remove(eventType));
+        }
+    }
+
+    /**
+     * 移除所有的Sticky事件
+     */
+    public void removeAllStickyEvents() {
+        synchronized (stickyEvent) {
+            stickyEvent.clear();
+        }
+    }
+
     public void send(int code, Object o) {
         bus.onNext(new Message(code, o));
     }
 
     public void send(Object o) {
+        bus.onNext(o);
+    }
+
+    public void sendSticky(Object o) {
+        synchronized (stickyEvent) {
+            stickyEvent.put(o.getClass(), o);
+        }
         bus.onNext(o);
     }
 

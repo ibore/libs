@@ -3,7 +3,6 @@ package me.ibore.libs.util;
  * Created by Administrator on 2018/1/19.
  */
 
-import android.annotation.SuppressLint;
 import android.app.*;
 import android.app.ActivityManager;
 import android.app.usage.UsageStats;
@@ -15,8 +14,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Process;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.annotation.RequiresPermission;
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresPermission;
 import android.util.Log;
 
 import java.util.Arrays;

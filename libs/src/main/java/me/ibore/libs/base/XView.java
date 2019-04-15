@@ -2,7 +2,6 @@ package me.ibore.libs.base;
 
 import android.app.Activity;
 import android.content.Context;
-import android.support.annotation.StringRes;
 
 import me.ibore.widget.LoadLayout;
 

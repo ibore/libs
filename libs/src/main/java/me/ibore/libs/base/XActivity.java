@@ -2,16 +2,13 @@ package me.ibore.libs.base;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.annotation.ColorRes;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.ColorRes;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
@@ -74,7 +71,7 @@ public abstract class XActivity<P extends XPresenter> extends AppCompatActivity 
         loadLayout = new LoadLayout(this);
         bottomBarView = getBottomBarView();
         actionBarView = getActionBarView();
-        loadLayout.setLoadView(R.layout.layout_loading, R.layout.layout_empty, R.layout.layout_error);
+        loadLayout.setLoadView(R.layout.libs_layout_loading, R.layout.libs_layout_empty, R.layout.libs_layout_error);
         loadLayout.setContentView(layoutId);
         loadLayout.setOnLoadingClickListener(new LoadLayout.OnLoadClickListener() {
             @Override
