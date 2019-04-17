@@ -1,19 +1,12 @@
 package me.ibore.libs.base;
 
 import androidx.annotation.NonNull;
-
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 import me.ibore.libs.util.DisposablesUtils;
 
-/**
- * description:
- * author: Ibore Xie
- * date: 2018-01-18 23:52
- * website: ibore.me
- */
-public abstract class XPresenter<V extends XView> {
+public abstract class MvpPresenter<V extends MvpView> {
 
     protected final V getView() {
         return mView;

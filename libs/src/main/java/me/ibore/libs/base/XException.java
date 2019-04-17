@@ -17,5 +17,4 @@ public class XException extends RuntimeException {
         super(cause);
     }
 
-
 }

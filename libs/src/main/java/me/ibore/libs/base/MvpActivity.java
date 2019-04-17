@@ -12,36 +12,26 @@ import java.util.List;
 
 import androidx.annotation.ColorRes;
 import androidx.annotation.DrawableRes;
-import androidx.annotation.LayoutRes;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import io.reactivex.Observable;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.observers.DisposableObserver;
 import me.ibore.libs.R;
 import me.ibore.libs.manager.ActivityManager;
 import me.ibore.libs.rxbus.RxBus;
 import me.ibore.libs.util.BarUtils;
-import me.ibore.libs.util.DisposablesUtils;
+import me.ibore.libs.util.ClassUtils;
 import me.ibore.widget.LoadLayout;
 
-/**
- * description:
- * author: Ibore Xie
- * date: 2018-01-18 23:50
- * website: ibore.me
- */
-
-public abstract class XActivity extends AppCompatActivity {
+public abstract class MvpActivity<P extends MvpPresenter> extends AppCompatActivity implements MvpView {
 
     protected LoadLayout loadLayout;
     protected ViewGroup rootView;
     protected View actionBarView;
     protected View bottomBarView;
+    protected P mPresenter;
     private Unbinder unbinder;
 
     protected abstract int getLayoutId();
@@ -66,6 +56,8 @@ public abstract class XActivity extends AppCompatActivity {
         setContentView(getLayoutView(getLayoutId()));
         unbinder = ButterKnife.bind(this);
         onBindView(savedInstanceState);
+        mPresenter = ClassUtils.getClass(this, 0);
+        if (mPresenter != null) mPresenter.onAttach(this);
         RxBus.get().register(this);
         onBindData();
     }
@@ -89,10 +81,8 @@ public abstract class XActivity extends AppCompatActivity {
         });
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        if (null != actionBarView)
-            layoutParams.addRule(RelativeLayout.BELOW, actionBarView.getId());
-        if (null != bottomBarView)
-            layoutParams.addRule(RelativeLayout.ABOVE, bottomBarView.getId());
+        if (null != actionBarView) layoutParams.addRule(RelativeLayout.BELOW, actionBarView.getId());
+        if (null != bottomBarView) layoutParams.addRule(RelativeLayout.ABOVE, bottomBarView.getId());
         loadLayout.setLayoutParams(layoutParams);
         rootView.addView(loadLayout);
         if (null != bottomBarView) rootView.addView(bottomBarView);
@@ -103,15 +93,23 @@ public abstract class XActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         RxBus.get().unRegister(this);
+        if (mPresenter != null) mPresenter.onDetach();
         unbinder.unbind();
         super.onDestroy();
     }
 
-    protected final void setLoadLayout(@LayoutRes int loadingViewResId, @LayoutRes int emptyViewResId, @LayoutRes int errorViewResId) {
-        loadLayout.setLoadView(loadingViewResId, emptyViewResId, errorViewResId);
+    @Override
+    public Activity getActivity() {
+        return this;
     }
 
-    protected final LoadLayout loadLayout() {
+    @Override
+    public Context getContext() {
+        return getApplicationContext();
+    }
+
+    @Override
+    public LoadLayout loadLayout() {
         return loadLayout;
     }
 
@@ -119,32 +117,13 @@ public abstract class XActivity extends AppCompatActivity {
         return ContextCompat.getColor(getContext(), colorId);
     }
 
-    protected final Drawable getDrawableX(@DrawableRes int drawableId) {
-        return ContextCompat.getDrawable(getContext(), drawableId);
-    }
-
     protected final String getStringX(int stringId) {
         return getContext().getString(stringId);
     }
 
-    protected final Activity getActivity() {
-        return this;
-    }
 
-    protected final Context getContext() {
-        return getApplicationContext();
-    }
-
-    protected final Disposable addDisposable(Disposable disposable) {
-        return DisposablesUtils.add(this, disposable);
-    }
-
-    protected final Disposable addDisposable(Observable observable, DisposableObserver observer) {
-        return DisposablesUtils.add(this, observable, observer);
-    }
-
-    protected final boolean removeDisposable(Disposable disposable) {
-        return DisposablesUtils.remove(this, disposable);
+    protected final Drawable getDrawableX(@DrawableRes int drawableId) {
+        return ContextCompat.getDrawable(getContext(), drawableId);
     }
 
     @Override
@@ -156,5 +135,6 @@ public abstract class XActivity extends AppCompatActivity {
             }
         }
     }
+
 }
 

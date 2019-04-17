@@ -1,6 +1,6 @@
 package me.ibore.libs.base;
 
-import android.app.Dialog;
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -9,6 +9,7 @@ import android.view.WindowManager;
 
 import androidx.annotation.ColorRes;
 import androidx.annotation.DrawableRes;
+import androidx.appcompat.app.AppCompatDialog;
 import androidx.core.content.ContextCompat;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -25,7 +26,7 @@ import me.ibore.libs.util.DisposablesUtils;
  * website: ibore.me
  */
 
-public abstract class XDialog extends Dialog {
+public abstract class XDialog extends AppCompatDialog {
 
     public XDialog(Context context) {
         this(context, 0);
@@ -34,10 +35,6 @@ public abstract class XDialog extends Dialog {
     public XDialog(Context context, int themeResId) {
         super(context, themeResId);
     }
-
-    protected abstract int getLayoutId();
-
-    protected abstract void onBindView(Bundle savedInstanceState);
 
     private Unbinder unBinder;
 
@@ -48,7 +45,14 @@ public abstract class XDialog extends Dialog {
         unBinder = ButterKnife.bind(this);
         onBindView(savedInstanceState);
         RxBus.get().register(this);
+        onBindData();
     }
+
+    protected abstract int getLayoutId();
+
+    protected abstract void onBindView(Bundle savedInstanceState);
+
+    protected void onBindData() { }
 
     @Override
     public void dismiss() {
@@ -87,6 +91,14 @@ public abstract class XDialog extends Dialog {
 
     protected final int getColorX(@ColorRes int colorId) {
         return ContextCompat.getColor(getContext(), colorId);
+    }
+
+    protected final String getStringX(int stringId) {
+        return getContext().getString(stringId);
+    }
+
+    protected final Activity getActivity() {
+        return (Activity) getContext();
     }
 
     protected final Drawable getDrawableX(@DrawableRes int drawableId) {

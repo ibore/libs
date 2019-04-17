@@ -2,16 +2,16 @@ package me.ibore.libs.base;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import androidx.annotation.ColorRes;
-import androidx.annotation.DrawableRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.core.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.ColorRes;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import io.reactivex.Observable;
@@ -95,6 +95,10 @@ public abstract class XFragment extends Fragment {
 
     protected final int getColorX(@ColorRes int colorId) {
         return ContextCompat.getColor(getContext(), colorId);
+    }
+
+    protected final String getStringX(int stringId) {
+        return getContext().getString(stringId);
     }
 
     protected final Drawable getDrawableX(@DrawableRes int drawableId) {
