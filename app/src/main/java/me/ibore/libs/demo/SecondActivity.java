@@ -23,7 +23,7 @@ public class SecondActivity extends AppCompatActivity {
         tv_bus = findViewById(R.id.tv_bus);
     }
 
-    @Subscribe(code = 2, threadMode = ThreadMode.MAIN, sticky = true)
+    @Subscribe(code = 2, threadMode = ThreadMode.MAIN)
     public void test(Test test) {
         LogUtils.d("22222222222222222");
         ToastUtils.showShort(test.getTest());

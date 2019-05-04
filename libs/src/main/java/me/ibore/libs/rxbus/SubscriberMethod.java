@@ -16,15 +16,13 @@ class SubscriberMethod {
     Class<?> eventType;
     Object subscriber;
     public int code;
-    public boolean sticky;
 
-    SubscriberMethod(Object subscriber, Method method, Class<?> eventType, int code, ThreadMode threadMode, boolean sticky) {
+    SubscriberMethod(Object subscriber, Method method, Class<?> eventType, int code, ThreadMode threadMode) {
         this.method = method;
         this.threadMode = threadMode;
         this.eventType = eventType;
         this.subscriber = subscriber;
         this.code = code;
-        this.sticky = sticky;
     }
 
 
@@ -57,7 +55,6 @@ class SubscriberMethod {
                 ", eventType=" + eventType +
                 ", subscriber=" + subscriber +
                 ", code=" + code +
-                ", sticky=" + sticky +
                 '}';
     }
 }

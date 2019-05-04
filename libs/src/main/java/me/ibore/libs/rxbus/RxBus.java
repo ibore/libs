@@ -1,15 +1,11 @@
 package me.ibore.libs.rxbus;
 
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
@@ -31,7 +27,6 @@ import io.reactivex.subjects.Subject;
  */
 
 public class RxBus {
-
     private static volatile RxBus defaultInstance;
 
     private Map<Class, List<Disposable>> subscriptionsByEventType = new HashMap<>();
@@ -39,9 +34,6 @@ public class RxBus {
     private Map<Object, List<Class>> eventTypesBySubscriber = new HashMap<>();
 
     private Map<Class, List<SubscriberMethod>> subscriberMethodByEventType = new HashMap<>();
-
-    /*stick数据*/
-    private final Map<Class<?>, Object> stickyEvent = new ConcurrentHashMap<>();
 
     private final Subject<Object> bus;
 
@@ -95,26 +87,6 @@ public class RxBus {
     }
 
     /**
-     * 根据传递的 eventType 类型返回特定类型(eventType)的 被观察者
-     */
-    public <T> Flowable<T> toFlowableSticky(final Class<T> eventType) {
-        synchronized (stickyEvent) {
-            Flowable<T> flowable = bus.toFlowable(BackpressureStrategy.BUFFER).ofType(eventType);
-            final Object event = stickyEvent.get(eventType);
-            if (event != null) {
-                return flowable.mergeWith(new Publisher<T>() {
-                    @Override
-                    public void subscribe(Subscriber<? super T> s) {
-                        s.onNext(eventType.cast(event));
-                    }
-                });
-            } else {
-                return flowable;
-            }
-        }
-    }
-
-    /**
      * 注册
      *
      * @param subscriber 订阅者
@@ -126,50 +98,33 @@ public class RxBus {
             if (method.isAnnotationPresent(Subscribe.class)) {
                 //获得参数类型
                 Class[] parameterType = method.getParameterTypes();
-                Class eventType = null;
                 //参数不为空 且参数个数为1
                 if (parameterType != null && parameterType.length == 1) {
-                    eventType = parameterType[0];
-                } else if (parameterType == null || parameterType.length == 0) {
-                    eventType = BusData.class;
-                }
-                if (null != eventType) {
+                    Class eventType = parameterType[0];
                     addEventTypeToMap(subscriber, eventType);
                     Subscribe sub = method.getAnnotation(Subscribe.class);
                     int code = sub.code();
                     ThreadMode threadMode = sub.threadMode();
-                    boolean sticky = sub.sticky();
-                    SubscriberMethod subscriberMethod = new SubscriberMethod(subscriber, method, eventType, code, threadMode, sticky);
-                    if (isAdd(eventType, subscriberMethod)) {
-                        addSubscriberToMap(eventType, subscriberMethod);
-                        addSubscriber(subscriberMethod);
-                    }
-                }
-            }
-        }
-    }
 
-    /**
-     * 检查是否已经添加过sub事件
-     *
-     * @param eventType
-     * @param subscriberMethod
-     * @return
-     */
-    private boolean isAdd(Class eventType, SubscriberMethod subscriberMethod) {
-        boolean resulte = true;
-        List<SubscriberMethod> subscriberMethods = subscriberMethodByEventType.get(eventType);
-        if (subscriberMethods != null && subscriberMethods.size() > 0) {
-            for (SubscriberMethod subscriberMethod1 : subscriberMethods) {
-                if (subscriberMethod1.code == subscriberMethod.code && subscriberMethod.subscriber == subscriberMethod1.subscriber) {
-                    resulte = false;
-                }
-                if (subscriberMethod1.eventType == subscriberMethod.eventType && subscriberMethod.subscriber == subscriberMethod1.subscriber) {
-                    resulte = false;
+                    SubscriberMethod subscriberMethod = new SubscriberMethod(subscriber, method, eventType, code, threadMode);
+                    addSubscriberToMap(eventType, subscriberMethod);
+
+                    addSubscriber(subscriberMethod);
+                } else if (parameterType == null || parameterType.length == 0) {
+                    Class eventType = Message.class;
+                    addEventTypeToMap(subscriber, eventType);
+                    Subscribe sub = method.getAnnotation(Subscribe.class);
+                    int code = sub.code();
+                    ThreadMode threadMode = sub.threadMode();
+
+                    SubscriberMethod subscriberMethod = new SubscriberMethod(subscriber, method, eventType, code, threadMode);
+                    addSubscriberToMap(eventType, subscriberMethod);
+
+                    addSubscriber(subscriberMethod);
+
                 }
             }
         }
-        return resulte;
     }
 
 
@@ -185,6 +140,7 @@ public class RxBus {
             eventTypes = new ArrayList<>();
             eventTypesBySubscriber.put(subscriber, eventTypes);
         }
+
         if (!eventTypes.contains(eventType)) {
             eventTypes.add(eventType);
         }
@@ -202,6 +158,7 @@ public class RxBus {
             subscriberMethods = new ArrayList<>();
             subscriberMethodByEventType.put(eventType, subscriberMethods);
         }
+
         if (!subscriberMethods.contains(subscriberMethod)) {
             subscriberMethods.add(subscriberMethod);
         }
@@ -219,6 +176,7 @@ public class RxBus {
             disposables = new ArrayList<>();
             subscriptionsByEventType.put(eventType, disposables);
         }
+
         if (!disposables.contains(disposable)) {
             disposables.add(disposable);
         }
@@ -231,19 +189,13 @@ public class RxBus {
      */
     @SuppressWarnings("unchecked")
     private void addSubscriber(final SubscriberMethod subscriberMethod) {
-
         Flowable flowable;
-        if (subscriberMethod.sticky) {
-            flowable = toFlowableSticky(subscriberMethod.eventType);
+        if (subscriberMethod.code == -1) {
+            flowable = toFlowable(subscriberMethod.eventType);
         } else {
-            if (subscriberMethod.code == -1) {
-                flowable = toFlowable(subscriberMethod.eventType);
-            } else {
-                flowable = toFlowable(subscriberMethod.code, subscriberMethod.eventType);
-            }
+            flowable = toFlowable(subscriberMethod.code, subscriberMethod.eventType);
         }
-
-        Disposable subscription = postToObservable(flowable, subscriberMethod)
+        Disposable subscription = postToFlowable(flowable, subscriberMethod)
                 .subscribe(new Consumer<Object>() {
                     @Override
                     public void accept(Object o) throws Exception {
@@ -261,15 +213,17 @@ public class RxBus {
      * @param subscriberMethod d
      * @return Observable
      */
-    private Flowable postToObservable(Flowable observable, SubscriberMethod subscriberMethod) {
+    private Flowable postToFlowable(Flowable observable, SubscriberMethod subscriberMethod) {
         Scheduler scheduler;
         switch (subscriberMethod.threadMode) {
             case MAIN:
                 scheduler = AndroidSchedulers.mainThread();
                 break;
+
             case NEW_THREAD:
                 scheduler = Schedulers.newThread();
                 break;
+
             case CURRENT_THREAD:
                 scheduler = Schedulers.trampoline();
                 break;
@@ -354,24 +308,6 @@ public class RxBus {
         }
     }
 
-    /**
-     * 移除指定eventType的Sticky事件
-     */
-    public <T> T removeStickyEvent(Class<T> eventType) {
-        synchronized (stickyEvent) {
-            return eventType.cast(stickyEvent.remove(eventType));
-        }
-    }
-
-    /**
-     * 移除所有的Sticky事件
-     */
-    public void removeAllStickyEvents() {
-        synchronized (stickyEvent) {
-            stickyEvent.clear();
-        }
-    }
-
     public void send(int code, Object o) {
         bus.onNext(new Message(code, o));
     }
@@ -380,15 +316,8 @@ public class RxBus {
         bus.onNext(o);
     }
 
-    public void sendSticky(Object o) {
-        synchronized (stickyEvent) {
-            stickyEvent.put(o.getClass(), o);
-        }
-        bus.onNext(o);
-    }
-
     public void send(int code) {
-        bus.onNext(new Message(code, new BusData()));
+        bus.onNext(new Message(code, new Message()));
     }
 
     private class Message {
@@ -417,35 +346,6 @@ public class RxBus {
 
         public void setObject(Object object) {
             this.object = object;
-        }
-    }
-
-    public class BusData {
-
-        private String id = "1";
-        private String status;
-
-        public BusData() {}
-
-        public BusData(String id, String status) {
-            this.id = id;
-            this.status = status;
-        }
-
-        public String getId() {
-            return id;
-        }
-
-        public void setId(String id) {
-            this.id = id;
-        }
-
-        public String getStatus() {
-            return status;
-        }
-
-        public void setStatus(String status) {
-            this.status = status;
         }
     }
 

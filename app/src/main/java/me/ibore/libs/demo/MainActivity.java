@@ -22,16 +22,17 @@ public class MainActivity extends XActivity {
     @Override
     protected void onBindView(@Nullable Bundle savedInstanceState) {
         BarUtils.addMarginTopEqualStatusBarHeight(getWindow());
+
+    }
+
+    @Override
+    protected void onBindData() {
         HomeFragment homeFragment = new HomeFragment();
         homeFragment.onDestroy();
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.fragment, new HomeFragment())
                 .commit();
-    }
-
-    @Override
-    protected void onBindData() {
         /*addDisposable(XHttp.download(
                 "http://shouji.360tpcdn.com/190429/6555c2813e90cb0e18a8cd418852080a/com.qihoo.appstore_300080086.apk",
                 XHttp.getClient(), getCacheDir(), progress -> {
@@ -57,10 +58,16 @@ public class MainActivity extends XActivity {
         LogUtils.d("wwwwwwwwwwwwwww");
     }
 
-
     @Subscribe(code = 22, threadMode = ThreadMode.MAIN)
-    public void sssss() {
-        ToastUtils.showShort("3333333333333333");
-        LogUtils.d("333333333333333333333");
+    public void ss(Test test) {
+        ToastUtils.showShort("dfffffffffffffffff");
+        LogUtils.d("fffffffffffffffffff");
+    }
+
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void sssss(String test) {
+        ToastUtils.showShort(test);
+        LogUtils.d(test);
     }
 }

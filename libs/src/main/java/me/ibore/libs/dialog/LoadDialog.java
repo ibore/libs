@@ -2,6 +2,7 @@ package me.ibore.libs.dialog;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -15,18 +16,20 @@ public class LoadDialog extends XDialog {
     private String tipText;
 
     public LoadDialog(Context context) {
-        super(context);
-        this.tipText = context.getString(R.string.libs_dialog_tip_text);
+        this(context, null);
     }
 
     public LoadDialog(Context context, @StringRes int tipTextId) {
-        super(context);
-        this.tipText = context.getString(tipTextId);
+        this(context, context.getString(tipTextId));
     }
 
     public LoadDialog(Context context, String tipText) {
         super(context);
-        this.tipText = tipText;
+        if (TextUtils.isEmpty(tipText)) {
+            this.tipText = context.getString(R.string.libs_dialog_tip_text);
+        } else {
+            this.tipText = tipText;
+        }
     }
 
     @Override

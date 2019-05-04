@@ -22,6 +22,6 @@ public @interface Subscribe {
 
     ThreadMode threadMode() default ThreadMode.CURRENT_THREAD;
 
-    boolean sticky() default false;
+    //boolean sticky() default false;
 
 }
