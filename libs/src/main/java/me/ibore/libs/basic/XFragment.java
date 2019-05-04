@@ -22,6 +22,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 import me.ibore.libs.rxbus.RxBus;
 import me.ibore.libs.util.DisposablesUtils;
+import me.ibore.libs.util.HandleBackUtils;
 
 /**
  * description:
@@ -30,7 +31,7 @@ import me.ibore.libs.util.DisposablesUtils;
  * website: ibore.me
  */
 
-public abstract class XFragment extends Fragment {
+public abstract class XFragment extends Fragment implements HandleBackUtils.HandleBackInterface {
 
     private boolean isPrepared;
     private boolean isVisible;
@@ -94,8 +95,9 @@ public abstract class XFragment extends Fragment {
         super.onDestroyView();
     }
 
-    public Boolean onBackPressed() {
-        return false;
+    @Override
+    public boolean onBackPressed() {
+        return HandleBackUtils.handleBackPress(this);
     }
 
     protected final XActivity getXActivity() {

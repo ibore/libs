@@ -27,9 +27,9 @@ public class HomeFragment extends XFragment {
         LogUtils.d("---------------");
     }
 
-    /*@Override
-    public Boolean onBackPressed() {
-        LogUtils.d("拦截返回按钮");
-        return false;
-    }*/
+    @Override
+    public boolean onBackPressed() {
+        LogUtils.d("dddddddddddddddd");
+        return super.onBackPressed();
+    }
 }

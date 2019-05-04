@@ -174,11 +174,11 @@ public final class GsonUtils {
         return GSON.fromJson(jsonStr, type);
     }
 
-    public static Object json2Bean(String jsonStr, Class<?> cl) {
-        return GSON.fromJson(jsonStr, cl);
+    public static  <T> T json2Bean(String jsonStr, Class<?> cl) {
+        return (T) GSON.fromJson(jsonStr, cl);
     }
 
-    public static Object json2Bean(String jsonStr, Type type) {
+    public static  <T> T json2Bean(String jsonStr, Type type) {
         return GSON.fromJson(jsonStr, type);
     }
 

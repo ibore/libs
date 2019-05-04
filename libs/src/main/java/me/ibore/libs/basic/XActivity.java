@@ -27,6 +27,7 @@ import me.ibore.libs.rxbus.RxBus;
 import me.ibore.libs.util.BarUtils;
 import me.ibore.libs.util.ClassUtils;
 import me.ibore.libs.util.DisposablesUtils;
+import me.ibore.libs.util.HandleBackUtils;
 import me.ibore.widget.LoadLayout;
 
 /**
@@ -165,11 +166,8 @@ public abstract class XActivity<P extends XPresenter> extends AppCompatActivity 
 
     @Override
     public void onBackPressed() {
-        List<Fragment> fragments = getSupportFragmentManager().getFragments();
-        for (Fragment fragment : fragments) {
-            if (fragment instanceof XFragment && ((XFragment) fragment).onBackPressed()) {
-                super.onBackPressed();
-            }
+        if (!HandleBackUtils.handleBackPress(this)) {
+            super.onBackPressed();
         }
     }
 }
