@@ -1,6 +1,6 @@
 package me.ibore.libs.exception;
 
-import me.ibore.libs.base.XException;
+import me.ibore.libs.basic.XException;
 
 public class ServerException extends XException {
 

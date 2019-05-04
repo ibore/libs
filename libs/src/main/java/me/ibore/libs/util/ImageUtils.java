@@ -3,6 +3,7 @@ package me.ibore.libs.util;
  * Created by Administrator on 2018/1/19.
  */
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -43,6 +44,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -630,6 +632,34 @@ public final class ImageUtils {
         } catch (IOException e) {
             e.printStackTrace();
             return -1;
+        }
+    }
+
+    /**
+     * 纠正照片的旋转角度
+     *
+     * @param path
+     */
+    public static void correctImage(String path) {
+
+        String imagePath = path;
+        int degree;
+        if ((degree = getRotateDegree(imagePath)) != 0) {
+            Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
+            if (bitmap == null) {
+                return;
+            }
+            Bitmap resultBitmap = rotate(bitmap, degree, bitmap.getWidth() / 2, bitmap.getHeight() / 2);
+            if (resultBitmap == null) {
+                return;
+            }
+            try {
+                resultBitmap.compress(Bitmap.CompressFormat.JPEG, 100, new FileOutputStream(new File(imagePath)));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (OutOfMemoryError e) {
+                e.printStackTrace();
+            }
         }
     }
 

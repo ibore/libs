@@ -32,6 +32,9 @@ public final class Progress implements Parcelable {
 
     private Object tag;
 
+    public Progress() {
+    }
+
     protected Progress(Parcel in) {
         currentBytes = in.readLong();
         contentLength = in.readLong();
@@ -149,5 +152,18 @@ public final class Progress implements Parcelable {
         dest.writeLong(eachBytes);
         dest.writeLong(usedTime);
         dest.writeByte((byte) (isFinish ? 1 : 0));
+    }
+
+    @Override
+    public String toString() {
+        return "Progress{" +
+                "currentBytes=" + currentBytes +
+                ", contentLength=" + contentLength +
+                ", intervalTime=" + intervalTime +
+                ", eachBytes=" + eachBytes +
+                ", usedTime=" + usedTime +
+                ", isFinish=" + isFinish +
+                ", tag=" + tag +
+                '}';
     }
 }

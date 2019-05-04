@@ -1,9 +1,9 @@
-package me.ibore.libs.base;
+package me.ibore.libs.basic;
 
 import android.app.Application;
+import android.content.Context;
 
 import me.ibore.libs.util.Utils;
-import me.ibore.widget.UIUtils;
 
 /**
  * description:
@@ -13,6 +13,11 @@ import me.ibore.widget.UIUtils;
  */
 
 public class XApplication extends Application {
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+    }
 
     @Override
     public void onCreate() {

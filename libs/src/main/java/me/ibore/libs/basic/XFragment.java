@@ -1,4 +1,4 @@
-package me.ibore.libs.base;
+package me.ibore.libs.basic;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -10,8 +10,11 @@ import androidx.annotation.ColorRes;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentPagerAdapter;
+
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import io.reactivex.Observable;
@@ -38,9 +41,11 @@ public abstract class XFragment extends Fragment {
     protected abstract void onBindView(Bundle savedInstanceState);
 
     /**
-     * 这个是懒加载模式的
+     * 这个是懒加载模式的，只在FragmentPagerAdapter中生效
      */
-    protected void onBindData() { }
+    protected void onBindData() {
+
+    }
 
     private Unbinder unBinder;
 
@@ -91,6 +96,10 @@ public abstract class XFragment extends Fragment {
 
     public Boolean onBackPressed() {
         return true;
+    }
+
+    protected final XActivity getXActivity() {
+        return (XActivity) getActivity();
     }
 
     protected final int getColorX(@ColorRes int colorId) {

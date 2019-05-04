@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="libs_dialog_tip_text">加载中...</string>
+    <string name="libs_dialog_tip_text">加载中…</string>
+    <string name="socket_timeout_exception">连接超时，请稍后再试</string>
+    <string name="connect_exception">连接失败，请稍后再试</string>
+    <string name="io_exception">"网络请求失败，请稍后再试"</string>
+    <string name="ssl_handshake_exception">证书验证失败，请稍后再试</string>
+    <string name="json_parse_exception">解析出错，请稍后再试</string>
+    <string name="client_exception">程序出错了</string>
+    <string name="parameter_cannot_be_null">参数不能为空</string>
+    <string name="file_download_failed">文件下载失败</string>
+    <string name="apply_for_permission">权限申请</string>
 </resources>

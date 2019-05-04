@@ -1,6 +1,6 @@
 package me.ibore.libs.http;
 
-public interface HttpProgressListener {
+public interface ProgressListener {
 
     void onProgress(Progress progress);
 

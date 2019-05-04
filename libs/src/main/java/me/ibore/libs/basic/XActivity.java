@@ -1,6 +1,5 @@
-package me.ibore.libs.base;
+package me.ibore.libs.basic;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -8,30 +7,42 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
-import java.util.List;
-
 import androidx.annotation.ColorRes;
 import androidx.annotation.DrawableRes;
+import androidx.annotation.LayoutRes;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+
+import java.util.List;
+
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableObserver;
 import me.ibore.libs.R;
-import me.ibore.libs.manager.ActivityManager;
 import me.ibore.libs.rxbus.RxBus;
 import me.ibore.libs.util.BarUtils;
 import me.ibore.libs.util.ClassUtils;
+import me.ibore.libs.util.DisposablesUtils;
 import me.ibore.widget.LoadLayout;
 
-public abstract class MvpActivity<P extends MvpPresenter> extends AppCompatActivity implements MvpView {
+/**
+ * description: 基类，请不要继承自它
+ * author: Ibore Xie
+ * date: 2018-01-18 23:50
+ * website: ibore.me
+ */
 
+public abstract class XActivity<P extends XPresenter> extends AppCompatActivity implements XView {
+
+    protected P mPresenter;
     protected LoadLayout loadLayout;
     protected ViewGroup rootView;
     protected View actionBarView;
     protected View bottomBarView;
-    protected P mPresenter;
     private Unbinder unbinder;
 
     protected abstract int getLayoutId();
@@ -51,15 +62,18 @@ public abstract class MvpActivity<P extends MvpPresenter> extends AppCompatActiv
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ActivityManager.getAppManager().addActivity(this);
-        BarUtils.setStatusBarAlpha(this, getColorX(android.R.color.transparent));
+        /*BarUtils.setStatusBarAlpha(this, getColorX(android.R.color.transparent));*/
         setContentView(getLayoutView(getLayoutId()));
         unbinder = ButterKnife.bind(this);
         onBindView(savedInstanceState);
         mPresenter = ClassUtils.getClass(this, 0);
-        if (mPresenter != null) mPresenter.onAttach(this);
+        if (null != mPresenter) mPresenter.onAttach(this);
         RxBus.get().register(this);
         onBindData();
+    }
+
+    protected void onInitData() {
+
     }
 
     protected View getLayoutView(int layoutId) {
@@ -81,8 +95,10 @@ public abstract class MvpActivity<P extends MvpPresenter> extends AppCompatActiv
         });
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        if (null != actionBarView) layoutParams.addRule(RelativeLayout.BELOW, actionBarView.getId());
-        if (null != bottomBarView) layoutParams.addRule(RelativeLayout.ABOVE, bottomBarView.getId());
+        if (null != actionBarView)
+            layoutParams.addRule(RelativeLayout.BELOW, actionBarView.getId());
+        if (null != bottomBarView)
+            layoutParams.addRule(RelativeLayout.ABOVE, bottomBarView.getId());
         loadLayout.setLayoutParams(layoutParams);
         rootView.addView(loadLayout);
         if (null != bottomBarView) rootView.addView(bottomBarView);
@@ -93,13 +109,40 @@ public abstract class MvpActivity<P extends MvpPresenter> extends AppCompatActiv
     @Override
     protected void onDestroy() {
         RxBus.get().unRegister(this);
-        if (mPresenter != null) mPresenter.onDetach();
+        DisposablesUtils.clear(this);
+        if (null != mPresenter) mPresenter.onDetach();
         unbinder.unbind();
         super.onDestroy();
     }
 
+    protected final void setLoadLayout(@LayoutRes int loadingViewResId, @LayoutRes int emptyViewResId, @LayoutRes int errorViewResId) {
+        loadLayout.setLoadView(loadingViewResId, emptyViewResId, errorViewResId);
+    }
+
     @Override
-    public Activity getActivity() {
+    public LoadLayout loadLayout() {
+        return loadLayout;
+    }
+
+    protected int getColorX(@ColorRes int colorId) {
+        return ContextCompat.getColor(getContext(), colorId);
+    }
+
+    protected Drawable getDrawableX(@DrawableRes int drawableId) {
+        return ContextCompat.getDrawable(getContext(), drawableId);
+    }
+
+    protected String getStringX(int stringId) {
+        return getContext().getString(stringId);
+    }
+
+    @Override
+    public XActivity getXActivity() {
+        return this;
+    }
+
+    @Override
+    public AppCompatActivity getActivity() {
         return this;
     }
 
@@ -108,22 +151,16 @@ public abstract class MvpActivity<P extends MvpPresenter> extends AppCompatActiv
         return getApplicationContext();
     }
 
-    @Override
-    public LoadLayout loadLayout() {
-        return loadLayout;
+    protected Disposable addDisposable(Disposable disposable) {
+        return DisposablesUtils.add(this, disposable);
     }
 
-    protected final int getColorX(@ColorRes int colorId) {
-        return ContextCompat.getColor(getContext(), colorId);
+    protected Disposable addDisposable(Observable observable, DisposableObserver observer) {
+        return DisposablesUtils.add(this, observable, observer);
     }
 
-    protected final String getStringX(int stringId) {
-        return getContext().getString(stringId);
-    }
-
-
-    protected final Drawable getDrawableX(@DrawableRes int drawableId) {
-        return ContextCompat.getDrawable(getContext(), drawableId);
+    protected boolean removeDisposable(Disposable disposable) {
+        return DisposablesUtils.remove(this, disposable);
     }
 
     @Override
@@ -135,6 +172,5 @@ public abstract class MvpActivity<P extends MvpPresenter> extends AppCompatActiv
             }
         }
     }
-
 }
 

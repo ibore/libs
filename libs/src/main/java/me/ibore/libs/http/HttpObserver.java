@@ -4,15 +4,21 @@ import android.content.Context;
 
 import com.google.gson.JsonParseException;
 
+import org.json.JSONException;
+
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.SocketTimeoutException;
-import java.util.concurrent.TimeoutException;
+
+import javax.net.ssl.SSLHandshakeException;
 
 import me.ibore.libs.BuildConfig;
-import me.ibore.libs.base.XObserver;
+import me.ibore.libs.R;
+import me.ibore.libs.basic.XObserver;
 import me.ibore.libs.exception.ClientException;
 import me.ibore.libs.exception.HttpException;
 import me.ibore.libs.exception.ServerException;
+import me.ibore.libs.util.Utils;
 import me.ibore.widget.LoadLayout;
 
 public abstract class HttpObserver<T> extends XObserver<T> implements HttpListener<T> {
@@ -49,20 +55,24 @@ public abstract class HttpObserver<T> extends XObserver<T> implements HttpListen
         if (e instanceof retrofit2.HttpException) {
             retrofit2.HttpException he = (retrofit2.HttpException) e;
             onError(new HttpException(he.code(), he.message()));
+        } else if (e instanceof ConnectException) {
+            onError(new HttpException(-1, Utils.getApp().getString(R.string.connect_exception)));
+        }  else if (e instanceof SSLHandshakeException) {
+            onError(new HttpException(-1, Utils.getApp().getString(R.string.ssl_handshake_exception)));
         } else if (e instanceof IOException) {
-            if (e instanceof SocketTimeoutException || e instanceof TimeoutException) {
-                onError(new HttpException(-1, "连接超时，请稍后再试"));
+            if (e instanceof SocketTimeoutException) {
+                onError(new HttpException(-1, Utils.getApp().getString(R.string.socket_timeout_exception)));
             } else {
-                onError(new HttpException(-1, "网络请求失败，请稍后再试"));
+                onError(new HttpException(-1, Utils.getApp().getString(R.string.io_exception)));
             }
-        } else if (e instanceof JsonParseException) {
-            onError(new ClientException("解析出错，工程师正在修复中"));
+        } else if (e instanceof JsonParseException || e instanceof JSONException) {
+            onError(new ClientException(Utils.getApp().getString(R.string.json_parse_exception)));
         } else if (e instanceof ServerException) {
             onError((Exception) e);
         } else if (e instanceof ClientException) {
             onError((Exception) e);
         } else {
-            onError(new ClientException("程序出错了"));
+            onError(new ClientException(Utils.getApp().getString(R.string.client_exception)));
         }
     }
 }

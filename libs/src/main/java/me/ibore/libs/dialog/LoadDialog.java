@@ -8,7 +8,7 @@ import android.widget.TextView;
 
 import androidx.annotation.StringRes;
 import me.ibore.libs.R;
-import me.ibore.libs.base.XDialog;
+import me.ibore.libs.basic.XDialog;
 
 public class LoadDialog extends XDialog {
 

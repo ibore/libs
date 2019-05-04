@@ -3,40 +3,56 @@ package me.ibore.libs.demo;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import me.ibore.libs.rxbus.RxBus;
-import me.ibore.libs.rxbus.Subscribe;
-import me.ibore.libs.rxbus.ThreadMode;
+
+import java.io.File;
+
+import me.ibore.libs.basic.XActivity;
+import me.ibore.libs.demo.fm.HomeFragment;
+import me.ibore.libs.http.HttpObserver;
+import me.ibore.libs.http.XHttp;
+import me.ibore.libs.util.BarUtils;
 import me.ibore.libs.util.LogUtils;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends XActivity {
+
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        RxBus.get().register(this);
-
-        findViewById(R.id.test).setOnClickListener(v -> {
-                    RxBus.get().send(new Test("1111111111"));
-                }
-        );
-    }
-
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void test(Test test) {
-        LogUtils.d("0000000000000");
-        //ToastUtils.showShort("测试");
-        //RxBus.get().send(2);
-        /*RxBus.get().send(new Test("测试2"));
-        Intent intent = new Intent(this, SecondActivity.class);
-        startActivity(intent);*/
+    protected int getLayoutId() {
+        return R.layout.activity_main;
     }
 
     @Override
-    protected void onDestroy() {
-        RxBus.get().unRegister(this);
-        super.onDestroy();
+    protected void onBindView(@Nullable Bundle savedInstanceState) {
+        BarUtils.addMarginTopEqualStatusBarHeight(getWindow());
+        HomeFragment homeFragment = new HomeFragment();
+        homeFragment.onDestroy();
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment, new HomeFragment())
+                .commit();
     }
+
+    @Override
+    protected void onBindData() {
+
+        addDisposable(XHttp.download(
+                "http://shouji.360tpcdn.com/190429/6555c2813e90cb0e18a8cd418852080a/com.qihoo.appstore_300080086.apk",
+                XHttp.getClient(), getCacheDir(), progress -> {
+                    LogUtils.d(progress.percent());
+                }),
+                new HttpObserver<File>() {
+                    @Override
+                    public void onSuccess(File file) {
+                        LogUtils.d(file.getAbsolutePath());
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        e.printStackTrace();
+                    }
+                })
+        ;
+    }
+
+
 }

@@ -1,14 +1,17 @@
-package me.ibore.libs.base;
+package me.ibore.libs.basic;
 
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 
 import androidx.annotation.ColorRes;
 import androidx.annotation.DrawableRes;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDialog;
 import androidx.core.content.ContextCompat;
 import butterknife.ButterKnife;
@@ -34,8 +37,11 @@ public abstract class XDialog extends AppCompatDialog {
 
     public XDialog(Context context, int themeResId) {
         super(context, themeResId);
+        mActivity = (AppCompatActivity) context;
     }
 
+
+    private AppCompatActivity mActivity;
     private Unbinder unBinder;
 
     @Override
@@ -46,6 +52,11 @@ public abstract class XDialog extends AppCompatDialog {
         onBindView(savedInstanceState);
         RxBus.get().register(this);
         onBindData();
+    }
+
+    @Override
+    public void setContentView(View view, ViewGroup.LayoutParams params) {
+        super.setContentView(view, params);
     }
 
     protected abstract int getLayoutId();
@@ -97,8 +108,12 @@ public abstract class XDialog extends AppCompatDialog {
         return getContext().getString(stringId);
     }
 
-    protected final Activity getActivity() {
-        return (Activity) getContext();
+    protected final AppCompatActivity getActivity() {
+        return mActivity;
+    }
+
+    protected final XActivity getXActivity() {
+        return (XActivity) mActivity;
     }
 
     protected final Drawable getDrawableX(@DrawableRes int drawableId) {

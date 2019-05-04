@@ -1,4 +1,4 @@
-package me.ibore.libs.base;
+package me.ibore.libs.basic;
 
 public class XException extends RuntimeException {
 

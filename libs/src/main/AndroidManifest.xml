@@ -5,9 +5,19 @@
 
         <activity
             android:name=".util.PermissionUtils$PermissionActivity"
-            android:label="权限申请"
+            android:label="@string/apply_for_permission"
             android:launchMode="singleTask"
             android:theme="@style/Theme.Libs.Transparent" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
     </application>
 </manifest>

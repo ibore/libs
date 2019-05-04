@@ -14,7 +14,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import me.ibore.libs.util.LogUtils;
-import me.ibore.libs.util.ToastUtils;
 
 import static android.os.Build.VERSION_CODES.M;
 
@@ -29,7 +28,7 @@ import static android.os.Build.VERSION_CODES.M;
 public final class AudioPlayer {
 
     private MediaPlayer mMediaPlayer;
-    private Handler mHander = new Handler();
+    private Handler mHandler = new Handler();
 
     private SeekBar mSeekBar;
     private TextView mCurrentTime;
@@ -145,9 +144,9 @@ public final class AudioPlayer {
     }
 
     public void start() {
-        mHander.removeCallbacks(mProgressRun);
+        mHandler.removeCallbacks(mProgressRun);
         if (mMediaPlayer != null && !isPlaying() && canPlay) {
-            mHander.post(mProgressRun);
+            mHandler.post(mProgressRun);
             if (null != mPlayPause) mPlayPause.setChecked(false);
             if (null != mSeekBar) {
                 if (mSeekBar.getProgress() < mSeekBar.getMax()) {
@@ -163,7 +162,7 @@ public final class AudioPlayer {
     }
 
     public void pause() {
-        mHander.removeCallbacks(mProgressRun);
+        mHandler.removeCallbacks(mProgressRun);
         if (null != mPlayPause) mPlayPause.setChecked(true);
         if (mMediaPlayer != null && isPlaying()) {
             mMediaPlayer.pause();
@@ -172,7 +171,7 @@ public final class AudioPlayer {
     }
 
     public void release() {
-        mHander.removeCallbacks(mProgressRun);
+        mHandler.removeCallbacks(mProgressRun);
         if (mMediaPlayer != null) {
             mMediaPlayer.release();
             mMediaPlayer = null;
@@ -221,7 +220,7 @@ public final class AudioPlayer {
                 percent = (int) (100 * ((double) getCurrent() / getDuration()));
                 current = getCurrent();
                 total = getDuration();
-                mHander.postDelayed(this, 300);
+                mHandler.postDelayed(this, 300);
             }
             if (null != mListener) mListener.onProgress(percent, current, total);
             upDateProgress((int) (10000 * ((double) getCurrent() / getDuration())), current, total);

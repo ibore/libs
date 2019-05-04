@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.widget.Button;
 
 import butterknife.BindView;
-import me.ibore.libs.base.XDialog;
+import me.ibore.libs.basic.XDialog;
 
 public class TestDialog extends XDialog {
 
