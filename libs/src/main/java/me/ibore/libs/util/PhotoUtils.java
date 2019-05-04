@@ -207,7 +207,7 @@ public final class PhotoUtils {
         void onAttach();
     }
 
-    private static class DelegateFragment extends Fragment {
+    public static class DelegateFragment extends Fragment {
         private final int REQUEST_CAPTURE_CAMERA = 0;
         private final int REQUEST_CAPTURE_GALLERY = 1;
         private final int REQUEST_CAPTURE_CAMERA_AND_CROP = 2;
