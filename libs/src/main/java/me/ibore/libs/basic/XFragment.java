@@ -95,7 +95,7 @@ public abstract class XFragment extends Fragment {
     }
 
     public Boolean onBackPressed() {
-        return true;
+        return false;
     }
 
     protected final XActivity getXActivity() {

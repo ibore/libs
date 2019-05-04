@@ -4,17 +4,15 @@ import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 
-import java.io.File;
-
 import me.ibore.libs.basic.XActivity;
 import me.ibore.libs.demo.fm.HomeFragment;
-import me.ibore.libs.http.HttpObserver;
-import me.ibore.libs.http.XHttp;
+import me.ibore.libs.rxbus.Subscribe;
+import me.ibore.libs.rxbus.ThreadMode;
 import me.ibore.libs.util.BarUtils;
 import me.ibore.libs.util.LogUtils;
+import me.ibore.libs.util.ToastUtils;
 
 public class MainActivity extends XActivity {
-
 
     @Override
     protected int getLayoutId() {
@@ -34,8 +32,7 @@ public class MainActivity extends XActivity {
 
     @Override
     protected void onBindData() {
-
-        addDisposable(XHttp.download(
+        /*addDisposable(XHttp.download(
                 "http://shouji.360tpcdn.com/190429/6555c2813e90cb0e18a8cd418852080a/com.qihoo.appstore_300080086.apk",
                 XHttp.getClient(), getCacheDir(), progress -> {
                     LogUtils.d(progress.percent());
@@ -50,9 +47,20 @@ public class MainActivity extends XActivity {
                     public void onError(Exception e) {
                         e.printStackTrace();
                     }
-                })
-        ;
+                });*/
     }
 
 
+    @Subscribe(code = 11, threadMode = ThreadMode.MAIN)
+    public void ss() {
+        ToastUtils.showShort("dddddddddd");
+        LogUtils.d("wwwwwwwwwwwwwww");
+    }
+
+
+    @Subscribe(code = 22, threadMode = ThreadMode.MAIN)
+    public void sssss() {
+        ToastUtils.showShort("3333333333333333");
+        LogUtils.d("333333333333333333333");
+    }
 }
