@@ -13,9 +13,6 @@ import androidx.annotation.LayoutRes;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-
-import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -24,7 +21,6 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 import me.ibore.libs.R;
 import me.ibore.libs.rxbus.RxBus;
-import me.ibore.libs.util.BarUtils;
 import me.ibore.libs.util.ClassUtils;
 import me.ibore.libs.util.DisposablesUtils;
 import me.ibore.libs.util.HandleBackUtils;

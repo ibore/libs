@@ -1,7 +1,4 @@
 package me.ibore.libs.util;
-/**
- * Created by Administrator on 2018/1/19.
- */
 
 import android.os.Environment;
 
@@ -9,13 +6,14 @@ import java.io.File;
 
 /**
  * <pre>
- * description:
- * author: Ibore Xie
- * date: 2018/1/19 13:57
- * website: ibore.me
+ *     author: Blankj
+ *     blog  : http://blankj.com
+ *     time  : 2016/09/27
+ *     desc  : utils about clean
  * </pre>
  */
 public final class CleanUtils {
+
     private CleanUtils() {
         throw new UnsupportedOperationException("u can't instantiate me...");
     }
@@ -161,5 +159,4 @@ public final class CleanUtils {
         }
         return true;
     }
-
 }

@@ -2,8 +2,6 @@ package me.ibore.libs.util;
 
 import java.lang.reflect.ParameterizedType;
 
-import me.ibore.libs.BuildConfig;
-
 /**
  * description:
  * author: Ibore Xie

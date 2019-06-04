@@ -29,7 +29,7 @@ public final class XHttp {
 
     private static OkHttpClient okHttpClient;
 
-    public static synchronized OkHttpClient getDefaultClient() {
+    public static synchronized OkHttpClient getClient() {
         if (null == okHttpClient) {
             synchronized (XHttp.class) {
                 okHttpClient = new OkHttpClient.Builder()
@@ -49,58 +49,54 @@ public final class XHttp {
 
     public static Observable<File> download(String url, OkHttpClient client, String tempFilePath, ProgressListener listener) {
         return Observable.create(emitter -> {
-            emitter.onNext(downloads(url, client, tempFilePath, listener));
-            emitter.onComplete();
-        });
-    }
-
-    public static File downloads(String url, OkHttpClient client, String tempFilePath, ProgressListener listener) throws IOException {
-        if (TextUtils.isEmpty(url) || TextUtils.isEmpty(tempFilePath)) {
-            throw new ClientException(Utils.getApp().getString(R.string.libs_parameter_cannot_be_null));
-        }
-        Request request = new Request.Builder()
-                .get()
-                .url(url)
-                .build();
-        Response response = client.newCall(request).execute();
-        ProgressResponseBody progressResponseBody = ProgressResponseBody.create(response.body(), listener, true, UI_REFRESH_TIME);
-        BufferedSink sink = null;
-        Buffer buffer = null;
-        BufferedSource source = null;
-        if (response.isSuccessful()) {
-            try {
-                File tempFile = new File(tempFilePath);
-                Progress progress = new Progress();
-                progress.setContentLength(progressResponseBody.contentLength());
-                if (tempFile.length() == progress.getContentLength()) {
-                    progress.setEachBytes(0L);
-                    progress.setCurrentBytes(progress.getContentLength());
-                    progress.setIntervalTime(0L);
-                    progress.setUsedTime(0L);
-                    progress.setFinish(true);
-                    XHttp.runOnUiThread(() -> listener.onProgress(progress));
-                } else {
-                    tempFile.createNewFile();
-                    sink = Okio.buffer(Okio.sink(tempFile));
-                    buffer = sink.buffer();
-                    source = progressResponseBody.source();
-                    while (source.read(buffer, 200 * 1024) != -1) {
-                        sink.emit();
-                    }
-                    source.close();
-                    sink.close();
-                }
-                return tempFile;
-            } catch (IOException e) {
-                throw e;
-            } catch (Exception e) {
-                throw new ClientException(Utils.getApp().getString(R.string.libs_file_download_failed), e);
-            } finally {
-                CloseUtils.closeIOQuietly(sink, buffer, source);
+            if (TextUtils.isEmpty(url) || TextUtils.isEmpty(tempFilePath)) {
+                throw new ClientException(Utils.getApp().getString(R.string.parameter_cannot_be_null));
             }
-        } else {
-            throw new HttpException(response.code(), response.message());
-        }
+            Request request = new Request.Builder()
+                    .get()
+                    .url(url)
+                    .build();
+            Response response = client.newCall(request).execute();
+            ProgressResponseBody progressResponseBody = ProgressResponseBody.create(response.body(), listener, true, UI_REFRESH_TIME);
+            BufferedSink sink = null;
+            Buffer buffer = null;
+            BufferedSource source = null;
+            if (response.isSuccessful()) {
+                try {
+                    File tempFile = new File(tempFilePath);
+                    Progress progress = new Progress();
+                    progress.setContentLength(progressResponseBody.contentLength());
+                    if (tempFile.length() == progress.getContentLength()) {
+                        progress.setEachBytes(0L);
+                        progress.setCurrentBytes(progress.getContentLength());
+                        progress.setIntervalTime(0L);
+                        progress.setUsedTime(0L);
+                        progress.setFinish(true);
+                        XHttp.runOnUiThread(() -> listener.onProgress(progress));
+                    } else {
+                        tempFile.createNewFile();
+                        sink = Okio.buffer(Okio.sink(tempFile));
+                        buffer = sink.buffer();
+                        source = progressResponseBody.source();
+                        while (source.read(buffer, 200 * 1024) != -1) {
+                            sink.emit();
+                        }
+                        source.close();
+                        sink.close();
+                    }
+                    emitter.onNext(tempFile);
+                    emitter.onComplete();
+                } catch (IOException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new ClientException(Utils.getApp().getString(R.string.file_download_failed), e);
+                } finally {
+                    CloseUtils.closeIOQuietly(sink, buffer, source);
+                }
+            } else {
+                throw new HttpException(response.code(), response.message());
+            }
+        });
     }
 
     /**

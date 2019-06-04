@@ -15,4 +15,9 @@ public class ServerException extends XException {
         return code;
     }
 
+    @Override
+    public String getMessage() {
+        return code + ":" + super.getMessage();
+    }
+
 }

@@ -317,13 +317,15 @@ public final class PhotoUtils {
             }
             if (requestCode == REQUEST_CAPTURE_CAMERA) {
                 if (photoCallBack != null) {
-                    ImageUtils.correctImage(captureCameraFile.getAbsolutePath());
+                    // TODO 未完成
+                    //ImageUtils.correctImage(captureCameraFile.getAbsolutePath());
                     photoCallBack.onSuccess(captureCameraFile);
                 }
             } else if (requestCode == REQUEST_CAPTURE_GALLERY) {
-                File file = UriUtils.uri2File(data.getData(), MediaStore.Images.Media.DATA);
+                File file = UriUtils.uri2File(data.getData());
                 if (photoCallBack != null) {
-                    ImageUtils.correctImage(file.getAbsolutePath());
+                    // TODO 未完成
+                    //ImageUtils.correctImage(file.getAbsolutePath());
                     photoCallBack.onSuccess(file);
                 }
             } else if (requestCode == REQUEST_CAPTURE_CAMERA_AND_CROP) {

@@ -1,23 +1,20 @@
 package me.ibore.libs.util;
-/**
- * Created by Administrator on 2018/1/19.
- */
 
 import android.annotation.SuppressLint;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Environment;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresPermission;
-import android.util.Log;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -30,13 +27,14 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 /**
  * <pre>
- * description:
- * author: Ibore Xie
- * date: 2018/1/19 14:11
- * website: ibore.me
+ *     author: Blankj
+ *     blog  : http://blankj.com
+ *     time  : 2016/09/27
+ *     desc  : utils about crash
  * </pre>
  */
 public final class CrashUtils {
+
     private static String defaultDir;
     private static String dir;
     private static String versionName;
@@ -46,8 +44,8 @@ public final class CrashUtils {
     @SuppressLint("SimpleDateFormat")
     private static final Format FORMAT   = new SimpleDateFormat("MM-dd HH-mm-ss");
 
-    private static final Thread.UncaughtExceptionHandler DEFAULT_UNCAUGHT_EXCEPTION_HANDLER;
-    private static final Thread.UncaughtExceptionHandler UNCAUGHT_EXCEPTION_HANDLER;
+    private static final UncaughtExceptionHandler DEFAULT_UNCAUGHT_EXCEPTION_HANDLER;
+    private static final UncaughtExceptionHandler UNCAUGHT_EXCEPTION_HANDLER;
 
     private static OnCrashListener sOnCrashListener;
 
@@ -65,7 +63,7 @@ public final class CrashUtils {
         }
         DEFAULT_UNCAUGHT_EXCEPTION_HANDLER = Thread.getDefaultUncaughtExceptionHandler();
 
-        UNCAUGHT_EXCEPTION_HANDLER = new Thread.UncaughtExceptionHandler() {
+        UNCAUGHT_EXCEPTION_HANDLER = new UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(final Thread t, final Throwable e) {
                 if (e == null) {
@@ -89,17 +87,8 @@ public final class CrashUtils {
                         "\nApp VersionName    : " + versionName +
                         "\nApp VersionCode    : " + versionCode +
                         "\n************* Log Head ****************\n\n";
-                sb.append(head);
-                StringWriter sw = new StringWriter();
-                PrintWriter pw = new PrintWriter(sw);
-                e.printStackTrace(pw);
-                Throwable cause = e.getCause();
-                while (cause != null) {
-                    cause.printStackTrace(pw);
-                    cause = cause.getCause();
-                }
-                pw.flush();
-                sb.append(sw.toString());
+                sb.append(head)
+                        .append(ThrowableUtils.getFullStackTrace(e));
                 final String crashInfo = sb.toString();
                 final String fullPath = (dir == null ? defaultDir : dir) + time + ".txt";
                 if (createOrExistsFile(fullPath)) {
@@ -125,18 +114,16 @@ public final class CrashUtils {
 
     /**
      * Initialization.
-     * <p>Must hold
-     * {@code <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}</p>
+     * <p>Must hold {@code <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}</p>
      */
-    @RequiresPermission(WRITE_EXTERNAL_STORAGE)
+    @SuppressLint("MissingPermission")
     public static void init() {
         init("");
     }
 
     /**
      * Initialization
-     * <p>Must hold
-     * {@code <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}</p>
+     * <p>Must hold {@code <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}</p>
      *
      * @param crashDir The directory of saving crash information.
      */
@@ -147,8 +134,7 @@ public final class CrashUtils {
 
     /**
      * Initialization
-     * <p>Must hold
-     * {@code <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}</p>
+     * <p>Must hold {@code <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}</p>
      *
      * @param crashDirPath The directory's path of saving crash information.
      */
@@ -159,20 +145,18 @@ public final class CrashUtils {
 
     /**
      * Initialization
-     * <p>Must hold
-     * {@code <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}</p>
+     * <p>Must hold {@code <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}</p>
      *
      * @param onCrashListener The crash listener.
      */
-    @RequiresPermission(WRITE_EXTERNAL_STORAGE)
+    @SuppressLint("MissingPermission")
     public static void init(final OnCrashListener onCrashListener) {
         init("", onCrashListener);
     }
 
     /**
      * Initialization
-     * <p>Must hold
-     * {@code <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}</p>
+     * <p>Must hold {@code <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}</p>
      *
      * @param crashDir        The directory of saving crash information.
      * @param onCrashListener The crash listener.
@@ -184,8 +168,7 @@ public final class CrashUtils {
 
     /**
      * Initialization
-     * <p>Must hold
-     * {@code <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}</p>
+     * <p>Must hold {@code <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}</p>
      *
      * @param crashDirPath    The directory's path of saving crash information.
      * @param onCrashListener The crash listener.

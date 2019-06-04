@@ -1,10 +1,7 @@
 package me.ibore.libs.util;
-/**
- * Created by Administrator on 2018/1/19.
- */
 
-import android.app.*;
 import android.app.ActivityManager;
+import android.app.AppOpsManager;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
@@ -12,11 +9,11 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.os.Process;
 import android.provider.Settings;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresPermission;
-import android.util.Log;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,14 +25,13 @@ import static android.Manifest.permission.KILL_BACKGROUND_PROCESSES;
 
 /**
  * <pre>
- * description:
- * author: Ibore Xie
- * date: 2018/1/19 14:07
- * website: ibore.me
+ *     author: Blankj
+ *     blog  : http://blankj.com
+ *     time  : 2016/10/18
+ *     desc  : utils about process
  * </pre>
  */
 public final class ProcessUtils {
-
 
     private ProcessUtils() {
         throw new UnsupportedOperationException("u can't instantiate me...");
@@ -51,7 +47,7 @@ public final class ProcessUtils {
     public static String getForegroundProcessName() {
         ActivityManager am =
                 (ActivityManager) Utils.getApp().getSystemService(Context.ACTIVITY_SERVICE);
-        if (am == null) return null;
+        //noinspection ConstantConditions
         List<ActivityManager.RunningAppProcessInfo> pInfo = am.getRunningAppProcesses();
         if (pInfo != null && pInfo.size() > 0) {
             for (ActivityManager.RunningAppProcessInfo aInfo : pInfo) {
@@ -77,20 +73,19 @@ public final class ProcessUtils {
                         pm.getApplicationInfo(Utils.getApp().getPackageName(), 0);
                 AppOpsManager aom =
                         (AppOpsManager) Utils.getApp().getSystemService(Context.APP_OPS_SERVICE);
-                if (aom != null) {
-                    if (aom.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
-                            info.uid,
-                            info.packageName) != AppOpsManager.MODE_ALLOWED) {
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        Utils.getApp().startActivity(intent);
-                    }
-                    if (aom.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
-                            info.uid,
-                            info.packageName) != AppOpsManager.MODE_ALLOWED) {
-                        Log.i("ProcessUtils",
-                                "getForegroundProcessName: refuse to device usage stats.");
-                        return "";
-                    }
+                //noinspection ConstantConditions
+                if (aom.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
+                        info.uid,
+                        info.packageName) != AppOpsManager.MODE_ALLOWED) {
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    Utils.getApp().startActivity(intent);
+                }
+                if (aom.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
+                        info.uid,
+                        info.packageName) != AppOpsManager.MODE_ALLOWED) {
+                    Log.i("ProcessUtils",
+                            "getForegroundProcessName: refuse to device usage stats.");
+                    return "";
                 }
                 UsageStatsManager usageStatsManager = (UsageStatsManager) Utils.getApp()
                         .getSystemService(Context.USAGE_STATS_SERVICE);
@@ -102,7 +97,7 @@ public final class ProcessUtils {
                             .queryUsageStats(UsageStatsManager.INTERVAL_BEST,
                                     beginTime, endTime);
                 }
-                if (usageStatsList == null || usageStatsList.isEmpty()) return null;
+                if (usageStatsList == null || usageStatsList.isEmpty()) return "";
                 UsageStats recentStats = null;
                 for (UsageStats usageStats : usageStatsList) {
                     if (recentStats == null
@@ -120,8 +115,7 @@ public final class ProcessUtils {
 
     /**
      * Return all background processes.
-     * <p>Must hold
-     * {@code <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />}</p>
+     * <p>Must hold {@code <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />}</p>
      *
      * @return all background processes
      */
@@ -129,7 +123,7 @@ public final class ProcessUtils {
     public static Set<String> getAllBackgroundProcesses() {
         ActivityManager am =
                 (ActivityManager) Utils.getApp().getSystemService(Context.ACTIVITY_SERVICE);
-        if (am == null) return Collections.emptySet();
+        //noinspection ConstantConditions
         List<ActivityManager.RunningAppProcessInfo> info = am.getRunningAppProcesses();
         Set<String> set = new HashSet<>();
         if (info != null) {
@@ -142,8 +136,7 @@ public final class ProcessUtils {
 
     /**
      * Kill all background processes.
-     * <p>Must hold
-     * {@code <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />}</p>
+     * <p>Must hold {@code <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />}</p>
      *
      * @return background processes were killed
      */
@@ -151,9 +144,10 @@ public final class ProcessUtils {
     public static Set<String> killAllBackgroundProcesses() {
         ActivityManager am =
                 (ActivityManager) Utils.getApp().getSystemService(Context.ACTIVITY_SERVICE);
-        if (am == null) return Collections.emptySet();
+        //noinspection ConstantConditions
         List<ActivityManager.RunningAppProcessInfo> info = am.getRunningAppProcesses();
         Set<String> set = new HashSet<>();
+        if (info == null) return set;
         for (ActivityManager.RunningAppProcessInfo aInfo : info) {
             for (String pkg : aInfo.pkgList) {
                 am.killBackgroundProcesses(pkg);
@@ -171,8 +165,7 @@ public final class ProcessUtils {
 
     /**
      * Kill background processes.
-     * <p>Must hold
-     * {@code <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />}</p>
+     * <p>Must hold {@code <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />}</p>
      *
      * @param packageName The name of the package.
      * @return {@code true}: success<br>{@code false}: fail
@@ -181,7 +174,7 @@ public final class ProcessUtils {
     public static boolean killBackgroundProcesses(@NonNull final String packageName) {
         ActivityManager am =
                 (ActivityManager) Utils.getApp().getSystemService(Context.ACTIVITY_SERVICE);
-        if (am == null) return false;
+        //noinspection ConstantConditions
         List<ActivityManager.RunningAppProcessInfo> info = am.getRunningAppProcesses();
         if (info == null || info.size() == 0) return true;
         for (ActivityManager.RunningAppProcessInfo aInfo : info) {
@@ -205,7 +198,7 @@ public final class ProcessUtils {
      * @return {@code true}: yes<br>{@code false}: no
      */
     public static boolean isMainProcess() {
-        return Utils.getApp().getPackageName().equals(getCurrentProcessName());
+        return Utils.getApp().getPackageName().equals(Utils.getCurrentProcessName());
     }
 
     /**
@@ -214,18 +207,6 @@ public final class ProcessUtils {
      * @return the name of current process
      */
     public static String getCurrentProcessName() {
-        ActivityManager am = (ActivityManager) Utils.getApp().getSystemService(Context.ACTIVITY_SERVICE);
-        if (am == null) return null;
-        List<ActivityManager.RunningAppProcessInfo> info = am.getRunningAppProcesses();
-        if (info == null || info.size() == 0) return null;
-        int pid = Process.myPid();
-        for (ActivityManager.RunningAppProcessInfo aInfo : info) {
-            if (aInfo.pid == pid) {
-                if (aInfo.processName != null) {
-                    return aInfo.processName;
-                }
-            }
-        }
-        return "";
+        return Utils.getCurrentProcessName();
     }
 }

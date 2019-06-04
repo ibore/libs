@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.StringRes;
+
 import me.ibore.libs.R;
 import me.ibore.libs.basic.XDialog;
 

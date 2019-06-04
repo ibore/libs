@@ -1,7 +1,4 @@
 package me.ibore.libs.constant;
-/**
- * Created by Administrator on 2018/1/19.
- */
 
 import androidx.annotation.IntDef;
 
@@ -10,29 +7,17 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * <pre>
- * description:
- * author: Ibore Xie
- * date: 2018/1/19 14:17
- * website: ibore.me
+ *     author: Blankj
+ *     blog  : http://blankj.com
+ *     time  : 2017/03/13
+ *     desc  : constants of memory
  * </pre>
  */
 public final class MemoryConstants {
 
-    /**
-     * Byte 与 Byte 的倍数
-     */
     public static final int BYTE = 1;
-    /**
-     * KB 与 Byte 的倍数
-     */
     public static final int KB   = 1024;
-    /**
-     * MB 与 Byte 的倍数
-     */
     public static final int MB   = 1048576;
-    /**
-     * GB 与 Byte 的倍数
-     */
     public static final int GB   = 1073741824;
 
     @IntDef({BYTE, KB, MB, GB})

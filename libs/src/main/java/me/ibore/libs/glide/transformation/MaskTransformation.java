@@ -9,11 +9,13 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.Drawable;
 
+import androidx.annotation.NonNull;
+
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 
 import java.security.MessageDigest;
 
-import androidx.annotation.NonNull;
+import me.ibore.libs.glide.internal.Utils;
 
 public class MaskTransformation extends BitmapTransformation {
 
@@ -46,7 +48,7 @@ public class MaskTransformation extends BitmapTransformation {
         Bitmap bitmap = pool.get(width, height, Bitmap.Config.ARGB_8888);
         bitmap.setHasAlpha(true);
 
-        Drawable mask = me.ibore.glide.internal.Utils.getMaskDrawable(context.getApplicationContext(), maskId);
+        Drawable mask = Utils.getMaskDrawable(context.getApplicationContext(), maskId);
 
         Canvas canvas = new Canvas(bitmap);
         mask.setBounds(0, 0, width, height);

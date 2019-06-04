@@ -1,6 +1,5 @@
 package me.ibore.libs.basic;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -14,6 +13,7 @@ import androidx.annotation.DrawableRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDialog;
 import androidx.core.content.ContextCompat;
+
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import io.reactivex.Observable;
@@ -79,12 +79,20 @@ public abstract class XDialog extends AppCompatDialog {
         }
     }
 
-    @Deprecated
     protected final void setFullScreen() {
         if (null != getWindow()) {
             getWindow().setBackgroundDrawable(new ColorDrawable(0x00000000));
             getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT,
                     WindowManager.LayoutParams.WRAP_CONTENT);
+        }
+    }
+
+    protected final void setFullScreen(int gravity) {
+        if (null != getWindow()) {
+            getWindow().setBackgroundDrawable(new ColorDrawable(0x00000000));
+            getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.WRAP_CONTENT);
+            getWindow().setGravity(gravity);
         }
     }
 

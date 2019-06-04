@@ -1,15 +1,5 @@
 package me.ibore.libs.util;
-/**
- * Created by Administrator on 2018/1/19.
- */
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.DrawableRes;
-import androidx.annotation.IntDef;
-import androidx.annotation.IntRange;
-import androidx.annotation.LayoutRes;
-import androidx.annotation.NonNull;
-import com.google.android.material.snackbar.Snackbar;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
@@ -17,16 +7,25 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.IntDef;
+import androidx.annotation.IntRange;
+import androidx.annotation.LayoutRes;
+import androidx.annotation.NonNull;
+
+import com.google.android.material.snackbar.Snackbar;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 
 /**
  * <pre>
- * description:
- * author: Ibore Xie
- * date: 2018/1/19 14:30
- * website: ibore.me
+ *     author: Blankj
+ *     blog  : http://blankj.com
+ *     time  : 2016/10/16
+ *     desc  : utils about snackbar
  * </pre>
  */
 public final class SnackbarUtils {
@@ -188,9 +187,9 @@ public final class SnackbarUtils {
     /**
      * Show the snackbar.
      */
-    public void show() {
+    public Snackbar show() {
         final View view = this.view;
-        if (view == null) return;
+        if (view == null) return null;
         if (messageColor != COLOR_DEFAULT) {
             SpannableString spannableString = new SpannableString(message);
             ForegroundColorSpan colorSpan = new ForegroundColorSpan(messageColor);
@@ -220,6 +219,7 @@ public final class SnackbarUtils {
             snackbar.setAction(actionText, actionListener);
         }
         snackbar.show();
+        return snackbar;
     }
 
     /**

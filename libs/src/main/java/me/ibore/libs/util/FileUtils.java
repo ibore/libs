@@ -1,9 +1,4 @@
 package me.ibore.libs.util;
-/**
- * Created by Administrator on 2018/1/19.
- */
-
-import android.annotation.SuppressLint;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -15,7 +10,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
@@ -24,12 +18,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import javax.net.ssl.HttpsURLConnection;
+
 /**
  * <pre>
- * description:
- * author: Ibore Xie
- * date: 2018/1/19 14:03
- * website: ibore.me
+ *     author: Blankj
+ *     blog  : http://blankj.com
+ *     time  : 2016/05/03
+ *     desc  : utils about file
  * </pre>
  */
 public final class FileUtils {
@@ -513,6 +509,30 @@ public final class FileUtils {
     /**
      * Delete the directory.
      *
+     * @param filePath The path of file.
+     * @return {@code true}: success<br>{@code false}: fail
+     */
+    public static boolean delete(final String filePath) {
+        return delete(getFileByPath(filePath));
+    }
+
+    /**
+     * Delete the directory.
+     *
+     * @param file The file.
+     * @return {@code true}: success<br>{@code false}: fail
+     */
+    public static boolean delete(final File file) {
+        if (file == null) return false;
+        if (file.isDirectory()) {
+            return deleteDir(file);
+        }
+        return deleteFile(file);
+    }
+
+    /**
+     * Delete the directory.
+     *
      * @param dirPath The path of directory.
      * @return {@code true}: success<br>{@code false}: fail
      */
@@ -974,7 +994,7 @@ public final class FileUtils {
         boolean isURL = filePath.matches("[a-zA-z]+://[^\\s]*");
         if (isURL) {
             try {
-                HttpURLConnection conn = (HttpURLConnection) new URL(filePath).openConnection();
+                HttpsURLConnection conn = (HttpsURLConnection) new URL(filePath).openConnection();
                 conn.setRequestProperty("Accept-Encoding", "identity");
                 conn.connect();
                 if (conn.getResponseCode() == 200) {

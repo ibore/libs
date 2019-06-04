@@ -1,9 +1,7 @@
 package me.ibore.libs.util;
-/**
- * Created by Administrator on 2018/1/19.
- */
 
 import android.annotation.SuppressLint;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -13,8 +11,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 
-import me.ibore.libs.constant.TimeConstants;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -23,13 +19,14 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
 import me.ibore.libs.constant.MemoryConstants;
+import me.ibore.libs.constant.TimeConstants;
 
 /**
  * <pre>
- * description:
- * author: Ibore Xie
- * date: 2018/1/19 14:10
- * website: ibore.me
+ *     author: Blankj
+ *     blog  : http://blankj.com
+ *     time  : 2016/08/13
+ *     desc  : utils about convert
  * </pre>
  */
 public final class ConvertUtils {
@@ -406,7 +403,9 @@ public final class ConvertUtils {
     public static String inputStream2String(final InputStream is, final String charsetName) {
         if (is == null || isSpace(charsetName)) return "";
         try {
-            return new String(inputStream2Bytes(is), charsetName);
+            ByteArrayOutputStream baos = input2OutputStream(is);
+            if (baos == null) return "";
+            return baos.toString(charsetName);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             return "";
@@ -582,7 +581,7 @@ public final class ConvertUtils {
      * @return value of px
      */
     public static int dp2px(final float dpValue) {
-        final float scale = Utils.getApp().getResources().getDisplayMetrics().density;
+        final float scale = Resources.getSystem().getDisplayMetrics().density;
         return (int) (dpValue * scale + 0.5f);
     }
 
@@ -593,7 +592,7 @@ public final class ConvertUtils {
      * @return value of dp
      */
     public static int px2dp(final float pxValue) {
-        final float scale = Utils.getApp().getResources().getDisplayMetrics().density;
+        final float scale = Resources.getSystem().getDisplayMetrics().density;
         return (int) (pxValue / scale + 0.5f);
     }
 
@@ -604,7 +603,7 @@ public final class ConvertUtils {
      * @return value of px
      */
     public static int sp2px(final float spValue) {
-        final float fontScale = Utils.getApp().getResources().getDisplayMetrics().scaledDensity;
+        final float fontScale = Resources.getSystem().getDisplayMetrics().scaledDensity;
         return (int) (spValue * fontScale + 0.5f);
     }
 
@@ -615,7 +614,7 @@ public final class ConvertUtils {
      * @return value of sp
      */
     public static int px2sp(final float pxValue) {
-        final float fontScale = Utils.getApp().getResources().getDisplayMetrics().scaledDensity;
+        final float fontScale = Resources.getSystem().getDisplayMetrics().scaledDensity;
         return (int) (pxValue / fontScale + 0.5f);
     }
 

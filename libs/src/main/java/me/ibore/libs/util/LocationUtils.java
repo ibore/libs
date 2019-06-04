@@ -1,9 +1,5 @@
 package me.ibore.libs.util;
-/**
- * Created by Administrator on 2018/1/19.
- */
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Criteria;
@@ -16,18 +12,22 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 
+import androidx.annotation.RequiresPermission;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.content.Context.LOCATION_SERVICE;
 
 /**
  * <pre>
- * description:
- * author: Ibore Xie
- * date: 2018/1/19 15:18
- * website: ibore.me
+ *     author: Blankj
+ *     blog  : http://blankj.com
+ *     time  : 16/11/13
+ *     desc  : 定位相关工具类
  * </pre>
  */
 public final class LocationUtils {
@@ -51,8 +51,8 @@ public final class LocationUtils {
 //     * @param Context
 //     * @param LocationListener
 //     * @return {@code Location}
-//     */
 //
+//    @SuppressLint("MissingPermission")
 //    public static Location getLocation(Context context, LocationListener listener) {
 //        Location location = null;
 //        try {
@@ -104,7 +104,7 @@ public final class LocationUtils {
 //        }
 //
 //        return location;
-//    }
+//    }*/
 
 
     /**
@@ -114,6 +114,7 @@ public final class LocationUtils {
      */
     public static boolean isGpsEnabled() {
         LocationManager lm = (LocationManager) Utils.getApp().getSystemService(LOCATION_SERVICE);
+        //noinspection ConstantConditions
         return lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
 
@@ -124,11 +125,9 @@ public final class LocationUtils {
      */
     public static boolean isLocationEnabled() {
         LocationManager lm = (LocationManager) Utils.getApp().getSystemService(LOCATION_SERVICE);
-        return lm != null
-                && (
-                lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
-                        || lm.isProviderEnabled(LocationManager.GPS_PROVIDER)
-        );
+        //noinspection ConstantConditions
+        return lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+                || lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
 
     /**
@@ -154,28 +153,29 @@ public final class LocationUtils {
      * @param listener    位置刷新的回调接口
      * @return {@code true}: 初始化成功<br>{@code false}: 初始化失败
      */
-    @SuppressLint("MissingPermission")
+    @RequiresPermission(ACCESS_FINE_LOCATION)
     public static boolean register(long minTime, long minDistance, OnLocationChangeListener listener) {
         if (listener == null) return false;
         mLocationManager = (LocationManager) Utils.getApp().getSystemService(LOCATION_SERVICE);
-        mListener = listener;
-        if (!isLocationEnabled()) {
+        //noinspection ConstantConditions
+        if (!mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+                && !mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             Log.d("LocationUtils", "无法定位，请打开定位服务");
             return false;
         }
+        mListener = listener;
         String provider = mLocationManager.getBestProvider(getCriteria(), true);
-        @SuppressLint("MissingPermission") Location location = mLocationManager.getLastKnownLocation(provider);
+        Location location = mLocationManager.getLastKnownLocation(provider);
         if (location != null) listener.getLastKnownLocation(location);
         if (myLocationListener == null) myLocationListener = new MyLocationListener();
         mLocationManager.requestLocationUpdates(provider, minTime, minDistance, myLocationListener);
         return true;
     }
 
-
     /**
      * 注销
      */
-    @SuppressLint("MissingPermission")
+    @RequiresPermission(ACCESS_COARSE_LOCATION)
     public static void unregister() {
         if (mLocationManager != null) {
             if (myLocationListener != null) {
@@ -183,6 +183,9 @@ public final class LocationUtils {
                 myLocationListener = null;
             }
             mLocationManager = null;
+        }
+        if (mListener != null) {
+            mListener = null;
         }
     }
 

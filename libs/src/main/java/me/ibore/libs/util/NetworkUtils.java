@@ -1,7 +1,4 @@
 package me.ibore.libs.util;
-/**
- * Created by Administrator on 2018/1/19.
- */
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -9,10 +6,14 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
-import androidx.annotation.RequiresPermission;
+import android.os.Build;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresPermission;
 
 import java.lang.reflect.Method;
 import java.net.InetAddress;
@@ -33,13 +34,14 @@ import static android.content.Context.WIFI_SERVICE;
 
 /**
  * <pre>
- * description:
- * author: Ibore Xie
- * date: 2018/1/19 14:08
- * website: ibore.me
+ *     author: Blankj
+ *     blog  : http://blankj.com
+ *     time  : 2016/08/02
+ *     desc  : utils about network
  * </pre>
  */
 public final class NetworkUtils {
+
     private NetworkUtils() {
         throw new UnsupportedOperationException("u can't instantiate me...");
     }
@@ -66,8 +68,7 @@ public final class NetworkUtils {
 
     /**
      * Return whether network is connected.
-     * <p>Must hold
-     * {@code <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />}</p>
+     * <p>Must hold {@code <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />}</p>
      *
      * @return {@code true}: connected<br>{@code false}: disconnected
      */
@@ -75,6 +76,67 @@ public final class NetworkUtils {
     public static boolean isConnected() {
         NetworkInfo info = getActiveNetworkInfo();
         return info != null && info.isConnected();
+    }
+
+    /**
+     * Return whether network is available.
+     * <p>Must hold {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
+     *
+     * @param callback The callback.
+     * @return the task
+     */
+    @RequiresPermission(INTERNET)
+    public static Utils.Task<Boolean> isAvailableAsync(@NonNull final Utils.Callback<Boolean> callback) {
+        return Utils.doAsync(new Utils.Task<Boolean>(callback) {
+            @RequiresPermission(INTERNET)
+            @Override
+            public Boolean doInBackground() {
+                return isAvailable();
+            }
+        });
+    }
+
+    /**
+     * Return whether network is available.
+     * <p>Must hold {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
+     *
+     * @return {@code true}: yes<br>{@code false}: no
+     */
+    @RequiresPermission(INTERNET)
+    public static boolean isAvailable() {
+        return isAvailableByDns() || isAvailableByPing(null);
+    }
+
+    /**
+     * Return whether network is available using ping.
+     * <p>Must hold {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
+     * <p>The default ping ip: 223.5.5.5</p>
+     *
+     * @param callback The callback.
+     */
+    @RequiresPermission(INTERNET)
+    public static void isAvailableByPingAsync(final Utils.Callback<Boolean> callback) {
+        isAvailableByPingAsync("", callback);
+    }
+
+    /**
+     * Return whether network is available using ping.
+     * <p>Must hold {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
+     *
+     * @param ip       The ip address.
+     * @param callback The callback.
+     * @return the task
+     */
+    @RequiresPermission(INTERNET)
+    public static Utils.Task<Boolean> isAvailableByPingAsync(final String ip,
+                                                             @NonNull final Utils.Callback<Boolean> callback) {
+        return Utils.doAsync(new Utils.Task<Boolean>(callback) {
+            @RequiresPermission(INTERNET)
+            @Override
+            public Boolean doInBackground() {
+                return isAvailableByPing(ip);
+            }
+        });
     }
 
     /**
@@ -86,7 +148,7 @@ public final class NetworkUtils {
      */
     @RequiresPermission(INTERNET)
     public static boolean isAvailableByPing() {
-        return isAvailableByPing(null);
+        return isAvailableByPing("");
     }
 
     /**
@@ -97,11 +159,9 @@ public final class NetworkUtils {
      * @return {@code true}: yes<br>{@code false}: no
      */
     @RequiresPermission(INTERNET)
-    public static boolean isAvailableByPing(String ip) {
-        if (ip == null || ip.length() <= 0) {
-            ip = "223.5.5.5";// default ping ip
-        }
-        ShellUtils.CommandResult result = ShellUtils.execCmd(String.format("ping -c 1 %s", ip), false);
+    public static boolean isAvailableByPing(final String ip) {
+        final String realIp = TextUtils.isEmpty(ip) ? "223.5.5.5" : ip;
+        ShellUtils.CommandResult result = ShellUtils.execCmd(String.format("ping -c 1 %s", realIp), false);
         boolean ret = result.result == 0;
         if (result.errorMsg != null) {
             Log.d("NetworkUtils", "isAvailableByPing() called" + result.errorMsg);
@@ -110,6 +170,68 @@ public final class NetworkUtils {
             Log.d("NetworkUtils", "isAvailableByPing() called" + result.successMsg);
         }
         return ret;
+    }
+
+    /**
+     * Return whether network is available using domain.
+     * <p>Must hold {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
+     *
+     * @param callback The callback.
+     */
+    @RequiresPermission(INTERNET)
+    public static void isAvailableByDnsAsync(final Utils.Callback<Boolean> callback) {
+        isAvailableByDnsAsync("", callback);
+    }
+
+    /**
+     * Return whether network is available using domain.
+     * <p>Must hold {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
+     *
+     * @param domain   The name of domain.
+     * @param callback The callback.
+     * @return the task
+     */
+    @RequiresPermission(INTERNET)
+    public static Utils.Task isAvailableByDnsAsync(final String domain,
+                                                   @NonNull final Utils.Callback<Boolean> callback) {
+        return Utils.doAsync(new Utils.Task<Boolean>(callback) {
+            @RequiresPermission(INTERNET)
+            @Override
+            public Boolean doInBackground() {
+                return isAvailableByDns(domain);
+            }
+        });
+    }
+
+    /**
+     * Return whether network is available using domain.
+     * <p>Must hold {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
+     *
+     * @return {@code true}: yes<br>{@code false}: no
+     */
+    @RequiresPermission(INTERNET)
+    public static boolean isAvailableByDns() {
+        return isAvailableByDns("");
+    }
+
+    /**
+     * Return whether network is available using domain.
+     * <p>Must hold {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
+     *
+     * @param domain The name of domain.
+     * @return {@code true}: yes<br>{@code false}: no
+     */
+    @RequiresPermission(INTERNET)
+    public static boolean isAvailableByDns(final String domain) {
+        final String realDomain = TextUtils.isEmpty(domain) ? "www.baidu.com" : domain;
+        InetAddress inetAddress;
+        try {
+            inetAddress = InetAddress.getByName(realDomain);
+            return inetAddress != null;
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     /**
@@ -122,44 +244,54 @@ public final class NetworkUtils {
             TelephonyManager tm =
                     (TelephonyManager) Utils.getApp().getSystemService(Context.TELEPHONY_SERVICE);
             if (tm == null) return false;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                return tm.isDataEnabled();
+            }
             @SuppressLint("PrivateApi")
-            Method getMobileDataEnabledMethod = tm.getClass().getDeclaredMethod("getDataEnabled");
+            Method getMobileDataEnabledMethod =
+                    tm.getClass().getDeclaredMethod("getDataEnabled");
             if (null != getMobileDataEnabledMethod) {
                 return (boolean) getMobileDataEnabledMethod.invoke(tm);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("NetworkUtils", "getMobileDataEnabled: ", e);
         }
         return false;
     }
 
     /**
-     * Set mobile data enabled.
+     * Enable or disable mobile data.
      * <p>Must hold {@code android:sharedUserId="android.uid.system"},
      * {@code <uses-permission android:name="android.permission.MODIFY_PHONE_STATE" />}</p>
      *
      * @param enabled True to enabled, false otherwise.
+     * @return {@code true}: success<br>{@code false}: fail
      */
     @RequiresPermission(MODIFY_PHONE_STATE)
-    public static void setMobileDataEnabled(final boolean enabled) {
+    public static boolean setMobileDataEnabled(final boolean enabled) {
         try {
             TelephonyManager tm =
                     (TelephonyManager) Utils.getApp().getSystemService(Context.TELEPHONY_SERVICE);
-            if (tm == null) return;
-            Method setMobileDataEnabledMethod =
+            if (tm == null) return false;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                tm.setDataEnabled(enabled);
+                return false;
+            }
+            Method setDataEnabledMethod =
                     tm.getClass().getDeclaredMethod("setDataEnabled", boolean.class);
-            if (null != setMobileDataEnabledMethod) {
-                setMobileDataEnabledMethod.invoke(tm, enabled);
+            if (null != setDataEnabledMethod) {
+                setDataEnabledMethod.invoke(tm, enabled);
+                return true;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("NetworkUtils", "setMobileDataEnabled: ", e);
         }
+        return false;
     }
 
     /**
      * Return whether using mobile data.
-     * <p>Must hold
-     * {@code <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />}</p>
+     * <p>Must hold {@code <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />}</p>
      *
      * @return {@code true}: yes<br>{@code false}: no
      */
@@ -173,8 +305,7 @@ public final class NetworkUtils {
 
     /**
      * Return whether using 4G.
-     * <p>Must hold
-     * {@code <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />}</p>
+     * <p>Must hold {@code <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />}</p>
      *
      * @return {@code true}: yes<br>{@code false}: no
      */
@@ -188,8 +319,7 @@ public final class NetworkUtils {
 
     /**
      * Return whether wifi is enabled.
-     * <p>Must hold
-     * {@code <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />}</p>
+     * <p>Must hold {@code <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />}</p>
      *
      * @return {@code true}: enabled<br>{@code false}: disabled
      */
@@ -197,13 +327,13 @@ public final class NetworkUtils {
     public static boolean getWifiEnabled() {
         @SuppressLint("WifiManagerLeak")
         WifiManager manager = (WifiManager) Utils.getApp().getSystemService(WIFI_SERVICE);
-        return manager != null && manager.isWifiEnabled();
+        if (manager == null) return false;
+        return manager.isWifiEnabled();
     }
 
     /**
-     * Set wifi enabled.
-     * <p>Must hold
-     * {@code <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />}</p>
+     * Enable or disable wifi.
+     * <p>Must hold {@code <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />}</p>
      *
      * @param enabled True to enabled, false otherwise.
      */
@@ -211,14 +341,14 @@ public final class NetworkUtils {
     public static void setWifiEnabled(final boolean enabled) {
         @SuppressLint("WifiManagerLeak")
         WifiManager manager = (WifiManager) Utils.getApp().getSystemService(WIFI_SERVICE);
-        if (manager == null || enabled == manager.isWifiEnabled()) return;
+        if (manager == null) return;
+        if (enabled == manager.isWifiEnabled()) return;
         manager.setWifiEnabled(enabled);
     }
 
     /**
      * Return whether wifi is connected.
-     * <p>Must hold
-     * {@code <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />}</p>
+     * <p>Must hold {@code <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />}</p>
      *
      * @return {@code true}: connected<br>{@code false}: disconnected
      */
@@ -226,22 +356,40 @@ public final class NetworkUtils {
     public static boolean isWifiConnected() {
         ConnectivityManager cm =
                 (ConnectivityManager) Utils.getApp().getSystemService(Context.CONNECTIVITY_SERVICE);
-        return cm != null
-                && cm.getActiveNetworkInfo() != null
-                && cm.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI;
+        if (cm == null) return false;
+        NetworkInfo ni = cm.getActiveNetworkInfo();
+        return ni != null && ni.getType() == ConnectivityManager.TYPE_WIFI;
     }
 
     /**
      * Return whether wifi is available.
-     * <p>Must hold
-     * {@code <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />},
+     * <p>Must hold {@code <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />},
      * {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
      *
      * @return {@code true}: available<br>{@code false}: unavailable
      */
     @RequiresPermission(allOf = {ACCESS_WIFI_STATE, INTERNET})
     public static boolean isWifiAvailable() {
-        return getWifiEnabled() && isAvailableByPing();
+        return getWifiEnabled() && isAvailable();
+    }
+
+    /**
+     * Return whether wifi is available.
+     * <p>Must hold {@code <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />},
+     * {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
+     *
+     * @param callback The callback.
+     * @return the task
+     */
+    @RequiresPermission(allOf = {ACCESS_WIFI_STATE, INTERNET})
+    public static Utils.Task<Boolean> isWifiAvailableAsync(@NonNull final Utils.Callback<Boolean> callback) {
+        return Utils.doAsync(new Utils.Task<Boolean>(callback) {
+            @RequiresPermission(allOf = {ACCESS_WIFI_STATE, INTERNET})
+            @Override
+            public Boolean doInBackground() {
+                return isWifiAvailable();
+            }
+        });
     }
 
     /**
@@ -252,45 +400,43 @@ public final class NetworkUtils {
     public static String getNetworkOperatorName() {
         TelephonyManager tm =
                 (TelephonyManager) Utils.getApp().getSystemService(Context.TELEPHONY_SERVICE);
-        return tm != null ? tm.getNetworkOperatorName() : "";
+        if (tm == null) return "";
+        return tm.getNetworkOperatorName();
     }
 
     /**
      * Return type of network.
-     * <p>Must hold
-     * {@code <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />}</p>
+     * <p>Must hold {@code <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />}</p>
      *
      * @return type of network
      * <ul>
-     * <li>{@link NetworkUtils.NetworkType#NETWORK_ETHERNET} </li>
-     * <li>{@link NetworkUtils.NetworkType#NETWORK_WIFI    } </li>
-     * <li>{@link NetworkUtils.NetworkType#NETWORK_4G      } </li>
-     * <li>{@link NetworkUtils.NetworkType#NETWORK_3G      } </li>
-     * <li>{@link NetworkUtils.NetworkType#NETWORK_2G      } </li>
-     * <li>{@link NetworkUtils.NetworkType#NETWORK_UNKNOWN } </li>
-     * <li>{@link NetworkUtils.NetworkType#NETWORK_NO      } </li>
+     * <li>{@link NetworkType#NETWORK_ETHERNET} </li>
+     * <li>{@link NetworkType#NETWORK_WIFI    } </li>
+     * <li>{@link NetworkType#NETWORK_4G      } </li>
+     * <li>{@link NetworkType#NETWORK_3G      } </li>
+     * <li>{@link NetworkType#NETWORK_2G      } </li>
+     * <li>{@link NetworkType#NETWORK_UNKNOWN } </li>
+     * <li>{@link NetworkType#NETWORK_NO      } </li>
      * </ul>
      */
     @RequiresPermission(ACCESS_NETWORK_STATE)
     public static NetworkType getNetworkType() {
-        NetworkType netType = NetworkType.NETWORK_NO;
+        if (isEthernet()) {
+            return NetworkType.NETWORK_ETHERNET;
+        }
         NetworkInfo info = getActiveNetworkInfo();
         if (info != null && info.isAvailable()) {
-            if (info.getType() == ConnectivityManager.TYPE_ETHERNET) {
-                netType = NetworkType.NETWORK_ETHERNET;
-            } else if (info.getType() == ConnectivityManager.TYPE_WIFI) {
-                netType = NetworkType.NETWORK_WIFI;
+            if (info.getType() == ConnectivityManager.TYPE_WIFI) {
+                return NetworkType.NETWORK_WIFI;
             } else if (info.getType() == ConnectivityManager.TYPE_MOBILE) {
                 switch (info.getSubtype()) {
-
                     case TelephonyManager.NETWORK_TYPE_GSM:
                     case TelephonyManager.NETWORK_TYPE_GPRS:
                     case TelephonyManager.NETWORK_TYPE_CDMA:
                     case TelephonyManager.NETWORK_TYPE_EDGE:
                     case TelephonyManager.NETWORK_TYPE_1xRTT:
                     case TelephonyManager.NETWORK_TYPE_IDEN:
-                        netType = NetworkType.NETWORK_2G;
-                        break;
+                        return NetworkType.NETWORK_2G;
 
                     case TelephonyManager.NETWORK_TYPE_TD_SCDMA:
                     case TelephonyManager.NETWORK_TYPE_EVDO_A:
@@ -302,38 +448,69 @@ public final class NetworkUtils {
                     case TelephonyManager.NETWORK_TYPE_EVDO_B:
                     case TelephonyManager.NETWORK_TYPE_EHRPD:
                     case TelephonyManager.NETWORK_TYPE_HSPAP:
-                        netType = NetworkType.NETWORK_3G;
-                        break;
+                        return NetworkType.NETWORK_3G;
 
                     case TelephonyManager.NETWORK_TYPE_IWLAN:
                     case TelephonyManager.NETWORK_TYPE_LTE:
-                        netType = NetworkType.NETWORK_4G;
-                        break;
-                    default:
+                        return NetworkType.NETWORK_4G;
 
+                    default:
                         String subtypeName = info.getSubtypeName();
                         if (subtypeName.equalsIgnoreCase("TD-SCDMA")
                                 || subtypeName.equalsIgnoreCase("WCDMA")
                                 || subtypeName.equalsIgnoreCase("CDMA2000")) {
-                            netType = NetworkType.NETWORK_3G;
-                        } else {
-                            netType = NetworkType.NETWORK_UNKNOWN;
+                            return NetworkType.NETWORK_3G;
                         }
-                        break;
                 }
-            } else {
-                netType = NetworkType.NETWORK_UNKNOWN;
             }
         }
-        return netType;
+        return NetworkType.NETWORK_UNKNOWN;
+    }
+
+    /**
+     * Return whether using ethernet.
+     * <p>Must hold
+     * {@code <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />}</p>
+     *
+     * @return {@code true}: yes<br>{@code false}: no
+     */
+    @RequiresPermission(ACCESS_NETWORK_STATE)
+    private static boolean isEthernet() {
+        final ConnectivityManager cm =
+                (ConnectivityManager) Utils.getApp().getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm == null) return false;
+        final NetworkInfo info = cm.getNetworkInfo(ConnectivityManager.TYPE_ETHERNET);
+        if (info == null) return false;
+        NetworkInfo.State state = info.getState();
+        if (null == state) return false;
+        return state == NetworkInfo.State.CONNECTED || state == NetworkInfo.State.CONNECTING;
     }
 
     @RequiresPermission(ACCESS_NETWORK_STATE)
     private static NetworkInfo getActiveNetworkInfo() {
-        ConnectivityManager manager =
+        ConnectivityManager cm =
                 (ConnectivityManager) Utils.getApp().getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (manager == null) return null;
-        return manager.getActiveNetworkInfo();
+        if (cm == null) return null;
+        return cm.getActiveNetworkInfo();
+    }
+
+    /**
+     * Return the ip address.
+     * <p>Must hold {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
+     *
+     * @param useIPv4  True to use ipv4, false otherwise.
+     * @param callback The callback.
+     * @return the task
+     */
+    public static Utils.Task<String> getIPAddressAsync(final boolean useIPv4,
+                                                       @NonNull final Utils.Callback<String> callback) {
+        return Utils.doAsync(new Utils.Task<String>(callback) {
+            @RequiresPermission(INTERNET)
+            @Override
+            public String doInBackground() {
+                return getIPAddress(useIPv4);
+            }
+        });
     }
 
     /**
@@ -392,7 +569,7 @@ public final class NetworkUtils {
                 NetworkInterface ni = nis.nextElement();
                 if (!ni.isUp() || ni.isLoopback()) continue;
                 List<InterfaceAddress> ias = ni.getInterfaceAddresses();
-                for (int i = 0; i < ias.size(); i++) {
+                for (int i = 0, size = ias.size(); i < size; i++) {
                     InterfaceAddress ia = ias.get(i);
                     InetAddress broadcast = ia.getBroadcast();
                     if (broadcast != null) {
@@ -404,6 +581,26 @@ public final class NetworkUtils {
             e.printStackTrace();
         }
         return "";
+    }
+
+    /**
+     * Return the domain address.
+     * <p>Must hold {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
+     *
+     * @param domain   The name of domain.
+     * @param callback The callback.
+     * @return the task
+     */
+    @RequiresPermission(INTERNET)
+    public static Utils.Task<String> getDomainAddressAsync(final String domain,
+                                                           @NonNull final Utils.Callback<String> callback) {
+        return Utils.doAsync(new Utils.Task<String>(callback) {
+            @RequiresPermission(INTERNET)
+            @Override
+            public String doInBackground() {
+                return getDomainAddress(domain);
+            }
+        });
     }
 
     /**
@@ -433,7 +630,7 @@ public final class NetworkUtils {
     @RequiresPermission(ACCESS_WIFI_STATE)
     public static String getIpAddressByWifi() {
         @SuppressLint("WifiManagerLeak")
-        WifiManager wm = (WifiManager) Utils.getApp().getSystemService(WIFI_SERVICE);
+        WifiManager wm = (WifiManager) Utils.getApp().getSystemService(Context.WIFI_SERVICE);
         if (wm == null) return "";
         return Formatter.formatIpAddress(wm.getDhcpInfo().ipAddress);
     }
@@ -446,7 +643,7 @@ public final class NetworkUtils {
     @RequiresPermission(ACCESS_WIFI_STATE)
     public static String getGatewayByWifi() {
         @SuppressLint("WifiManagerLeak")
-        WifiManager wm = (WifiManager) Utils.getApp().getSystemService(WIFI_SERVICE);
+        WifiManager wm = (WifiManager) Utils.getApp().getSystemService(Context.WIFI_SERVICE);
         if (wm == null) return "";
         return Formatter.formatIpAddress(wm.getDhcpInfo().gateway);
     }
@@ -459,7 +656,7 @@ public final class NetworkUtils {
     @RequiresPermission(ACCESS_WIFI_STATE)
     public static String getNetMaskByWifi() {
         @SuppressLint("WifiManagerLeak")
-        WifiManager wm = (WifiManager) Utils.getApp().getSystemService(WIFI_SERVICE);
+        WifiManager wm = (WifiManager) Utils.getApp().getSystemService(Context.WIFI_SERVICE);
         if (wm == null) return "";
         return Formatter.formatIpAddress(wm.getDhcpInfo().netmask);
     }
@@ -472,7 +669,7 @@ public final class NetworkUtils {
     @RequiresPermission(ACCESS_WIFI_STATE)
     public static String getServerAddressByWifi() {
         @SuppressLint("WifiManagerLeak")
-        WifiManager wm = (WifiManager) Utils.getApp().getSystemService(WIFI_SERVICE);
+        WifiManager wm = (WifiManager) Utils.getApp().getSystemService(Context.WIFI_SERVICE);
         if (wm == null) return "";
         return Formatter.formatIpAddress(wm.getDhcpInfo().serverAddress);
     }

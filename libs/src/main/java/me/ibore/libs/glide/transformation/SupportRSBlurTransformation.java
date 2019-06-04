@@ -6,12 +6,14 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Build;
 
+import androidx.annotation.NonNull;
+
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 
 import java.security.MessageDigest;
 
-import androidx.annotation.NonNull;
-
+import me.ibore.libs.glide.internal.FastBlur;
+import me.ibore.libs.glide.internal.RSBlur;
 import me.ibore.libs.glide.internal.SupportRSBlur;
 
 
@@ -61,12 +63,12 @@ public class SupportRSBlurTransformation extends BitmapTransformation {
             try {
                 bitmap = SupportRSBlur.blur(context, bitmap, radius);
             } catch (NoClassDefFoundError e) {
-                bitmap = me.ibore.glide.internal.RSBlur.blur(context, bitmap, radius);
+                bitmap = RSBlur.blur(context, bitmap, radius);
             } catch (RuntimeException e) {
-                bitmap = me.ibore.glide.internal.FastBlur.blur(bitmap, radius, true);
+                bitmap = FastBlur.blur(bitmap, radius, true);
             }
         } else {
-            bitmap = me.ibore.glide.internal.FastBlur.blur(bitmap, radius, true);
+            bitmap = FastBlur.blur(bitmap, radius, true);
         }
 
         return bitmap;

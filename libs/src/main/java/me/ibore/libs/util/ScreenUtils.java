@@ -1,7 +1,4 @@
 package me.ibore.libs.util;
-/**
- * Created by Administrator on 2018/1/19.
- */
 
 import android.app.Activity;
 import android.app.KeyguardManager;
@@ -13,25 +10,27 @@ import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.os.Build;
 import android.provider.Settings;
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresPermission;
 import android.util.DisplayMetrics;
 import android.view.Surface;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresPermission;
+
 import static android.Manifest.permission.WRITE_SETTINGS;
 
 /**
  * <pre>
- * description:
- * author: Ibore Xie
- * date: 2018/1/19 14:33
- * website: ibore.me
+ *     author: Blankj
+ *     blog  : http://blankj.com
+ *     time  : 2016/08/02
+ *     desc  : utils about screen
  * </pre>
  */
 public final class ScreenUtils {
+
     private ScreenUtils() {
         throw new UnsupportedOperationException("u can't instantiate me...");
     }
@@ -43,9 +42,7 @@ public final class ScreenUtils {
      */
     public static int getScreenWidth() {
         WindowManager wm = (WindowManager) Utils.getApp().getSystemService(Context.WINDOW_SERVICE);
-        if (wm == null) {
-            return Utils.getApp().getResources().getDisplayMetrics().widthPixels;
-        }
+        if (wm == null) return -1;
         Point point = new Point();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             wm.getDefaultDisplay().getRealSize(point);
@@ -62,9 +59,7 @@ public final class ScreenUtils {
      */
     public static int getScreenHeight() {
         WindowManager wm = (WindowManager) Utils.getApp().getSystemService(Context.WINDOW_SERVICE);
-        if (wm == null) {
-            return Utils.getApp().getResources().getDisplayMetrics().heightPixels;
-        }
+        if (wm == null) return -1;
         Point point = new Point();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             wm.getDefaultDisplay().getRealSize(point);
@@ -75,12 +70,38 @@ public final class ScreenUtils {
     }
 
     /**
+     * Return the application's width of screen, in pixel.
+     *
+     * @return the application's width of screen, in pixel
+     */
+    public static int getAppScreenWidth() {
+        WindowManager wm = (WindowManager) Utils.getApp().getSystemService(Context.WINDOW_SERVICE);
+        if (wm == null) return -1;
+        Point point = new Point();
+        wm.getDefaultDisplay().getSize(point);
+        return point.x;
+    }
+
+    /**
+     * Return the application's height of screen, in pixel.
+     *
+     * @return the application's height of screen, in pixel
+     */
+    public static int getAppScreenHeight() {
+        WindowManager wm = (WindowManager) Utils.getApp().getSystemService(Context.WINDOW_SERVICE);
+        if (wm == null) return -1;
+        Point point = new Point();
+        wm.getDefaultDisplay().getSize(point);
+        return point.y;
+    }
+
+    /**
      * Return the density of screen.
      *
      * @return the density of screen
      */
     public static float getScreenDensity() {
-        return Utils.getApp().getResources().getDisplayMetrics().density;
+        return Resources.getSystem().getDisplayMetrics().density;
     }
 
     /**
@@ -89,7 +110,7 @@ public final class ScreenUtils {
      * @return the screen density expressed as dots-per-inch
      */
     public static int getScreenDensityDpi() {
-        return Utils.getApp().getResources().getDisplayMetrics().densityDpi;
+        return Resources.getSystem().getDisplayMetrics().densityDpi;
     }
 
     /**
@@ -98,8 +119,7 @@ public final class ScreenUtils {
      * @param activity The activity.
      */
     public static void setFullScreen(@NonNull final Activity activity) {
-        activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN
-                | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
 
     /**
@@ -108,8 +128,7 @@ public final class ScreenUtils {
      * @param activity The activity.
      */
     public static void setNonFullScreen(@NonNull final Activity activity) {
-        activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN
-                | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
 
     /**
@@ -118,14 +137,12 @@ public final class ScreenUtils {
      * @param activity The activity.
      */
     public static void toggleFullScreen(@NonNull final Activity activity) {
-        int fullScreenFlag = WindowManager.LayoutParams.FLAG_FULLSCREEN;
+        boolean isFullScreen = isFullScreen(activity);
         Window window = activity.getWindow();
-        if ((window.getAttributes().flags & fullScreenFlag) == fullScreenFlag) {
-            window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN
-                    | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        if (isFullScreen) {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         } else {
-            window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN
-                    | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         }
     }
 
@@ -251,7 +268,8 @@ public final class ScreenUtils {
     public static boolean isScreenLock() {
         KeyguardManager km =
                 (KeyguardManager) Utils.getApp().getSystemService(Context.KEYGUARD_SERVICE);
-        return km != null && km.inKeyguardRestrictedInputMode();
+        if (km == null) return false;
+        return km.inKeyguardRestrictedInputMode();
     }
 
     /**
@@ -284,89 +302,5 @@ public final class ScreenUtils {
             e.printStackTrace();
             return -123;
         }
-    }
-
-    /**
-     * Return whether device is tablet.
-     *
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    public static boolean isTablet() {
-        return (Utils.getApp().getResources().getConfiguration().screenLayout
-                & Configuration.SCREENLAYOUT_SIZE_MASK)
-                >= Configuration.SCREENLAYOUT_SIZE_LARGE;
-    }
-
-    /**
-     * Adapt the screen for vertical slide.
-     *
-     * @param activity        The activity.
-     * @param designWidthInPx The size of design diagram's width, in pixel.
-     */
-    public static void adaptScreen4VerticalSlide(final Activity activity,
-                                                 final int designWidthInPx) {
-        adaptScreen(activity, designWidthInPx, true);
-    }
-
-    /**
-     * Adapt the screen for horizontal slide.
-     *
-     * @param activity         The activity.
-     * @param designHeightInPx The size of design diagram's height, in pixel.
-     */
-    public static void adaptScreen4HorizontalSlide(final Activity activity,
-                                                   final int designHeightInPx) {
-        adaptScreen(activity, designHeightInPx, false);
-    }
-
-    /**
-     * Reference from: https://mp.weixin.qq.com/s/d9QCoBP6kV9VSWvVldVVwA
-     */
-    private static void adaptScreen(final Activity activity,
-                                    final int sizeInPx,
-                                    final boolean isVerticalSlide) {
-        final DisplayMetrics systemDm = Resources.getSystem().getDisplayMetrics();
-        final DisplayMetrics appDm = Utils.getApp().getResources().getDisplayMetrics();
-        final DisplayMetrics activityDm = activity.getResources().getDisplayMetrics();
-        if (isVerticalSlide) {
-            activityDm.density = activityDm.widthPixels / (float) sizeInPx;
-        } else {
-            activityDm.density = activityDm.heightPixels / (float) sizeInPx;
-        }
-        activityDm.scaledDensity = activityDm.density * (systemDm.scaledDensity / systemDm.density);
-        activityDm.densityDpi = (int) (160 * activityDm.density);
-
-        appDm.density = activityDm.density;
-        appDm.scaledDensity = activityDm.scaledDensity;
-        appDm.densityDpi = activityDm.densityDpi;
-    }
-
-    /**
-     * Cancel adapt the screen.
-     *
-     * @param activity The activity.
-     */
-    public static void cancelAdaptScreen(final Activity activity) {
-        final DisplayMetrics systemDm = Resources.getSystem().getDisplayMetrics();
-        final DisplayMetrics appDm = Utils.getApp().getResources().getDisplayMetrics();
-        final DisplayMetrics activityDm = activity.getResources().getDisplayMetrics();
-        activityDm.density = systemDm.density;
-        activityDm.scaledDensity = systemDm.scaledDensity;
-        activityDm.densityDpi = systemDm.densityDpi;
-
-        appDm.density = systemDm.density;
-        appDm.scaledDensity = systemDm.scaledDensity;
-        appDm.densityDpi = systemDm.densityDpi;
-    }
-
-    /**
-     * Return whether adapt screen.
-     *
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    public static boolean isAdaptScreen() {
-        final DisplayMetrics systemDm = Resources.getSystem().getDisplayMetrics();
-        final DisplayMetrics appDm = Utils.getApp().getResources().getDisplayMetrics();
-        return systemDm.density != appDm.density;
     }
 }

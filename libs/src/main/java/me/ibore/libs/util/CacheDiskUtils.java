@@ -8,8 +8,9 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
-import androidx.collection.SimpleArrayMap;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -18,6 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -36,14 +38,35 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import me.ibore.libs.constant.CacheConstants;
 
+/**
+ * <pre>
+ *     author: Blankj
+ *     blog  : http://blankj.com
+ *     time  : 2017/05/24
+ *     desc  : utils about disk cache
+ * </pre>
+ */
 public final class CacheDiskUtils implements CacheConstants {
 
-    private static final long DEFAULT_MAX_SIZE  = Long.MAX_VALUE;
-    private static final int  DEFAULT_MAX_COUNT = Integer.MAX_VALUE;
+    private static final long   DEFAULT_MAX_SIZE  = Long.MAX_VALUE;
+    private static final int    DEFAULT_MAX_COUNT = Integer.MAX_VALUE;
+    private static final String CACHE_PREFIX      = "cdu_";
+    private static final String TYPE_BYTE         = "by_";
+    private static final String TYPE_STRING       = "st_";
+    private static final String TYPE_JSON_OBJECT  = "jo_";
+    private static final String TYPE_JSON_ARRAY   = "ja_";
+    private static final String TYPE_BITMAP       = "bi_";
+    private static final String TYPE_DRAWABLE     = "dr_";
+    private static final String TYPE_PARCELABLE   = "pa_";
+    private static final String TYPE_SERIALIZABLE = "se_";
 
-    private static final SimpleArrayMap<String, CacheDiskUtils> CACHE_MAP = new SimpleArrayMap<>();
+    private static final Map<String, CacheDiskUtils> CACHE_MAP = new HashMap<>();
+
     private final String           mCacheKey;
-    private final DiskCacheManager mDiskCacheManager;
+    private final File             mCacheDir;
+    private final long             mMaxSize;
+    private final int              mMaxCount;
+    private       DiskCacheManager mDiskCacheManager;
 
     /**
      * Return the single {@link CacheDiskUtils} instance.
@@ -123,18 +146,40 @@ public final class CacheDiskUtils implements CacheConstants {
         final String cacheKey = cacheDir.getAbsoluteFile() + "_" + maxSize + "_" + maxCount;
         CacheDiskUtils cache = CACHE_MAP.get(cacheKey);
         if (cache == null) {
-            if (!cacheDir.exists() && !cacheDir.mkdirs()) {
-                throw new RuntimeException("can't make dirs in " + cacheDir.getAbsolutePath());
+            synchronized (CacheDiskUtils.class) {
+                cache = CACHE_MAP.get(cacheKey);
+                if (cache == null) {
+                    cache = new CacheDiskUtils(cacheKey, cacheDir, maxSize, maxCount);
+                    CACHE_MAP.put(cacheKey, cache);
+                }
             }
-            cache = new CacheDiskUtils(cacheKey, new DiskCacheManager(cacheDir, maxSize, maxCount));
-            CACHE_MAP.put(cacheKey, cache);
         }
         return cache;
     }
 
-    private CacheDiskUtils(final String cacheKey, final DiskCacheManager cacheManager) {
+    private CacheDiskUtils(final String cacheKey,
+                           final File cacheDir,
+                           final long maxSize,
+                           final int maxCount) {
         mCacheKey = cacheKey;
-        mDiskCacheManager = cacheManager;
+        mCacheDir = cacheDir;
+        mMaxSize = maxSize;
+        mMaxCount = maxCount;
+    }
+
+    private DiskCacheManager getDiskCacheManager() {
+        if (mCacheDir.exists()) {
+            if (mDiskCacheManager == null) {
+                mDiskCacheManager = new DiskCacheManager(mCacheDir, mMaxSize, mMaxCount);
+            }
+        } else {
+            if (mCacheDir.mkdirs()) {
+                mDiskCacheManager = new DiskCacheManager(mCacheDir, mMaxSize, mMaxCount);
+            } else {
+                Log.e("CacheDiskUtils", "can't make dirs in " + mCacheDir.getAbsolutePath());
+            }
+        }
+        return mDiskCacheManager;
     }
 
     @Override
@@ -163,14 +208,21 @@ public final class CacheDiskUtils implements CacheConstants {
      * @param value    The value of cache.
      * @param saveTime The save time of cache, in seconds.
      */
-    public void put(@NonNull final String key, byte[] value, final int saveTime) {
-        if (value == null) return;
-        if (saveTime >= 0) value = DiskCacheHelper.newByteArrayWithTime(saveTime, value);
-        File file = mDiskCacheManager.getFileBeforePut(key);
-        writeFileFromBytes(file, value);
-        mDiskCacheManager.updateModify(file);
-        mDiskCacheManager.put(file);
+    public void put(@NonNull final String key, final byte[] value, final int saveTime) {
+        realPutBytes(TYPE_BYTE + key, value, saveTime);
     }
+
+    private void realPutBytes(final String key, byte[] value, int saveTime) {
+        if (value == null) return;
+        DiskCacheManager diskCacheManager = getDiskCacheManager();
+        if (diskCacheManager == null) return;
+        if (saveTime >= 0) value = DiskCacheHelper.newByteArrayWithTime(saveTime, value);
+        File file = diskCacheManager.getFileBeforePut(key);
+        writeFileFromBytes(file, value);
+        diskCacheManager.updateModify(file);
+        diskCacheManager.put(file);
+    }
+
 
     /**
      * Return the bytes in cache.
@@ -190,14 +242,24 @@ public final class CacheDiskUtils implements CacheConstants {
      * @return the bytes if cache exists or defaultValue otherwise
      */
     public byte[] getBytes(@NonNull final String key, final byte[] defaultValue) {
-        final File file = mDiskCacheManager.getFileIfExists(key);
+        return realGetBytes(TYPE_BYTE + key, defaultValue);
+    }
+
+    private byte[] realGetBytes(@NonNull final String key) {
+        return realGetBytes(key, null);
+    }
+
+    private byte[] realGetBytes(@NonNull final String key, final byte[] defaultValue) {
+        DiskCacheManager diskCacheManager = getDiskCacheManager();
+        if (diskCacheManager == null) return defaultValue;
+        final File file = diskCacheManager.getFileIfExists(key);
         if (file == null) return defaultValue;
         byte[] data = readFile2Bytes(file);
         if (DiskCacheHelper.isDue(data)) {
-            mDiskCacheManager.removeByKey(key);
+            diskCacheManager.removeByKey(key);
             return defaultValue;
         }
-        mDiskCacheManager.updateModify(file);
+        diskCacheManager.updateModify(file);
         return DiskCacheHelper.getDataWithoutDueTime(data);
     }
 
@@ -223,7 +285,7 @@ public final class CacheDiskUtils implements CacheConstants {
      * @param saveTime The save time of cache, in seconds.
      */
     public void put(@NonNull final String key, final String value, final int saveTime) {
-        put(key, string2Bytes(value), saveTime);
+        realPutBytes(TYPE_STRING + key, string2Bytes(value), saveTime);
     }
 
     /**
@@ -244,7 +306,7 @@ public final class CacheDiskUtils implements CacheConstants {
      * @return the string value if cache exists or defaultValue otherwise
      */
     public String getString(@NonNull final String key, final String defaultValue) {
-        byte[] bytes = getBytes(key);
+        byte[] bytes = realGetBytes(TYPE_STRING + key);
         if (bytes == null) return defaultValue;
         return bytes2String(bytes);
     }
@@ -273,7 +335,7 @@ public final class CacheDiskUtils implements CacheConstants {
     public void put(@NonNull final String key,
                     final JSONObject value,
                     final int saveTime) {
-        put(key, jsonObject2Bytes(value), saveTime);
+        realPutBytes(TYPE_JSON_OBJECT + key, jsonObject2Bytes(value), saveTime);
     }
 
     /**
@@ -294,7 +356,7 @@ public final class CacheDiskUtils implements CacheConstants {
      * @return the JSONObject if cache exists or defaultValue otherwise
      */
     public JSONObject getJSONObject(@NonNull final String key, final JSONObject defaultValue) {
-        byte[] bytes = getBytes(key);
+        byte[] bytes = realGetBytes(TYPE_JSON_OBJECT + key);
         if (bytes == null) return defaultValue;
         return bytes2JSONObject(bytes);
     }
@@ -322,7 +384,7 @@ public final class CacheDiskUtils implements CacheConstants {
      * @param saveTime The save time of cache, in seconds.
      */
     public void put(@NonNull final String key, final JSONArray value, final int saveTime) {
-        put(key, jsonArray2Bytes(value), saveTime);
+        realPutBytes(TYPE_JSON_ARRAY + key, jsonArray2Bytes(value), saveTime);
     }
 
     /**
@@ -343,7 +405,7 @@ public final class CacheDiskUtils implements CacheConstants {
      * @return the JSONArray if cache exists or defaultValue otherwise
      */
     public JSONArray getJSONArray(@NonNull final String key, final JSONArray defaultValue) {
-        byte[] bytes = getBytes(key);
+        byte[] bytes = realGetBytes(TYPE_JSON_ARRAY + key);
         if (bytes == null) return defaultValue;
         return bytes2JSONArray(bytes);
     }
@@ -371,7 +433,7 @@ public final class CacheDiskUtils implements CacheConstants {
      * @param saveTime The save time of cache, in seconds.
      */
     public void put(@NonNull final String key, final Bitmap value, final int saveTime) {
-        put(key, bitmap2Bytes(value), saveTime);
+        realPutBytes(TYPE_BITMAP + key, bitmap2Bytes(value), saveTime);
     }
 
     /**
@@ -392,7 +454,7 @@ public final class CacheDiskUtils implements CacheConstants {
      * @return the bitmap if cache exists or defaultValue otherwise
      */
     public Bitmap getBitmap(@NonNull final String key, final Bitmap defaultValue) {
-        byte[] bytes = getBytes(key);
+        byte[] bytes = realGetBytes(TYPE_BITMAP + key);
         if (bytes == null) return defaultValue;
         return bytes2Bitmap(bytes);
     }
@@ -419,7 +481,7 @@ public final class CacheDiskUtils implements CacheConstants {
      * @param saveTime The save time of cache, in seconds.
      */
     public void put(@NonNull final String key, final Drawable value, final int saveTime) {
-        put(key, drawable2Bytes(value), saveTime);
+        realPutBytes(TYPE_DRAWABLE + key, drawable2Bytes(value), saveTime);
     }
 
     /**
@@ -440,7 +502,7 @@ public final class CacheDiskUtils implements CacheConstants {
      * @return the drawable if cache exists or defaultValue otherwise
      */
     public Drawable getDrawable(@NonNull final String key, final Drawable defaultValue) {
-        byte[] bytes = getBytes(key);
+        byte[] bytes = realGetBytes(TYPE_DRAWABLE + key);
         if (bytes == null) return defaultValue;
         return bytes2Drawable(bytes);
     }
@@ -467,7 +529,7 @@ public final class CacheDiskUtils implements CacheConstants {
      * @param saveTime The save time of cache, in seconds.
      */
     public void put(@NonNull final String key, final Parcelable value, final int saveTime) {
-        put(key, parcelable2Bytes(value), saveTime);
+        realPutBytes(TYPE_PARCELABLE + key, parcelable2Bytes(value), saveTime);
     }
 
     /**
@@ -495,7 +557,7 @@ public final class CacheDiskUtils implements CacheConstants {
     public <T> T getParcelable(@NonNull final String key,
                                @NonNull final Parcelable.Creator<T> creator,
                                final T defaultValue) {
-        byte[] bytes = getBytes(key);
+        byte[] bytes = realGetBytes(TYPE_PARCELABLE + key);
         if (bytes == null) return defaultValue;
         return bytes2Parcelable(bytes, creator);
     }
@@ -522,7 +584,7 @@ public final class CacheDiskUtils implements CacheConstants {
      * @param saveTime The save time of cache, in seconds.
      */
     public void put(@NonNull final String key, final Serializable value, final int saveTime) {
-        put(key, serializable2Bytes(value), saveTime);
+        realPutBytes(TYPE_SERIALIZABLE + key, serializable2Bytes(value), saveTime);
     }
 
     /**
@@ -543,9 +605,9 @@ public final class CacheDiskUtils implements CacheConstants {
      * @return the bitmap if cache exists or defaultValue otherwise
      */
     public Object getSerializable(@NonNull final String key, final Object defaultValue) {
-        byte[] bytes = getBytes(key);
+        byte[] bytes = realGetBytes(TYPE_SERIALIZABLE + key);
         if (bytes == null) return defaultValue;
-        return bytes2Object(getBytes(key));
+        return bytes2Object(bytes);
     }
 
     /**
@@ -554,7 +616,9 @@ public final class CacheDiskUtils implements CacheConstants {
      * @return the size of cache, in bytes
      */
     public long getCacheSize() {
-        return mDiskCacheManager.getCacheSize();
+        DiskCacheManager diskCacheManager = getDiskCacheManager();
+        if (diskCacheManager == null) return 0;
+        return diskCacheManager.getCacheSize();
     }
 
     /**
@@ -563,7 +627,9 @@ public final class CacheDiskUtils implements CacheConstants {
      * @return the count of cache
      */
     public int getCacheCount() {
-        return mDiskCacheManager.getCacheCount();
+        DiskCacheManager diskCacheManager = getDiskCacheManager();
+        if (diskCacheManager == null) return 0;
+        return diskCacheManager.getCacheCount();
     }
 
     /**
@@ -573,7 +639,16 @@ public final class CacheDiskUtils implements CacheConstants {
      * @return {@code true}: success<br>{@code false}: fail
      */
     public boolean remove(@NonNull final String key) {
-        return mDiskCacheManager.removeByKey(key);
+        DiskCacheManager diskCacheManager = getDiskCacheManager();
+        if (diskCacheManager == null) return true;
+        return diskCacheManager.removeByKey(TYPE_BYTE + key)
+                && diskCacheManager.removeByKey(TYPE_STRING + key)
+                && diskCacheManager.removeByKey(TYPE_JSON_OBJECT + key)
+                && diskCacheManager.removeByKey(TYPE_JSON_ARRAY + key)
+                && diskCacheManager.removeByKey(TYPE_BITMAP + key)
+                && diskCacheManager.removeByKey(TYPE_DRAWABLE + key)
+                && diskCacheManager.removeByKey(TYPE_PARCELABLE + key)
+                && diskCacheManager.removeByKey(TYPE_SERIALIZABLE + key);
     }
 
     /**
@@ -582,18 +657,20 @@ public final class CacheDiskUtils implements CacheConstants {
      * @return {@code true}: success<br>{@code false}: fail
      */
     public boolean clear() {
-        return mDiskCacheManager.clear();
+        DiskCacheManager diskCacheManager = getDiskCacheManager();
+        if (diskCacheManager == null) return true;
+        return diskCacheManager.clear();
     }
 
     private static final class DiskCacheManager {
-        private final AtomicLong cacheSize;
-        private final AtomicInteger cacheCount;
-        private final long          sizeLimit;
-        private final int           countLimit;
+        private final AtomicLong      cacheSize;
+        private final AtomicInteger   cacheCount;
+        private final long            sizeLimit;
+        private final int             countLimit;
         private final Map<File, Long> lastUsageDates
                 = Collections.synchronizedMap(new HashMap<File, Long>());
-        private final File   cacheDir;
-        private final Thread mThread;
+        private final File            cacheDir;
+        private final Thread          mThread;
 
         private DiskCacheManager(final File cacheDir, final long sizeLimit, final int countLimit) {
             this.cacheDir = cacheDir;
@@ -606,7 +683,12 @@ public final class CacheDiskUtils implements CacheConstants {
                 public void run() {
                     int size = 0;
                     int count = 0;
-                    final File[] cachedFiles = cacheDir.listFiles();
+                    final File[] cachedFiles = cacheDir.listFiles(new FilenameFilter() {
+                        @Override
+                        public boolean accept(File dir, String name) {
+                            return name.startsWith(CACHE_PREFIX);
+                        }
+                    });
                     if (cachedFiles != null) {
                         for (File cachedFile : cachedFiles) {
                             size += cachedFile.length();
@@ -622,25 +704,18 @@ public final class CacheDiskUtils implements CacheConstants {
         }
 
         private long getCacheSize() {
-            try {
-                mThread.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            wait2InitOk();
             return cacheSize.get();
         }
 
         private int getCacheCount() {
-            try {
-                mThread.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            wait2InitOk();
             return cacheCount.get();
         }
 
         private File getFileBeforePut(final String key) {
-            File file = new File(cacheDir, String.valueOf(key.hashCode()));
+            wait2InitOk();
+            File file = new File(cacheDir, getCacheNameByKey(key));
             if (file.exists()) {
                 cacheCount.addAndGet(-1);
                 cacheSize.addAndGet(-file.length());
@@ -648,10 +723,22 @@ public final class CacheDiskUtils implements CacheConstants {
             return file;
         }
 
+        private void wait2InitOk() {
+            try {
+                mThread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         private File getFileIfExists(final String key) {
-            File file = new File(cacheDir, String.valueOf(key.hashCode()));
+            File file = new File(cacheDir, getCacheNameByKey(key));
             if (!file.exists()) return null;
             return file;
+        }
+
+        private String getCacheNameByKey(final String key) {
+            return CACHE_PREFIX + key.substring(0, 3) + key.substring(3).hashCode();
         }
 
         private void put(final File file) {
@@ -680,7 +767,12 @@ public final class CacheDiskUtils implements CacheConstants {
         }
 
         private boolean clear() {
-            File[] files = cacheDir.listFiles();
+            File[] files = cacheDir.listFiles(new FilenameFilter() {
+                @Override
+                public boolean accept(File dir, String name) {
+                    return name.startsWith(CACHE_PREFIX);
+                }
+            });
             if (files == null || files.length <= 0) return true;
             boolean flag = true;
             for (File file : files) {

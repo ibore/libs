@@ -1,7 +1,4 @@
 package me.ibore.libs.util;
-/**
- * Created by Administrator on 2018/1/19.
- */
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
@@ -20,10 +17,10 @@ import java.util.Map;
 
 /**
  * <pre>
- * description:
- * author: Ibore Xie
- * date: 2018/1/19 14:35
- * website: ibore.me
+ *     author: Blankj
+ *     blog  : http://blankj.com
+ *     time  : 2017/12/15
+ *     desc  : utils about reflect
  * </pre>
  */
 public final class ReflectUtils {
@@ -441,8 +438,7 @@ public final class ReflectUtils {
                 String name = method.getName();
                 try {
                     return reflect(object).method(name, args).get();
-                }
-                catch (ReflectException e) {
+                } catch (ReflectException e) {
                     if (isMap) {
                         Map<String, Object> map = (Map<String, Object>) object;
                         int length = (args == null ? 0 : args.length);

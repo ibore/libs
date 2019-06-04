@@ -1,16 +1,14 @@
 package me.ibore.libs.util;
-/**
- * Created by Administrator on 2018/1/19.
- */
 
 import android.os.Build;
-import androidx.annotation.RequiresApi;
-import androidx.collection.LongSparseArray;
-import androidx.collection.SimpleArrayMap;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.SparseLongArray;
+
+import androidx.annotation.RequiresApi;
+import androidx.collection.LongSparseArray;
+import androidx.collection.SimpleArrayMap;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
@@ -18,13 +16,14 @@ import java.util.Map;
 
 /**
  * <pre>
- * description:
- * author: Ibore Xie
- * date: 2018/1/19 14:23
- * website: ibore.me
+ *     author: Blankj
+ *     blog  : http://blankj.com
+ *     time  : 2017/12/24
+ *     desc  : utils about object
  * </pre>
  */
 public final class ObjectUtils {
+
     private ObjectUtils() {
         throw new UnsupportedOperationException("u can't instantiate me...");
     }
@@ -223,5 +222,4 @@ public final class ObjectUtils {
     public static int hashCode(final Object o) {
         return o != null ? o.hashCode() : 0;
     }
-
 }

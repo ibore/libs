@@ -5,11 +5,13 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
+import androidx.annotation.NonNull;
+
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 
 import java.security.MessageDigest;
 
-import androidx.annotation.NonNull;
+import me.ibore.libs.glide.internal.FastBlur;
 
 public class BlurTransformation extends BitmapTransformation {
 
@@ -53,7 +55,7 @@ public class BlurTransformation extends BitmapTransformation {
         paint.setFlags(Paint.FILTER_BITMAP_FLAG);
         canvas.drawBitmap(toTransform, 0, 0, paint);
 
-        bitmap = me.ibore.glide.internal.FastBlur.blur(bitmap, radius, true);
+        bitmap = FastBlur.blur(bitmap, radius, true);
 
         return bitmap;
     }

@@ -1,39 +1,37 @@
 package me.ibore.libs.util;
-/**
- * Created by Administrator on 2018/1/19.
- */
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.os.Debug;
 import android.os.PowerManager;
 import android.provider.Settings;
-import androidx.annotation.RequiresPermission;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
+import androidx.annotation.RequiresApi;
+import androidx.annotation.RequiresPermission;
+
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
-import java.util.Objects;
-import java.util.UUID;
 
 import static android.Manifest.permission.ACCESS_WIFI_STATE;
 import static android.Manifest.permission.INTERNET;
 
 /**
  * <pre>
- * description:
- * author: Ibore Xie
- * date: 2018/1/19 14:13
- * website: ibore.me
+ *     author: Blankj
+ *     blog  : http://blankj.com
+ *     time  : 2016/8/1
+ *     desc  : utils about device
  * </pre>
  */
 public final class DeviceUtils {
@@ -50,7 +48,8 @@ public final class DeviceUtils {
     public static boolean isDeviceRooted() {
         String su = "su";
         String[] locations = {"/system/bin/", "/system/xbin/", "/sbin/", "/system/sd/xbin/",
-                "/system/bin/failsafe/", "/data/local/xbin/", "/data/local/bin/", "/data/local/"};
+                "/system/bin/failsafe/", "/data/local/xbin/", "/data/local/bin/", "/data/local/",
+                "/system/sbin/", "/usr/bin/", "/vendor/bin/"};
         for (String location : locations) {
             if (new File(location + su).exists()) {
                 return true;
@@ -60,12 +59,25 @@ public final class DeviceUtils {
     }
 
     /**
+     * Return whether ADB is enabled.
+     *
+     * @return {@code true}: yes<br>{@code false}: no
+     */
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
+    public static boolean isAdbEnabled() {
+        return Settings.Secure.getInt(
+                Utils.getApp().getContentResolver(),
+                Settings.Global.ADB_ENABLED, 0
+        ) > 0;
+    }
+
+    /**
      * Return the version name of device's system.
      *
      * @return the version name of device's system
      */
     public static String getSDKVersionName() {
-        return android.os.Build.VERSION.RELEASE;
+        return Build.VERSION.RELEASE;
     }
 
     /**
@@ -74,7 +86,7 @@ public final class DeviceUtils {
      * @return version code of device's system
      */
     public static int getSDKVersionCode() {
-        return android.os.Build.VERSION.SDK_INT;
+        return Build.VERSION.SDK_INT;
     }
 
     /**
@@ -93,8 +105,7 @@ public final class DeviceUtils {
 
     /**
      * Return the MAC address.
-     * <p>Must hold
-     * {@code <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />},
+     * <p>Must hold {@code <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />},
      * {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
      *
      * @return the MAC address
@@ -106,23 +117,22 @@ public final class DeviceUtils {
 
     /**
      * Return the MAC address.
-     * <p>Must hold
-     * {@code <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />},
+     * <p>Must hold {@code <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />},
      * {@code <uses-permission android:name="android.permission.INTERNET" />}</p>
      *
      * @return the MAC address
      */
     @RequiresPermission(allOf = {ACCESS_WIFI_STATE, INTERNET})
     public static String getMacAddress(final String... excepts) {
-        String macAddress = getMacAddressByWifiInfo();
-        if (isAddressNotInExcepts(macAddress, excepts)) {
-            return macAddress;
-        }
-        macAddress = getMacAddressByNetworkInterface();
+        String macAddress = getMacAddressByNetworkInterface();
         if (isAddressNotInExcepts(macAddress, excepts)) {
             return macAddress;
         }
         macAddress = getMacAddressByInetAddress();
+        if (isAddressNotInExcepts(macAddress, excepts)) {
+            return macAddress;
+        }
+        macAddress = getMacAddressByWifiInfo();
         if (isAddressNotInExcepts(macAddress, excepts)) {
             return macAddress;
         }
@@ -131,41 +141,6 @@ public final class DeviceUtils {
             return macAddress;
         }
         return "";
-    }
-
-    private static String uuid;
-
-    /**
-     * Gets the unique identifier
-     *
-     * @return UUID
-     */
-    @SuppressLint({"HardwareIds", "MissingPermission"})
-    public synchronized static String getUuid() {
-        if (uuid == null) {
-            final SharedPreferences prefs = Utils.getApp().getSharedPreferences("device_id.xml", Context.MODE_PRIVATE);
-            final String id = prefs.getString("device_id", null);
-
-            if (id != null) {
-                uuid = id;
-            } else {
-
-                final String androidId = Settings.Secure.getString(Utils.getApp().getContentResolver(), Settings.Secure.ANDROID_ID);
-                try {
-                    if (!"9774d56d682e549c".equals(androidId)) {
-                        uuid = UUID.nameUUIDFromBytes(androidId.getBytes("utf8")).toString();
-                    } else {
-                        final String deviceId = ((TelephonyManager) Objects.requireNonNull(Utils.getApp().getSystemService(Context.TELEPHONY_SERVICE))).getDeviceId();
-                        uuid = deviceId != null ? UUID.nameUUIDFromBytes(deviceId.getBytes("utf8")).toString() : UUID.randomUUID().toString();
-                    }
-                } catch (UnsupportedEncodingException e) {
-                    throw new RuntimeException(e);
-                }
-                // Write the value out to the prefs file
-                prefs.edit().putString("device_id", uuid).apply();
-            }
-        }
-        return uuid;
     }
 
     private static boolean isAddressNotInExcepts(final String address, final String... excepts) {
@@ -180,13 +155,13 @@ public final class DeviceUtils {
         return true;
     }
 
-    @SuppressLint({"HardwareIds", "MissingPermission"})
+    @SuppressLint({"MissingPermission", "HardwareIds"})
     private static String getMacAddressByWifiInfo() {
         try {
-            Context context = Utils.getApp().getApplicationContext();
-            WifiManager wifi = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+            final WifiManager wifi = (WifiManager) Utils.getApp()
+                    .getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             if (wifi != null) {
-                WifiInfo info = wifi.getConnectionInfo();
+                final WifiInfo info = wifi.getConnectionInfo();
                 if (info != null) return info.getMacAddress();
             }
         } catch (Exception e) {
@@ -358,14 +333,9 @@ public final class DeviceUtils {
      *               request special boot modes, or null.
      */
     public static void reboot(final String reason) {
-        PowerManager mPowerManager =
-                (PowerManager) Utils.getApp().getSystemService(Context.POWER_SERVICE);
-        try {
-            if (mPowerManager == null) return;
-            mPowerManager.reboot(reason);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        PowerManager pm = (PowerManager) Utils.getApp().getSystemService(Context.POWER_SERVICE);
+        //noinspection ConstantConditions
+        pm.reboot(reason);
     }
 
     /**
@@ -385,4 +355,94 @@ public final class DeviceUtils {
     }
 
 
+    /**
+     * Return whether device is tablet.
+     *
+     * @return {@code true}: yes<br>{@code false}: no
+     */
+    public static boolean isTablet() {
+        return (Utils.getApp().getResources().getConfiguration().screenLayout
+                & Configuration.SCREENLAYOUT_SIZE_MASK)
+                >= Configuration.SCREENLAYOUT_SIZE_LARGE;
+    }
+
+    /**
+     * Return whether device is emulator.
+     *
+     * @return {@code true}: yes<br>{@code false}: no
+     */
+    public static boolean isEmulator() {
+        boolean checkProperty = Build.FINGERPRINT.startsWith("generic")
+                || Build.FINGERPRINT.toLowerCase().contains("vbox")
+                || Build.FINGERPRINT.toLowerCase().contains("test-keys")
+                || Build.MODEL.contains("google_sdk")
+                || Build.MODEL.contains("Emulator")
+                || Build.SERIAL.equalsIgnoreCase("unknown")
+                || Build.SERIAL.equalsIgnoreCase("android")
+                || Build.MODEL.contains("Android SDK built for x86")
+                || Build.MANUFACTURER.contains("Genymotion")
+                || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
+                || "google_sdk".equals(Build.PRODUCT);
+        if (checkProperty) return true;
+
+        boolean checkDebuggerConnected = Debug.isDebuggerConnected();
+        if (checkDebuggerConnected) return true;
+
+        String operatorName = "";
+        TelephonyManager tm = (TelephonyManager) Utils.getApp().getSystemService(Context.TELEPHONY_SERVICE);
+        if (tm != null) {
+            String name = tm.getNetworkOperatorName();
+            if (name != null) {
+                operatorName = name;
+            }
+        }
+        boolean checkOperatorName = operatorName.toLowerCase().equals("android");
+        if (checkOperatorName) return true;
+
+        String url = "tel:" + "123456";
+        Intent intent = new Intent();
+        intent.setData(Uri.parse(url));
+        intent.setAction(Intent.ACTION_DIAL);
+        boolean checkDial = intent.resolveActivity(Utils.getApp().getPackageManager()) != null;
+        if (checkDial) return true;
+
+        return false;
+    }
+
+//    protected static final String PREFS_FILE      = "device_id.xml";
+//    protected static final String PREFS_DEVICE_ID = "device_id";
+//
+//    protected static UUID uuid;
+//
+//    public static String getDeviceId() {
+//        if (uuid == null) {
+//            synchronized (DeviceUtils.class) {
+//                if (uuid == null) {
+//                    final SharedPreferences prefs = Utils.getApp().getSharedPreferences(PREFS_FILE, 0);
+//                    final String id = prefs.getString(PREFS_DEVICE_ID, null);
+//
+//                    if (id != null) {
+//                        // Use the ids previously computed and stored in the prefs file
+//                        uuid = UUID.fromString(id);
+//
+//                    } else {
+//                        final String androidId = Settings.Secure.getString(Utils.getApp().getContentResolver(), Settings.Secure.ANDROID_ID);
+//                        try {
+//                            if (!"9774d56d682e549c".equals(androidId)) {
+//                                uuid = UUID.nameUUIDFromBytes(androidId.getBytes());
+//                            } else {
+//                                final String deviceId = ((TelephonyManager) Utils.getApp().getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
+//                                uuid = deviceId != null ? UUID.nameUUIDFromBytes(deviceId.getBytes()) : UUID.randomUUID();
+//                            }
+//                        } catch (UnsupportedEncodingException e) {
+//                            throw new RuntimeException(e);
+//                        }
+//                        // Write the value out to the prefs file
+//                        prefs.edit().putString(PREFS_DEVICE_ID, uuid.toString()).commit();
+//                    }
+//
+//                }
+//            }
+//        }
+//    }
 }

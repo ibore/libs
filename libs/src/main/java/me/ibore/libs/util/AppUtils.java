@@ -1,13 +1,11 @@
 package me.ibore.libs.util;
-/**
- * Created by Administrator on 2018/1/19.
- */
 
 import android.annotation.SuppressLint;
-import android.app.*;
+import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.AppOpsManager;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -19,9 +17,10 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.core.content.FileProvider;
-import android.util.Log;
 
 import java.io.File;
 import java.security.MessageDigest;
@@ -31,10 +30,10 @@ import java.util.List;
 
 /**
  * <pre>
- * description:
- * author: Ibore Xie
- * date: 2018/1/19 13:57
- * website: ibore.me
+ *     author: Blankj
+ *     blog  : http://blankj.com
+ *     time  : 2016/08/02
+ *     desc  : utils about app
  * </pre>
  */
 public final class AppUtils {
@@ -51,7 +50,7 @@ public final class AppUtils {
      */
     public static void registerAppStatusChangedListener(@NonNull final Object obj,
                                                         @NonNull final Utils.OnAppStatusChangedListener listener) {
-        Utils.getActivityLifecycle().addListener(obj, listener);
+        Utils.getActivityLifecycle().addOnAppStatusChangedListener(obj, listener);
     }
 
     /**
@@ -60,7 +59,7 @@ public final class AppUtils {
      * @param obj The object.
      */
     public static void unregisterAppStatusChangedListener(@NonNull final Object obj) {
-        Utils.getActivityLifecycle().removeListener(obj);
+        Utils.getActivityLifecycle().removeOnAppStatusChangedListener(obj);
     }
 
     /**
@@ -122,6 +121,7 @@ public final class AppUtils {
     /**
      * Install the app silently.
      * <p>Without root permission must hold
+     * {@code android:sharedUserId="android.uid.shell"} and
      * {@code <uses-permission android:name="android.permission.INSTALL_PACKAGES" />}</p>
      *
      * @param filePath The path of file.
@@ -134,6 +134,7 @@ public final class AppUtils {
     /**
      * Install the app silently.
      * <p>Without root permission must hold
+     * {@code android:sharedUserId="android.uid.shell"} and
      * {@code <uses-permission android:name="android.permission.INSTALL_PACKAGES" />}</p>
      *
      * @param file The file.
@@ -147,6 +148,7 @@ public final class AppUtils {
     /**
      * Install the app silently.
      * <p>Without root permission must hold
+     * {@code android:sharedUserId="android.uid.shell"} and
      * {@code <uses-permission android:name="android.permission.INSTALL_PACKAGES" />}</p>
      *
      * @param filePath The path of file.
@@ -160,6 +162,7 @@ public final class AppUtils {
     /**
      * Install the app silently.
      * <p>Without root permission must hold
+     * {@code android:sharedUserId="android.uid.shell"} and
      * {@code <uses-permission android:name="android.permission.INSTALL_PACKAGES" />}</p>
      *
      * @param file   The file.
@@ -173,6 +176,7 @@ public final class AppUtils {
     /**
      * Install the app silently.
      * <p>Without root permission must hold
+     * {@code android:sharedUserId="android.uid.shell"} and
      * {@code <uses-permission android:name="android.permission.INSTALL_PACKAGES" />}</p>
      *
      * @param file     The file.
@@ -227,6 +231,7 @@ public final class AppUtils {
     /**
      * Uninstall the app silently.
      * <p>Without root permission must hold
+     * {@code android:sharedUserId="android.uid.shell"} and
      * {@code <uses-permission android:name="android.permission.DELETE_PACKAGES" />}</p>
      *
      * @param packageName The name of the package.
@@ -239,6 +244,7 @@ public final class AppUtils {
     /**
      * Uninstall the app silently.
      * <p>Without root permission must hold
+     * {@code android:sharedUserId="android.uid.shell"} and
      * {@code <uses-permission android:name="android.permission.DELETE_PACKAGES" />}</p>
      *
      * @param packageName The name of the package.
@@ -252,6 +258,7 @@ public final class AppUtils {
     /**
      * Uninstall the app silently.
      * <p>Without root permission must hold
+     * {@code android:sharedUserId="android.uid.shell"} and
      * {@code <uses-permission android:name="android.permission.DELETE_PACKAGES" />}</p>
      *
      * @param packageName The name of the package.
@@ -280,28 +287,17 @@ public final class AppUtils {
     /**
      * Return whether the app is installed.
      *
-     * @param packageName The name of the package.
+     * @param pkgName The name of the package.
      * @return {@code true}: yes<br>{@code false}: no
      */
-    public static boolean isAppInstalled(@NonNull final String packageName) {
-        return !isSpace(packageName)
-                && Utils.getApp().getPackageManager().getLaunchIntentForPackage(packageName) != null;
-    }
-
-    /**
-     * Return whether the app is installed.
-     *
-     * @param action   The Intent action, such as ACTION_VIEW.
-     * @param category The desired category.
-     * @return {@code true}: yes<br>{@code false}: no
-     */
-    public static boolean isAppInstalled(@NonNull final String action,
-                                         @NonNull final String category) {
-        Intent intent = new Intent(action);
-        intent.addCategory(category);
-        PackageManager pm = Utils.getApp().getPackageManager();
-        ResolveInfo info = pm.resolveActivity(intent, 0);
-        return info != null;
+    public static boolean isAppInstalled(@NonNull final String pkgName) {
+        PackageManager packageManager = Utils.getApp().getPackageManager();
+        try {
+            return packageManager.getApplicationInfo(pkgName, 0) != null;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**
@@ -393,6 +389,46 @@ public final class AppUtils {
         return !isSpace(packageName) && packageName.equals(getForegroundProcessName());
     }
 
+
+    /**
+     * Return whether application is running.
+     *
+     * @param pkgName The name of the package.
+     * @return {@code true}: yes<br>{@code false}: no
+     */
+    public static boolean isAppRunning(@NonNull final String pkgName) {
+        int uid;
+        PackageManager packageManager = Utils.getApp().getPackageManager();
+        try {
+            ApplicationInfo ai = packageManager.getApplicationInfo(pkgName, 0);
+            if (ai == null) return false;
+            uid = ai.uid;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
+        ActivityManager am = (ActivityManager) Utils.getApp().getSystemService(Context.ACTIVITY_SERVICE);
+        if (am != null) {
+            List<ActivityManager.RunningTaskInfo> taskInfo = am.getRunningTasks(Integer.MAX_VALUE);
+            if (taskInfo != null && taskInfo.size() > 0) {
+                for (ActivityManager.RunningTaskInfo aInfo : taskInfo) {
+                    if (pkgName.equals(aInfo.baseActivity.getPackageName())) {
+                        return true;
+                    }
+                }
+            }
+            List<ActivityManager.RunningServiceInfo> serviceInfo = am.getRunningServices(Integer.MAX_VALUE);
+            if (serviceInfo != null && serviceInfo.size() > 0) {
+                for (ActivityManager.RunningServiceInfo aInfo : serviceInfo) {
+                    if (uid == aInfo.uid) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     /**
      * Launch the application.
      *
@@ -422,12 +458,22 @@ public final class AppUtils {
      * Relaunch the application.
      */
     public static void relaunchApp() {
+        relaunchApp(false);
+    }
+
+    /**
+     * Relaunch the application.
+     *
+     * @param isKillProcess True to kill the process, false otherwise.
+     */
+    public static void relaunchApp(final boolean isKillProcess) {
         PackageManager packageManager = Utils.getApp().getPackageManager();
         Intent intent = packageManager.getLaunchIntentForPackage(Utils.getApp().getPackageName());
         if (intent == null) return;
-        ComponentName componentName = intent.getComponent();
-        Intent mainIntent = Intent.makeRestartActivityTask(componentName);
-        Utils.getApp().startActivity(mainIntent);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        Utils.getApp().startActivity(intent);
+        if (!isKillProcess) return;
+        android.os.Process.killProcess(android.os.Process.myPid());
         System.exit(0);
     }
 
@@ -445,7 +491,7 @@ public final class AppUtils {
      */
     public static void launchAppDetailsSettings(final String packageName) {
         if (isSpace(packageName)) return;
-        Intent intent = new Intent("android.settings.APPLICATION_DETAILS_SETTINGS");
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
         intent.setData(Uri.parse("package:" + packageName));
         Utils.getApp().startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
@@ -651,11 +697,81 @@ public final class AppUtils {
      * @return the application's signature for SHA1 value
      */
     public static String getAppSignatureSHA1(final String packageName) {
+        return getAppSignatureHash(packageName, "SHA1");
+    }
+
+    /**
+     * Return the application's signature for SHA256 value.
+     *
+     * @return the application's signature for SHA256 value
+     */
+    public static String getAppSignatureSHA256() {
+        return getAppSignatureSHA256(Utils.getApp().getPackageName());
+    }
+
+    /**
+     * Return the application's signature for SHA256 value.
+     *
+     * @param packageName The name of the package.
+     * @return the application's signature for SHA256 value
+     */
+    public static String getAppSignatureSHA256(final String packageName) {
+        return getAppSignatureHash(packageName, "SHA256");
+    }
+
+    /**
+     * Return the application's signature for MD5 value.
+     *
+     * @return the application's signature for MD5 value
+     */
+    public static String getAppSignatureMD5() {
+        return getAppSignatureMD5(Utils.getApp().getPackageName());
+    }
+
+    /**
+     * Return the application's signature for MD5 value.
+     *
+     * @param packageName The name of the package.
+     * @return the application's signature for MD5 value
+     */
+    public static String getAppSignatureMD5(final String packageName) {
+        return getAppSignatureHash(packageName, "MD5");
+    }
+
+
+    /**
+     * Return the application's user-ID.
+     *
+     * @return the application's signature for MD5 value
+     */
+    public static int getAppUid() {
+        return getAppUid(Utils.getApp().getPackageName());
+    }
+
+    /**
+     * Return the application's user-ID.
+     *
+     * @param pkgName The name of the package.
+     * @return the application's signature for MD5 value
+     */
+    public static int getAppUid(String pkgName) {
+        try {
+            ApplicationInfo ai = Utils.getApp().getPackageManager().getApplicationInfo(pkgName, 0);
+            if (ai != null) {
+                return ai.uid;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    private static String getAppSignatureHash(final String packageName, final String algorithm) {
         if (isSpace(packageName)) return "";
         Signature[] signature = getAppSignature(packageName);
         if (signature == null || signature.length <= 0) return "";
-        return encryptSHA1ToString(signature[0].toByteArray()).
-                replaceAll("(?<=[0-9A-F]{2})[0-9A-F]{2}", ":$0");
+        return bytes2HexString(hashTemplate(signature[0].toByteArray(), algorithm))
+                .replaceAll("(?<=[0-9A-F]{2})[0-9A-F]{2}", ":$0");
     }
 
     /**
@@ -689,13 +805,13 @@ public final class AppUtils {
      * </ul>
      *
      * @param packageName The name of the package.
-     * @return 当前应用的 AppInfo
+     * @return the application's information
      */
     public static AppInfo getAppInfo(final String packageName) {
         try {
             PackageManager pm = Utils.getApp().getPackageManager();
-            PackageInfo pi = pm.getPackageInfo(packageName, 0);
-            return getBean(pm, pi);
+            if (pm == null) return null;
+            return getBean(pm, pm.getPackageInfo(packageName, 0));
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
             return null;
@@ -710,6 +826,7 @@ public final class AppUtils {
     public static List<AppInfo> getAppsInfo() {
         List<AppInfo> list = new ArrayList<>();
         PackageManager pm = Utils.getApp().getPackageManager();
+        if (pm == null) return list;
         List<PackageInfo> installedPackages = pm.getInstalledPackages(0);
         for (PackageInfo pi : installedPackages) {
             AppInfo ai = getBean(pm, pi);
@@ -719,8 +836,35 @@ public final class AppUtils {
         return list;
     }
 
+    /**
+     * Return the application's package information.
+     *
+     * @return the application's package information
+     */
+    public static AppInfo getApkInfo(final File apkFile) {
+        if (apkFile == null || !apkFile.isFile() || !apkFile.exists()) return null;
+        return getApkInfo(apkFile.getAbsolutePath());
+    }
+
+    /**
+     * Return the application's package information.
+     *
+     * @return the application's package information
+     */
+    public static AppInfo getApkInfo(final String apkFilePath) {
+        if (isSpace(apkFilePath)) return null;
+        PackageManager pm = Utils.getApp().getPackageManager();
+        if (pm == null) return null;
+        PackageInfo pi = pm.getPackageArchiveInfo(apkFilePath, 0);
+        if (pi == null) return null;
+        ApplicationInfo appInfo = pi.applicationInfo;
+        appInfo.sourceDir = apkFilePath;
+        appInfo.publicSourceDir = apkFilePath;
+        return getBean(pm, pi);
+    }
+
     private static AppInfo getBean(final PackageManager pm, final PackageInfo pi) {
-        if (pm == null || pi == null) return null;
+        if (pi == null) return null;
         ApplicationInfo ai = pi.applicationInfo;
         String packageName = pi.packageName;
         String name = ai.loadLabel(pm).toString();
@@ -737,13 +881,13 @@ public final class AppUtils {
      */
     public static class AppInfo {
 
-        private String   packageName;
-        private String   name;
+        private String packageName;
+        private String name;
         private Drawable icon;
-        private String   packagePath;
-        private String   versionName;
-        private int      versionCode;
-        private boolean  isSystem;
+        private String packagePath;
+        private String versionName;
+        private int versionCode;
+        private boolean isSystem;
 
         public Drawable getIcon() {
             return icon;
@@ -814,13 +958,15 @@ public final class AppUtils {
 
         @Override
         public String toString() {
-            return "pkg name: " + getPackageName() +
-                    "\napp icon: " + getIcon() +
-                    "\napp name: " + getName() +
-                    "\napp path: " + getPackagePath() +
-                    "\napp v name: " + getVersionName() +
-                    "\napp v code: " + getVersionCode() +
-                    "\nis system: " + isSystem();
+            return "{" +
+                    "\n  pkg name: " + getPackageName() +
+                    "\n  app icon: " + getIcon() +
+                    "\n  app name: " + getName() +
+                    "\n  app path: " + getPackagePath() +
+                    "\n  app v name: " + getVersionName() +
+                    "\n  app v code: " + getVersionCode() +
+                    "\n  is system: " + isSystem() +
+                    "}";
         }
     }
 
@@ -849,7 +995,8 @@ public final class AppUtils {
     private static boolean isDeviceRooted() {
         String su = "su";
         String[] locations = {"/system/bin/", "/system/xbin/", "/sbin/", "/system/sd/xbin/",
-                "/system/bin/failsafe/", "/data/local/xbin/", "/data/local/bin/", "/data/local/"};
+                "/system/bin/failsafe/", "/data/local/xbin/", "/data/local/bin/", "/data/local/",
+                "/system/sbin/", "/usr/bin/", "/vendor/bin/"};
         for (String location : locations) {
             if (new File(location + su).exists()) {
                 return true;
@@ -861,14 +1008,10 @@ public final class AppUtils {
     private static final char HEX_DIGITS[] =
             {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
-    private static String encryptSHA1ToString(final byte[] data) {
-        return bytes2HexString(encryptSHA1(data));
-    }
-
-    private static byte[] encryptSHA1(final byte[] data) {
+    private static byte[] hashTemplate(final byte[] data, final String algorithm) {
         if (data == null || data.length <= 0) return null;
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA1");
+            MessageDigest md = MessageDigest.getInstance(algorithm);
             md.update(data);
             return md.digest();
         } catch (NoSuchAlgorithmException e) {
@@ -900,10 +1043,11 @@ public final class AppUtils {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
             data = Uri.fromFile(file);
         } else {
-            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             String authority = Utils.getApp().getPackageName() + ".fileProvider";
             data = FileProvider.getUriForFile(Utils.getApp(), authority, file);
+            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         }
+        Utils.getApp().grantUriPermission(Utils.getApp().getPackageName(), data, Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.setDataAndType(data, type);
         return isNewTask ? intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) : intent;
     }
@@ -931,7 +1075,7 @@ public final class AppUtils {
     private static String getForegroundProcessName() {
         ActivityManager am =
                 (ActivityManager) Utils.getApp().getSystemService(Context.ACTIVITY_SERVICE);
-        if (am == null) return null;
+        //noinspection ConstantConditions
         List<ActivityManager.RunningAppProcessInfo> pInfo = am.getRunningAppProcesses();
         if (pInfo != null && pInfo.size() > 0) {
             for (ActivityManager.RunningAppProcessInfo aInfo : pInfo) {
@@ -941,7 +1085,7 @@ public final class AppUtils {
                 }
             }
         }
-        if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.LOLLIPOP) {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
             PackageManager pm = Utils.getApp().getPackageManager();
             Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
             List<ResolveInfo> list =
@@ -957,20 +1101,19 @@ public final class AppUtils {
                         pm.getApplicationInfo(Utils.getApp().getPackageName(), 0);
                 AppOpsManager aom =
                         (AppOpsManager) Utils.getApp().getSystemService(Context.APP_OPS_SERVICE);
-                if (aom != null) {
-                    if (aom.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
-                            info.uid,
-                            info.packageName) != AppOpsManager.MODE_ALLOWED) {
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        Utils.getApp().startActivity(intent);
-                    }
-                    if (aom.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
-                            info.uid,
-                            info.packageName) != AppOpsManager.MODE_ALLOWED) {
-                        Log.i("ProcessUtils",
-                                "getForegroundProcessName: refuse to device usage stats.");
-                        return "";
-                    }
+                //noinspection ConstantConditions
+                if (aom.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
+                        info.uid,
+                        info.packageName) != AppOpsManager.MODE_ALLOWED) {
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    Utils.getApp().startActivity(intent);
+                }
+                if (aom.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
+                        info.uid,
+                        info.packageName) != AppOpsManager.MODE_ALLOWED) {
+                    Log.i("ProcessUtils",
+                            "getForegroundProcessName: refuse to device usage stats.");
+                    return "";
                 }
                 UsageStatsManager usageStatsManager = (UsageStatsManager) Utils.getApp()
                         .getSystemService(Context.USAGE_STATS_SERVICE);

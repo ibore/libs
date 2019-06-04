@@ -1,8 +1,6 @@
 package me.ibore.libs.util;
-/**
- * Created by Administrator on 2018/1/19.
- */
 
+import android.content.res.Resources;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
@@ -10,14 +8,13 @@ import android.view.ViewGroup;
 
 /**
  * <pre>
- * description:
- * author: Ibore Xie
- * date: 2018/1/19 14:33
- * website: ibore.me
+ *     author: Blankj
+ *     blog  : http://blankj.com
+ *     time  : 2016/08/02
+ *     desc  : utils about size
  * </pre>
  */
 public final class SizeUtils {
-
 
     private SizeUtils() {
         throw new UnsupportedOperationException("u can't instantiate me...");
@@ -30,7 +27,7 @@ public final class SizeUtils {
      * @return value of px
      */
     public static int dp2px(final float dpValue) {
-        final float scale = Utils.getApp().getResources().getDisplayMetrics().density;
+        final float scale = Resources.getSystem().getDisplayMetrics().density;
         return (int) (dpValue * scale + 0.5f);
     }
 
@@ -41,7 +38,7 @@ public final class SizeUtils {
      * @return value of dp
      */
     public static int px2dp(final float pxValue) {
-        final float scale = Utils.getApp().getResources().getDisplayMetrics().density;
+        final float scale = Resources.getSystem().getDisplayMetrics().density;
         return (int) (pxValue / scale + 0.5f);
     }
 
@@ -52,7 +49,7 @@ public final class SizeUtils {
      * @return value of px
      */
     public static int sp2px(final float spValue) {
-        final float fontScale = Utils.getApp().getResources().getDisplayMetrics().scaledDensity;
+        final float fontScale = Resources.getSystem().getDisplayMetrics().scaledDensity;
         return (int) (spValue * fontScale + 0.5f);
     }
 
@@ -63,7 +60,7 @@ public final class SizeUtils {
      * @return value of sp
      */
     public static int px2sp(final float pxValue) {
-        final float fontScale = Utils.getApp().getResources().getDisplayMetrics().scaledDensity;
+        final float fontScale = Resources.getSystem().getDisplayMetrics().scaledDensity;
         return (int) (pxValue / fontScale + 0.5f);
     }
 
@@ -78,7 +75,7 @@ public final class SizeUtils {
      * metrics depending on its unit.
      */
     public static float applyDimension(final float value, final int unit) {
-        DisplayMetrics metrics = Utils.getApp().getResources().getDisplayMetrics();
+        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
         switch (unit) {
             case TypedValue.COMPLEX_UNIT_PX:
                 return value;

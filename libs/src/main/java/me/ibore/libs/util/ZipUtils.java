@@ -1,7 +1,4 @@
 package me.ibore.libs.util;
-/**
- * Created by Administrator on 2018/1/19.
- */
 
 import android.util.Log;
 
@@ -23,13 +20,14 @@ import java.util.zip.ZipOutputStream;
 
 /**
  * <pre>
- * description:
- * author: Ibore Xie
- * date: 2018/1/19 14:27
- * website: ibore.me
+ *     author: Blankj
+ *     blog  : http://blankj.com
+ *     time  : 2016/08/27
+ *     desc  : utils about zip
  * </pre>
  */
 public final class ZipUtils {
+
     private static final int BUFFER_LEN = 8192;
 
     private ZipUtils() {
@@ -289,50 +287,53 @@ public final class ZipUtils {
             throws IOException {
         if (zipFile == null || destDir == null) return null;
         List<File> files = new ArrayList<>();
-        ZipFile zf = new ZipFile(zipFile);
-        Enumeration<?> entries = zf.entries();
-        if (isSpace(keyword)) {
-            while (entries.hasMoreElements()) {
-                ZipEntry entry = ((ZipEntry) entries.nextElement());
-                String entryName = entry.getName();
-                if (entryName.contains("../")) {
-                    Log.e("ZipUtils", "it's dangerous!");
-                    return files;
+        ZipFile zip = new ZipFile(zipFile);
+        Enumeration<?> entries = zip.entries();
+        try {
+            if (isSpace(keyword)) {
+                while (entries.hasMoreElements()) {
+                    ZipEntry entry = ((ZipEntry) entries.nextElement());
+                    String entryName = entry.getName();
+                    if (entryName.contains("../")) {
+                        Log.e("ZipUtils", "entryName: " + entryName + " is dangerous!");
+                        continue;
+                    }
+                    if (!unzipChildFile(destDir, files, zip, entry, entryName)) return files;
                 }
-                if (!unzipChildFile(destDir, files, zf, entry, entryName)) return files;
+            } else {
+                while (entries.hasMoreElements()) {
+                    ZipEntry entry = ((ZipEntry) entries.nextElement());
+                    String entryName = entry.getName();
+                    if (entryName.contains("../")) {
+                        Log.e("ZipUtils", "entryName: " + entryName + " is dangerous!");
+                        continue;
+                    }
+                    if (entryName.contains(keyword)) {
+                        if (!unzipChildFile(destDir, files, zip, entry, entryName)) return files;
+                    }
+                }
             }
-        } else {
-            while (entries.hasMoreElements()) {
-                ZipEntry entry = ((ZipEntry) entries.nextElement());
-                String entryName = entry.getName();
-                if (entryName.contains("../")) {
-                    Log.e("ZipUtils", "it's dangerous!");
-                    return files;
-                }
-                if (entryName.contains(keyword)) {
-                    if (!unzipChildFile(destDir, files, zf, entry, entryName)) return files;
-                }
-            }
+        } finally {
+            zip.close();
         }
         return files;
     }
 
     private static boolean unzipChildFile(final File destDir,
                                           final List<File> files,
-                                          final ZipFile zf,
+                                          final ZipFile zip,
                                           final ZipEntry entry,
-                                          final String entryName) throws IOException {
-        String filePath = destDir + File.separator + entryName;
-        File file = new File(filePath);
+                                          final String name) throws IOException {
+        File file = new File(destDir, name);
         files.add(file);
         if (entry.isDirectory()) {
-            if (!createOrExistsDir(file)) return false;
+            return createOrExistsDir(file);
         } else {
             if (!createOrExistsFile(file)) return false;
             InputStream in = null;
             OutputStream out = null;
             try {
-                in = new BufferedInputStream(zf.getInputStream(entry));
+                in = new BufferedInputStream(zip.getInputStream(entry));
                 out = new BufferedOutputStream(new FileOutputStream(file));
                 byte buffer[] = new byte[BUFFER_LEN];
                 int len;
@@ -374,10 +375,18 @@ public final class ZipUtils {
             throws IOException {
         if (zipFile == null) return null;
         List<String> paths = new ArrayList<>();
-        Enumeration<?> entries = new ZipFile(zipFile).entries();
+        ZipFile zip = new ZipFile(zipFile);
+        Enumeration<?> entries = zip.entries();
         while (entries.hasMoreElements()) {
-            paths.add(((ZipEntry) entries.nextElement()).getName());
+            String entryName = ((ZipEntry) entries.nextElement()).getName();
+            if (entryName.contains("../")) {
+                Log.e("ZipUtils", "entryName: " + entryName + " is dangerous!");
+                paths.add(entryName);
+            } else {
+                paths.add(entryName);
+            }
         }
+        zip.close();
         return paths;
     }
 
@@ -404,11 +413,13 @@ public final class ZipUtils {
             throws IOException {
         if (zipFile == null) return null;
         List<String> comments = new ArrayList<>();
-        Enumeration<?> entries = new ZipFile(zipFile).entries();
+        ZipFile zip = new ZipFile(zipFile);
+        Enumeration<?> entries = zip.entries();
         while (entries.hasMoreElements()) {
             ZipEntry entry = ((ZipEntry) entries.nextElement());
             comments.add(entry.getComment());
         }
+        zip.close();
         return comments;
     }
 

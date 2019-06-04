@@ -1,7 +1,4 @@
 package me.ibore.libs.util;
-/**
- * Created by Administrator on 2018/1/19.
- */
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -26,14 +23,15 @@ import java.util.List;
 
 /**
  * <pre>
- * description:
- * author: Ibore Xie
- * date: 2018/1/19 14:06
- * website: ibore.me
+ *     author: Blankj
+ *     blog  : http://blankj.com
+ *     time  : 2017/06/22
+ *     desc  : utils about file io
  * </pre>
  */
 public final class FileIOUtils {
-    private static int sBufferSize = 8192;
+
+    private static int sBufferSize = 524288;
 
     private FileIOUtils() {
         throw new UnsupportedOperationException("u can't instantiate me...");
@@ -91,8 +89,7 @@ public final class FileIOUtils {
         try {
             os = new BufferedOutputStream(new FileOutputStream(file, append));
             byte data[] = new byte[sBufferSize];
-            int len;
-            while ((len = is.read(data, 0, sBufferSize)) != -1) {
+            for (int len; (len = is.read(data)) != -1; ) {
                 os.write(data, 0, len);
             }
             return true;

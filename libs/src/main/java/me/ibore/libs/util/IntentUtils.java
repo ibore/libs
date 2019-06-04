@@ -1,14 +1,14 @@
 package me.ibore.libs.util;
-/**
- * Created by Administrator on 2018/1/19.
- */
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.provider.Settings;
+
 import androidx.annotation.RequiresPermission;
 import androidx.core.content.FileProvider;
 
@@ -21,10 +21,10 @@ import static android.Manifest.permission.CALL_PHONE;
 
 /**
  * <pre>
- * description:
- * author: Ibore Xie
- * date: 2018/1/19 13:58
- * website: ibore.me
+ *     author: Blankj
+ *     blog  : http://blankj.com
+ *     time  : 2016/09/23
+ *     desc  : utils about intent
  * </pre>
  */
 public final class IntentUtils {
@@ -40,7 +40,10 @@ public final class IntentUtils {
      * @return {@code true}: yes<br>{@code false}: no
      */
     public static boolean isIntentAvailable(final Intent intent) {
-        return Utils.getApp().getPackageManager().queryIntentActivities(intent, 0).size() > 0;
+        return Utils.getApp()
+                .getPackageManager()
+                .queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
+                .size() > 0;
     }
 
     /**
@@ -170,7 +173,7 @@ public final class IntentUtils {
      */
     public static Intent getLaunchAppDetailsSettingsIntent(final String packageName,
                                                            final boolean isNewTask) {
-        Intent intent = new Intent("android.settings.APPLICATION_DETAILS_SETTINGS");
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
         intent.setData(Uri.parse("package:" + packageName));
         return getIntent(intent, isNewTask);
     }

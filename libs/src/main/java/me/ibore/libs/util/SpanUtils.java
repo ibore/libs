@@ -1,7 +1,4 @@
 package me.ibore.libs.util;
-/**
- * Created by Administrator on 2018/1/19.
- */
 
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
@@ -17,18 +14,12 @@ import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import androidx.annotation.ColorInt;
-import androidx.annotation.DrawableRes;
-import androidx.annotation.FloatRange;
-import androidx.annotation.IntDef;
-import androidx.annotation.IntRange;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import android.text.Layout;
+import android.text.Layout.Alignment;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextPaint;
+import android.text.method.LinkMovementMethod;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.AlignmentSpan;
 import android.text.style.BackgroundColorSpan;
@@ -50,8 +41,19 @@ import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
 import android.text.style.UpdateAppearance;
 import android.util.Log;
+import android.widget.TextView;
+
+import androidx.annotation.ColorInt;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.FloatRange;
+import androidx.annotation.IntDef;
+import androidx.annotation.IntRange;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import java.io.InputStream;
+import java.io.Serializable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
@@ -60,10 +62,10 @@ import static android.graphics.BlurMaskFilter.Blur;
 
 /**
  * <pre>
- * description:
- * author: Ibore Xie
- * date: 2018/1/19 14:29
- * website: ibore.me
+ *     author: Blankj
+ *     blog  : http://blankj.com
+ *     time  : 16/12/13
+ *     desc  : utils about span
  * </pre>
  */
 public final class SpanUtils {
@@ -82,6 +84,7 @@ public final class SpanUtils {
 
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
+    private TextView      mTextView;
     private CharSequence  mText;
     private int           flag;
     private int           foregroundColor;
@@ -109,7 +112,8 @@ public final class SpanUtils {
     private boolean       isBoldItalic;
     private String        fontFamily;
     private Typeface      typeface;
-    private Layout.Alignment alignment;
+    private Alignment     alignment;
+    private int           verticalAlign;
     private ClickableSpan clickSpan;
     private String        url;
     private float         blurRadius;
@@ -130,17 +134,22 @@ public final class SpanUtils {
     private int spaceSize;
     private int spaceColor;
 
-    private SpannableStringBuilder mBuilder;
+    private SerializableSpannableStringBuilder mBuilder;
 
-    private int mType;
+    private       int mType;
     private final int mTypeCharSequence = 0;
     private final int mTypeImage        = 1;
     private final int mTypeSpace        = 2;
 
+    private SpanUtils(TextView textView) {
+        this();
+        mTextView = textView;
+    }
 
     public SpanUtils() {
-        mBuilder = new SpannableStringBuilder();
+        mBuilder = new SerializableSpannableStringBuilder();
         mText = "";
+        mType = -1;
         setDefault();
     }
 
@@ -165,6 +174,7 @@ public final class SpanUtils {
         fontFamily = null;
         typeface = null;
         alignment = null;
+        verticalAlign = -1;
         clickSpan = null;
         url = null;
         blurRadius = -1;
@@ -459,18 +469,35 @@ public final class SpanUtils {
     }
 
     /**
-     * Set the span of alignment.
+     * Set the span of horizontal alignment.
      *
      * @param alignment The alignment.
      *                  <ul>
-     *                  <li>{@link Layout.Alignment#ALIGN_NORMAL  }</li>
-     *                  <li>{@link Layout.Alignment#ALIGN_OPPOSITE}</li>
-     *                  <li>{@link Layout.Alignment#ALIGN_CENTER  }</li>
+     *                  <li>{@link Alignment#ALIGN_NORMAL  }</li>
+     *                  <li>{@link Alignment#ALIGN_OPPOSITE}</li>
+     *                  <li>{@link Alignment#ALIGN_CENTER  }</li>
      *                  </ul>
      * @return the single {@link SpanUtils} instance
      */
-    public SpanUtils setAlign(@NonNull final Layout.Alignment alignment) {
+    public SpanUtils setHorizontalAlign(@NonNull final Alignment alignment) {
         this.alignment = alignment;
+        return this;
+    }
+
+    /**
+     * Set the span of vertical alignment.
+     *
+     * @param align The alignment.
+     *              <ul>
+     *              <li>{@link Align#ALIGN_TOP     }</li>
+     *              <li>{@link Align#ALIGN_CENTER  }</li>
+     *              <li>{@link Align#ALIGN_BASELINE}</li>
+     *              <li>{@link Align#ALIGN_BOTTOM  }</li>
+     *              </ul>
+     * @return the single {@link SpanUtils} instance
+     */
+    public SpanUtils setVerticalAlign(@Align final int align) {
+        this.verticalAlign = align;
         return this;
     }
 
@@ -482,6 +509,9 @@ public final class SpanUtils {
      * @return the single {@link SpanUtils} instance
      */
     public SpanUtils setClickSpan(@NonNull final ClickableSpan clickSpan) {
+        if (mTextView != null && mTextView.getMovementMethod() == null) {
+            mTextView.setMovementMethod(LinkMovementMethod.getInstance());
+        }
         this.clickSpan = clickSpan;
         return this;
     }
@@ -494,6 +524,9 @@ public final class SpanUtils {
      * @return the single {@link SpanUtils} instance
      */
     public SpanUtils setUrl(@NonNull final String url) {
+        if (mTextView != null && mTextView.getMovementMethod() == null) {
+            mTextView.setMovementMethod(LinkMovementMethod.getInstance());
+        }
         this.url = url;
         return this;
     }
@@ -711,7 +744,6 @@ public final class SpanUtils {
      * @return the single {@link SpanUtils} instance
      */
     public SpanUtils appendImage(@DrawableRes final int resourceId, @Align final int align) {
-        append(Character.toString((char) 0));// it's important for span start with image
         apply(mTypeImage);
         this.imageResourceId = resourceId;
         this.alignImage = align;
@@ -754,6 +786,9 @@ public final class SpanUtils {
      */
     public SpannableStringBuilder create() {
         applyLast();
+        if (mTextView != null) {
+            mTextView.setText(mBuilder);
+        }
         return mBuilder;
     }
 
@@ -771,8 +806,17 @@ public final class SpanUtils {
     private void updateCharCharSequence() {
         if (mText.length() == 0) return;
         int start = mBuilder.length();
+        if (start == 0 && lineHeight != -1) {// bug of LineHeightSpan when first line
+            mBuilder.append(Character.toString((char) 2))
+                    .append("\n")
+                    .setSpan(new AbsoluteSizeSpan(0), 0, 2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            start = 2;
+        }
         mBuilder.append(mText);
         int end = mBuilder.length();
+        if (verticalAlign != -1) {
+            mBuilder.setSpan(new VerticalAlignSpan(verticalAlign), start, end, flag);
+        }
         if (foregroundColor != COLOR_DEFAULT) {
             mBuilder.setSpan(new ForegroundColorSpan(foregroundColor), start, end, flag);
         }
@@ -874,6 +918,10 @@ public final class SpanUtils {
 
     private void updateImage() {
         int start = mBuilder.length();
+        if (start == 0) {
+            mBuilder.append(Character.toString((char) 2));
+            start = 1;
+        }
         mBuilder.append("<img>");
         int end = start + 5;
         if (imageBitmap != null) {
@@ -894,16 +942,63 @@ public final class SpanUtils {
         mBuilder.setSpan(new SpaceSpan(spaceSize, spaceColor), start, end, flag);
     }
 
-    class CustomLineHeightSpan extends CharacterStyle
-            implements LineHeightSpan {
+    static class VerticalAlignSpan extends ReplacementSpan {
+
+        static final int ALIGN_CENTER = 2;
+        static final int ALIGN_TOP    = 3;
+
+        final int mVerticalAlignment;
+
+        VerticalAlignSpan(int verticalAlignment) {
+            mVerticalAlignment = verticalAlignment;
+        }
+
+        @Override
+        public int getSize(@NonNull Paint paint, CharSequence text, int start, int end, @Nullable Paint.FontMetricsInt fm) {
+            text = text.subSequence(start, end);
+            return (int) paint.measureText(text.toString());
+        }
+
+        @Override
+        public void draw(@NonNull Canvas canvas, CharSequence text, int start, int end, float x, int top, int y, int bottom, @NonNull Paint paint) {
+            text = text.subSequence(start, end);
+            Paint.FontMetricsInt fm = paint.getFontMetricsInt();
+//            int need = height - (v + fm.descent - fm.ascent - spanstartv);
+//            if (need > 0) {
+//                if (mVerticalAlignment == ALIGN_TOP) {
+//                    fm.descent += need;
+//                } else if (mVerticalAlignment == ALIGN_CENTER) {
+//                    fm.descent += need / 2;
+//                    fm.ascent -= need / 2;
+//                } else {
+//                    fm.ascent -= need;
+//                }
+//            }
+//            need = height - (v + fm.bottom - fm.top - spanstartv);
+//            if (need > 0) {
+//                if (mVerticalAlignment == ALIGN_TOP) {
+//                    fm.bottom += need;
+//                } else if (mVerticalAlignment == ALIGN_CENTER) {
+//                    fm.bottom += need / 2;
+//                    fm.top -= need / 2;
+//                } else {
+//                    fm.top -= need;
+//                }
+//            }
+
+            canvas.drawText(text.toString(), x, y - ((y + fm.descent + y + fm.ascent) / 2 - (bottom + top) / 2), paint);
+        }
+    }
+
+    static class CustomLineHeightSpan implements LineHeightSpan {
 
         private final int height;
 
         static final int ALIGN_CENTER = 2;
+        static final int ALIGN_TOP    = 3;
 
-        static final int ALIGN_TOP = 3;
-
-        final int mVerticalAlignment;
+        final  int                  mVerticalAlignment;
+        static Paint.FontMetricsInt sfm;
 
         CustomLineHeightSpan(int height, int verticalAlignment) {
             this.height = height;
@@ -913,40 +1008,54 @@ public final class SpanUtils {
         @Override
         public void chooseHeight(final CharSequence text, final int start, final int end,
                                  final int spanstartv, final int v, final Paint.FontMetricsInt fm) {
+            LogUtils.e(fm, sfm);
+            if (sfm == null) {
+                sfm = new Paint.FontMetricsInt();
+                sfm.top = fm.top;
+                sfm.ascent = fm.ascent;
+                sfm.descent = fm.descent;
+                sfm.bottom = fm.bottom;
+                sfm.leading = fm.leading;
+            } else {
+                fm.top = sfm.top;
+                fm.ascent = sfm.ascent;
+                fm.descent = sfm.descent;
+                fm.bottom = sfm.bottom;
+                fm.leading = sfm.leading;
+            }
             int need = height - (v + fm.descent - fm.ascent - spanstartv);
-//            if (need > 0) {
-            if (mVerticalAlignment == ALIGN_TOP) {
-                fm.descent += need;
-            } else if (mVerticalAlignment == ALIGN_CENTER) {
-                fm.descent += need / 2;
-                fm.ascent -= need / 2;
-            } else {
-                fm.ascent -= need;
+            if (need > 0) {
+                if (mVerticalAlignment == ALIGN_TOP) {
+                    fm.descent += need;
+                } else if (mVerticalAlignment == ALIGN_CENTER) {
+                    fm.descent += need / 2;
+                    fm.ascent -= need / 2;
+                } else {
+                    fm.ascent -= need;
+                }
             }
-//            }
             need = height - (v + fm.bottom - fm.top - spanstartv);
-//            if (need > 0) {
-            if (mVerticalAlignment == ALIGN_TOP) {
-                fm.top += need;
-            } else if (mVerticalAlignment == ALIGN_CENTER) {
-                fm.bottom += need / 2;
-                fm.top -= need / 2;
-            } else {
-                fm.top -= need;
+            if (need > 0) {
+                if (mVerticalAlignment == ALIGN_TOP) {
+                    fm.bottom += need;
+                } else if (mVerticalAlignment == ALIGN_CENTER) {
+                    fm.bottom += need / 2;
+                    fm.top -= need / 2;
+                } else {
+                    fm.top -= need;
+                }
             }
-//            }
-        }
-
-        @Override
-        public void updateDrawState(final TextPaint tp) {
-
+            if (end == ((Spanned) text).getSpanEnd(this)) {
+                sfm = null;
+            }
+            LogUtils.e(fm, sfm);
         }
     }
 
-    class SpaceSpan extends ReplacementSpan {
+    static class SpaceSpan extends ReplacementSpan {
 
-        private final int width;
-        private final int color;
+        private final int   width;
+        private final Paint paint = new Paint();
 
         private SpaceSpan(final int width) {
             this(width, Color.TRANSPARENT);
@@ -955,7 +1064,8 @@ public final class SpanUtils {
         private SpaceSpan(final int width, final int color) {
             super();
             this.width = width;
-            this.color = color;
+            paint.setColor(color);
+            paint.setStyle(Paint.Style.FILL);
         }
 
         @Override
@@ -972,20 +1082,11 @@ public final class SpanUtils {
                          @IntRange(from = 0) final int end,
                          final float x, final int top, final int y, final int bottom,
                          @NonNull final Paint paint) {
-            Paint.Style style = paint.getStyle();
-            int color = paint.getColor();
-
-            paint.setStyle(Paint.Style.FILL);
-            paint.setColor(this.color);
-
-            canvas.drawRect(x, top, x + width, bottom, paint);
-
-            paint.setStyle(style);
-            paint.setColor(color);
+            canvas.drawRect(x, top, x + width, bottom, this.paint);
         }
     }
 
-    class CustomQuoteSpan implements LeadingMarginSpan {
+    static class CustomQuoteSpan implements LeadingMarginSpan {
 
         private final int color;
         private final int stripeWidth;
@@ -1019,7 +1120,7 @@ public final class SpanUtils {
         }
     }
 
-    class CustomBulletSpan implements LeadingMarginSpan {
+    static class CustomBulletSpan implements LeadingMarginSpan {
 
         private final int color;
         private final int radius;
@@ -1067,7 +1168,7 @@ public final class SpanUtils {
     }
 
     @SuppressLint("ParcelCreator")
-    class CustomTypefaceSpan extends TypefaceSpan {
+    static class CustomTypefaceSpan extends TypefaceSpan {
 
         private final Typeface newType;
 
@@ -1110,7 +1211,7 @@ public final class SpanUtils {
         }
     }
 
-    class CustomImageSpan extends CustomDynamicDrawableSpan {
+    static class CustomImageSpan extends CustomDynamicDrawableSpan {
         private Drawable mDrawable;
         private Uri      mContentUri;
         private int      mResourceId;
@@ -1176,7 +1277,7 @@ public final class SpanUtils {
         }
     }
 
-    abstract class CustomDynamicDrawableSpan extends ReplacementSpan {
+    static abstract class CustomDynamicDrawableSpan extends ReplacementSpan {
 
         static final int ALIGN_BOTTOM = 0;
 
@@ -1273,7 +1374,7 @@ public final class SpanUtils {
         private WeakReference<Drawable> mDrawableRef;
     }
 
-    class ShaderSpan extends CharacterStyle implements UpdateAppearance {
+    static class ShaderSpan extends CharacterStyle implements UpdateAppearance {
         private Shader mShader;
 
         private ShaderSpan(final Shader shader) {
@@ -1286,7 +1387,7 @@ public final class SpanUtils {
         }
     }
 
-    class ShadowSpan extends CharacterStyle implements UpdateAppearance {
+    static class ShadowSpan extends CharacterStyle implements UpdateAppearance {
         private float radius;
         private float dx, dy;
         private int shadowColor;
@@ -1305,5 +1406,19 @@ public final class SpanUtils {
         public void updateDrawState(final TextPaint tp) {
             tp.setShadowLayer(radius, dx, dy, shadowColor);
         }
+    }
+
+    private static class SerializableSpannableStringBuilder extends SpannableStringBuilder
+            implements Serializable {
+
+        private static final long serialVersionUID = 4909567650765875771L;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // static
+    ///////////////////////////////////////////////////////////////////////////
+
+    public static SpanUtils with(final TextView textView) {
+        return new SpanUtils(textView);
     }
 }

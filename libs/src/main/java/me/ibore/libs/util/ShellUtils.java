@@ -1,7 +1,6 @@
 package me.ibore.libs.util;
-/**
- * Created by Administrator on 2018/1/19.
- */
+
+import androidx.annotation.NonNull;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -11,19 +10,116 @@ import java.util.List;
 
 /**
  * <pre>
- * description:
- * author: Ibore Xie
- * date: 2018/1/19 14:05
- * website: ibore.me
+ *     author: Blankj
+ *     blog  : http://blankj.com
+ *     time  : 2016/08/07
+ *     desc  : utils about shell
  * </pre>
  */
 public final class ShellUtils {
-
 
     private static final String LINE_SEP = System.getProperty("line.separator");
 
     private ShellUtils() {
         throw new UnsupportedOperationException("u can't instantiate me...");
+    }
+
+    /**
+     * Execute the command asynchronously.
+     *
+     * @param command  The command.
+     * @param isRooted True to use root, false otherwise.
+     * @param callback The callback.
+     * @return the task
+     */
+    public static Utils.Task<CommandResult> execCmdAsync(final String command,
+                                                         final boolean isRooted,
+                                                         final Utils.Callback<CommandResult> callback) {
+        return execCmdAsync(new String[]{command}, isRooted, true, callback);
+    }
+
+    /**
+     * Execute the command asynchronously.
+     *
+     * @param commands The commands.
+     * @param isRooted True to use root, false otherwise.
+     * @param callback The callback.
+     * @return the task
+     */
+    public static Utils.Task<CommandResult> execCmdAsync(final List<String> commands,
+                                                         final boolean isRooted,
+                                                         final Utils.Callback<CommandResult> callback) {
+        return execCmdAsync(commands == null ? null : commands.toArray(new String[]{}), isRooted, true, callback);
+    }
+
+    /**
+     * Execute the command asynchronously.
+     *
+     * @param commands The commands.
+     * @param isRooted True to use root, false otherwise.
+     * @param callback The callback.
+     * @return the task
+     */
+    public static Utils.Task<CommandResult> execCmdAsync(final String[] commands,
+                                                         final boolean isRooted,
+                                                         final Utils.Callback<CommandResult> callback) {
+        return execCmdAsync(commands, isRooted, true, callback);
+    }
+
+    /**
+     * Execute the command asynchronously.
+     *
+     * @param command         The command.
+     * @param isRooted        True to use root, false otherwise.
+     * @param isNeedResultMsg True to return the message of result, false otherwise.
+     * @param callback        The callback.
+     * @return the task
+     */
+    public static Utils.Task<CommandResult> execCmdAsync(final String command,
+                                                         final boolean isRooted,
+                                                         final boolean isNeedResultMsg,
+                                                         final Utils.Callback<CommandResult> callback) {
+        return execCmdAsync(new String[]{command}, isRooted, isNeedResultMsg, callback);
+    }
+
+    /**
+     * Execute the command asynchronously.
+     *
+     * @param commands        The commands.
+     * @param isRooted        True to use root, false otherwise.
+     * @param isNeedResultMsg True to return the message of result, false otherwise.
+     * @param callback        The callback.
+     * @return the task
+     */
+    public static Utils.Task<CommandResult> execCmdAsync(final List<String> commands,
+                                                         final boolean isRooted,
+                                                         final boolean isNeedResultMsg,
+                                                         final Utils.Callback<CommandResult> callback) {
+        return execCmdAsync(commands == null ? null : commands.toArray(new String[]{}),
+                isRooted,
+                isNeedResultMsg,
+                callback);
+    }
+
+    /**
+     * Execute the command asynchronously.
+     *
+     * @param commands        The commands.
+     * @param isRooted        True to use root, false otherwise.
+     * @param isNeedResultMsg True to return the message of result, false otherwise.
+     * @param callback        The callback.
+     * @return the task
+     */
+    public static Utils.Task<CommandResult> execCmdAsync(final String[] commands,
+                                                         final boolean isRooted,
+                                                         final boolean isNeedResultMsg,
+                                                         @NonNull final Utils.Callback<CommandResult> callback) {
+        return Utils.doAsync(new Utils.Task<CommandResult>(callback) {
+            @Override
+            public CommandResult doInBackground() {
+                return execCmd(commands, isRooted, isNeedResultMsg);
+            }
+        });
     }
 
     /**

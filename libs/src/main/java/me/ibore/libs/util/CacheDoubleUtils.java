@@ -3,21 +3,32 @@ package me.ibore.libs.util;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Parcelable;
+
 import androidx.annotation.NonNull;
-import androidx.collection.SimpleArrayMap;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 import me.ibore.libs.constant.CacheConstants;
 
+/**
+ * <pre>
+ *     author: Blankj
+ *     blog  : http://blankj.com
+ *     time  : 2018/06/13
+ *     desc  : utils about double cache
+ * </pre>
+ */
 public final class CacheDoubleUtils implements CacheConstants {
 
-    private static final SimpleArrayMap<String, CacheDoubleUtils> CACHE_MAP = new SimpleArrayMap<>();
-    private CacheMemoryUtils mCacheMemoryUtils;
-    private CacheDiskUtils   mCacheDiskUtils;
+    private static final Map<String, CacheDoubleUtils> CACHE_MAP = new HashMap<>();
+
+    private final CacheMemoryUtils mCacheMemoryUtils;
+    private final CacheDiskUtils mCacheDiskUtils;
 
     /**
      * Return the single {@link CacheDoubleUtils} instance.
@@ -36,13 +47,17 @@ public final class CacheDoubleUtils implements CacheConstants {
      * @return the single {@link CacheDoubleUtils} instance
      */
     public static CacheDoubleUtils getInstance(@NonNull final CacheMemoryUtils cacheMemoryUtils,
-                                               @NonNull final CacheDiskUtils cacheDiskUtils
-    ) {
+                                               @NonNull final CacheDiskUtils cacheDiskUtils) {
         final String cacheKey = cacheDiskUtils.toString() + "_" + cacheMemoryUtils.toString();
         CacheDoubleUtils cache = CACHE_MAP.get(cacheKey);
         if (cache == null) {
-            cache = new CacheDoubleUtils(cacheMemoryUtils, cacheDiskUtils);
-            CACHE_MAP.put(cacheKey, cache);
+            synchronized (CacheDoubleUtils.class) {
+                cache = CACHE_MAP.get(cacheKey);
+                if (cache == null) {
+                    cache = new CacheDoubleUtils(cacheMemoryUtils, cacheDiskUtils);
+                    CACHE_MAP.put(cacheKey, cache);
+                }
+            }
         }
         return cache;
     }
@@ -500,4 +515,3 @@ public final class CacheDoubleUtils implements CacheConstants {
         mCacheDiskUtils.clear();
     }
 }
-

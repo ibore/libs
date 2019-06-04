@@ -2,29 +2,23 @@ package me.ibore.libs.util;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.Reader;
 import java.lang.reflect.Type;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
 
 /**
- * description:
- * author: Ibore Xie
- * date: 2018-01-23 23:24
- * website: ibore.me
+ * <pre>
+ *     author: Blankj
+ *     blog  : http://blankj.com
+ *     time  : 2018/04/05
+ *     desc  : utils about gson
+ * </pre>
  */
-
 public final class GsonUtils {
 
     private static final Gson GSON = createGson(true);
@@ -47,7 +41,7 @@ public final class GsonUtils {
     /**
      * Gets pre-configured {@link Gson} instance.
      *
-     * @param serializeNulls determines if nulls will be serialized.
+     * @param serializeNulls Determines if nulls will be serialized.
      * @return {@link Gson} instance.
      */
     public static Gson getGson(final boolean serializeNulls) {
@@ -57,7 +51,7 @@ public final class GsonUtils {
     /**
      * Serializes an object into json.
      *
-     * @param object the object to serialize.
+     * @param object The object to serialize.
      * @return object serialized into json.
      */
     public static String toJson(final Object object) {
@@ -67,20 +61,43 @@ public final class GsonUtils {
     /**
      * Serializes an object into json.
      *
-     * @param object       the object to serialize.
-     * @param includeNulls determines if nulls will be included.
+     * @param object       The object to serialize.
+     * @param includeNulls Determines if nulls will be included.
      * @return object serialized into json.
      */
     public static String toJson(final Object object, final boolean includeNulls) {
         return includeNulls ? GSON.toJson(object) : GSON_NO_NULLS.toJson(object);
     }
 
+    /**
+     * Serializes an object into json.
+     *
+     * @param src       The object to serialize.
+     * @param typeOfSrc The specific genericized type of src.
+     * @return object serialized into json.
+     */
+    public static String toJson(final Object src, final Type typeOfSrc) {
+        return toJson(src, typeOfSrc, true);
+    }
+
+    /**
+     * Serializes an object into json.
+     *
+     * @param src          The object to serialize.
+     * @param typeOfSrc    The specific genericized type of src.
+     * @param includeNulls Determines if nulls will be included.
+     * @return object serialized into json.
+     */
+    public static String toJson(final Object src, final Type typeOfSrc, final boolean includeNulls) {
+        return includeNulls ? GSON.toJson(src, typeOfSrc) : GSON_NO_NULLS.toJson(src, typeOfSrc);
+    }
+
 
     /**
      * Converts {@link String} to given type.
      *
-     * @param json the json to convert.
-     * @param type type type json will be converted to.
+     * @param json The json to convert.
+     * @param type Type json will be converted to.
      * @return instance of type
      */
     public static <T> T fromJson(final String json, final Class<T> type) {
@@ -121,6 +138,58 @@ public final class GsonUtils {
     }
 
     /**
+     * Return the type of {@link List} with the {@code type}.
+     *
+     * @param type The type.
+     * @return the type of {@link List} with the {@code type}
+     */
+    public static Type getListType(final Type type) {
+        return TypeToken.getParameterized(List.class, type).getType();
+    }
+
+    /**
+     * Return the type of {@link Set} with the {@code type}.
+     *
+     * @param type The type.
+     * @return the type of {@link Set} with the {@code type}
+     */
+    public static Type getSetType(final Type type) {
+        return TypeToken.getParameterized(Set.class, type).getType();
+    }
+
+    /**
+     * Return the type of map with the {@code keyType} and {@code valueType}.
+     *
+     * @param keyType   The type of key.
+     * @param valueType The type of value.
+     * @return the type of map with the {@code keyType} and {@code valueType}
+     */
+    public static Type getMapType(final Type keyType, final Type valueType) {
+        return TypeToken.getParameterized(Map.class, keyType, valueType).getType();
+    }
+
+    /**
+     * Return the type of array with the {@code type}.
+     *
+     * @param type The type.
+     * @return the type of map with the {@code type}
+     */
+    public static Type getArrayType(final Type type) {
+        return TypeToken.getArray(type).getType();
+    }
+
+    /**
+     * Return the type of {@code rawType} with the {@code typeArguments}.
+     *
+     * @param rawType       The raw type.
+     * @param typeArguments The type of arguments.
+     * @return the type of map with the {@code type}
+     */
+    public static Type getType(final Type rawType, final Type... typeArguments) {
+        return TypeToken.getParameterized(rawType, typeArguments).getType();
+    }
+
+    /**
      * Create a pre-configured {@link Gson} instance.
      *
      * @param serializeNulls determines if nulls will be serialized.
@@ -130,85 +199,5 @@ public final class GsonUtils {
         final GsonBuilder builder = new GsonBuilder();
         if (serializeNulls) builder.serializeNulls();
         return builder.create();
-    }
-
-    public static String object2Json(Object obj) {
-        return GSON.toJson(obj);
-    }
-
-
-    public static String object2Json(Object obj, Type type) {
-        return GSON.toJson(obj, type);
-    }
-
-
-    public static String objectToJsonDateSerializer(Object ts, final String dateformat) {
-        Gson gson = new GsonBuilder()
-                .registerTypeHierarchyAdapter(Date.class, new JsonSerializer<Date>() {
-                    public JsonElement serialize(Date src,
-                                                 Type typeOfSrc,
-                                                 JsonSerializationContext context) {
-                        SimpleDateFormat format = new SimpleDateFormat(dateformat);
-                        return new JsonPrimitive(format.format(src));
-                    }
-                }).setDateFormat(dateformat).create();
-        return gson.toJson(ts);
-    }
-
-
-    public static List<?> json2List(String jsonStr) {
-        Type type = new com.google.gson.reflect.TypeToken<List<?>>() {
-        }.getType();
-        return GSON.fromJson(jsonStr, type);
-    }
-
-
-    public static List<?> json2List(String jsonStr, Type type) {
-        return GSON.fromJson(jsonStr, type);
-    }
-
-
-    public static Map<?, ?> json2Map(String jsonStr) {
-        Type type = new com.google.gson.reflect.TypeToken<Map<?, ?>>() {
-        }.getType();
-        return GSON.fromJson(jsonStr, type);
-    }
-
-    public static  <T> T json2Bean(String jsonStr, Class<?> cl) {
-        return (T) GSON.fromJson(jsonStr, cl);
-    }
-
-    public static  <T> T json2Bean(String jsonStr, Type type) {
-        return GSON.fromJson(jsonStr, type);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> T jsonToBeanDateSerializer(String jsonStr, Class<T> cl, final String pattern) {
-        Gson gson = new GsonBuilder()
-                .registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
-                    public Date deserialize(JsonElement json, Type typeOfT,
-                                            JsonDeserializationContext context)
-                            throws JsonParseException {
-                        SimpleDateFormat format = new SimpleDateFormat(pattern);
-                        String dateStr = json.getAsString();
-                        try {
-                            return format.parse(dateStr);
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
-                        return null;
-                    }
-                }).setDateFormat(pattern).create();
-        return gson.fromJson(jsonStr, cl);
-    }
-
-
-    public static Object getJsonValue(String jsonStr, String key) {
-        Object ruleObj = null;
-        Map<?, ?> ruleMap = json2Map(jsonStr);
-        if (ruleMap != null && ruleMap.size() > 0) {
-            ruleObj = ruleMap.get(key);
-        }
-        return ruleObj;
     }
 }

@@ -1,4 +1,4 @@
-package me.ibore.glide.internal;
+package me.ibore.libs.glide.internal;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;

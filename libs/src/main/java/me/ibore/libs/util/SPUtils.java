@@ -1,30 +1,29 @@
 package me.ibore.libs.util;
-/**
- * Created by Administrator on 2018/1/19.
- */
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
+
 import androidx.annotation.NonNull;
-import androidx.collection.SimpleArrayMap;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 /**
  * <pre>
- * description:
- * author: Ibore Xie
- * date: 2018/1/19 14:28
- * website: ibore.me
+ *     author: Blankj
+ *     blog  : http://blankj.com
+ *     time  : 2016/08/02
+ *     desc  : utils about shared preference
  * </pre>
  */
 @SuppressLint("ApplySharedPref")
 public final class SPUtils {
-    private static final SimpleArrayMap<String, SPUtils> SP_UTILS_MAP = new SimpleArrayMap<>();
-    private SharedPreferences sp;
+
+    private static final Map<String, SPUtils> SP_UTILS_MAP = new HashMap<>();
+    private              SharedPreferences    sp;
 
     /**
      * Return the single {@link SPUtils} instance
@@ -66,8 +65,13 @@ public final class SPUtils {
         if (isSpace(spName)) spName = "spUtils";
         SPUtils spUtils = SP_UTILS_MAP.get(spName);
         if (spUtils == null) {
-            spUtils = new SPUtils(spName, mode);
-            SP_UTILS_MAP.put(spName, spUtils);
+            synchronized (SPUtils.class) {
+                spUtils = SP_UTILS_MAP.get(spName);
+                if (spUtils == null) {
+                    spUtils = new SPUtils(spName, mode);
+                    SP_UTILS_MAP.put(spName, spUtils);
+                }
+            }
         }
         return spUtils;
     }

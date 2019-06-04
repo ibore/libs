@@ -5,7 +5,7 @@
 
         <activity
             android:name=".util.PermissionUtils$PermissionActivity"
-            android:label="@string/libs_apply_for_permission"
+            android:label="@string/apply_for_permission"
             android:launchMode="singleTask"
             android:theme="@style/Theme.Libs.Transparent" />
 

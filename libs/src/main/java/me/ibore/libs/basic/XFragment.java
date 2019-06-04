@@ -10,10 +10,8 @@ import androidx.annotation.ColorRes;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentPagerAdapter;
 
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -41,6 +39,9 @@ public abstract class XFragment extends Fragment implements HandleBackUtils.Hand
 
     protected abstract void onBindView(Bundle savedInstanceState);
 
+    /**
+     * 这个是懒加载模式的，只在FragmentPagerAdapter中生效
+     */
     protected abstract void onBindData();
 
     private Unbinder unBinder;
@@ -63,12 +64,10 @@ public abstract class XFragment extends Fragment implements HandleBackUtils.Hand
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        if (isLazyLoad()) {
-            this.isVisible = isVisibleToUser;
-            if (isVisible && isPrepared && !isInitialized) {
-                isInitialized = true;
-                onBindData();
-            }
+        this.isVisible = isVisibleToUser;
+        if (isVisible && isPrepared && !isInitialized) {
+            isInitialized = true;
+            onBindData();
         }
     }
 
@@ -77,13 +76,9 @@ public abstract class XFragment extends Fragment implements HandleBackUtils.Hand
         super.onActivityCreated(savedInstanceState);
         onBindView(savedInstanceState);
         RxBus.get().register(this);
-        if (isLazyLoad()) {
-            isPrepared = true;
-            if (isVisible && !isInitialized) {
-                isInitialized = true;
-                onBindData();
-            }
-        } else {
+        isPrepared = true;
+        if (isVisible && !isInitialized) {
+            isInitialized = true;
             onBindData();
         }
     }
@@ -99,10 +94,6 @@ public abstract class XFragment extends Fragment implements HandleBackUtils.Hand
     @Override
     public boolean onBackPressed() {
         return HandleBackUtils.handleBackPress(this);
-    }
-
-    protected boolean isLazyLoad() {
-        return false;
     }
 
     protected final XActivity getXActivity() {
