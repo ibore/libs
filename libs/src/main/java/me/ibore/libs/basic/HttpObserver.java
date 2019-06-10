@@ -1,4 +1,4 @@
-package me.ibore.libs.http;
+package me.ibore.libs.basic;
 
 import android.content.Context;
 
@@ -18,6 +18,7 @@ import me.ibore.libs.basic.XObserver;
 import me.ibore.libs.exception.ClientException;
 import me.ibore.libs.exception.HttpException;
 import me.ibore.libs.exception.ServerException;
+import me.ibore.libs.http.HttpListener;
 import me.ibore.libs.util.Utils;
 import me.ibore.widget.LoadLayout;
 

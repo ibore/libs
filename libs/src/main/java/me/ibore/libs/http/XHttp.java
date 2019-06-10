@@ -9,6 +9,10 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import me.ibore.henna.Progress;
+import me.ibore.henna.ProgressListener;
+import me.ibore.henna.ProgressResponseBody;
+import me.ibore.henna.interceptor.HttpInterceptor;
 import me.ibore.libs.R;
 import me.ibore.libs.exception.ClientException;
 import me.ibore.libs.exception.HttpException;
@@ -36,7 +40,7 @@ public final class XHttp {
                         .writeTimeout(20, TimeUnit.SECONDS)
                         .readTimeout(20, TimeUnit.SECONDS)
                         .connectTimeout(20, TimeUnit.SECONDS)
-                        .addInterceptor(new HttpInterceptor())
+                        .addInterceptor(new HttpInterceptor("HTTP"))
                         .build();
             }
         }
