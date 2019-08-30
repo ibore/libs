@@ -14,7 +14,7 @@ import java.util.StringTokenizer;
  *     desc  : utils about exception
  * </pre>
  */
-public class ThrowableUtils {
+public final class ThrowableUtils {
 
     private static final String LINE_SEP = System.getProperty("line.separator");
 

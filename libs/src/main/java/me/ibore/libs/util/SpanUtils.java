@@ -60,14 +60,6 @@ import java.lang.ref.WeakReference;
 
 import static android.graphics.BlurMaskFilter.Blur;
 
-/**
- * <pre>
- *     author: Blankj
- *     blog  : http://blankj.com
- *     time  : 16/12/13
- *     desc  : utils about span
- * </pre>
- */
 public final class SpanUtils {
 
     private static final int COLOR_DEFAULT = 0xFEFFFFFF;

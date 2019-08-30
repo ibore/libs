@@ -69,10 +69,6 @@ public abstract class XActivity<P extends XPresenter> extends AppCompatActivity 
         onBindData();
     }
 
-    protected void onInitData() {
-
-    }
-
     protected View getLayoutView(int layoutId) {
         rootView = new RelativeLayout(this);
         loadLayout = new LoadLayout(this);
@@ -134,12 +130,7 @@ public abstract class XActivity<P extends XPresenter> extends AppCompatActivity 
     }
 
     @Override
-    public XActivity getXActivity() {
-        return this;
-    }
-
-    @Override
-    public AppCompatActivity getActivity() {
+    public final XActivity getXActivity() {
         return this;
     }
 

@@ -37,25 +37,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/**
- * <pre>
- *     author:
- *                                      ___           ___           ___         ___
- *         _____                       /  /\         /__/\         /__/|       /  /\
- *        /  /::\                     /  /::\        \  \:\       |  |:|      /  /:/
- *       /  /:/\:\    ___     ___    /  /:/\:\        \  \:\      |  |:|     /__/::\
- *      /  /:/~/::\  /__/\   /  /\  /  /:/~/::\   _____\__\:\   __|  |:|     \__\/\:\
- *     /__/:/ /:/\:| \  \:\ /  /:/ /__/:/ /:/\:\ /__/::::::::\ /__/\_|:|____    \  \:\
- *     \  \:\/:/~/:/  \  \:\  /:/  \  \:\/:/__\/ \  \:\~~\~~\/ \  \:\/:::::/     \__\:\
- *      \  \::/ /:/    \  \:\/:/    \  \::/       \  \:\  ~~~   \  \::/~~~~      /  /:/
- *       \  \:\/:/      \  \::/      \  \:\        \  \:\        \  \:\         /__/:/
- *        \  \::/        \__\/        \  \:\        \  \:\        \  \:\        \__\/
- *         \__\/                       \__\/         \__\/         \__\/
- *     blog  : http://blankj.com
- *     time  : 16/12/08
- *     desc  : utils about initialization
- * </pre>
- */
+
 public final class Utils {
 
     private static final String PERMISSION_ACTIVITY_CLASS_NAME =

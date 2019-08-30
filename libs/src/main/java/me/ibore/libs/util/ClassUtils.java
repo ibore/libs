@@ -2,6 +2,8 @@ package me.ibore.libs.util;
 
 import java.lang.reflect.ParameterizedType;
 
+import me.ibore.libs.BuildConfig;
+
 /**
  * description:
  * author: Ibore Xie
@@ -18,7 +20,7 @@ public class ClassUtils {
                     .getGenericSuperclass())).getActualTypeArguments()[position])
                     .newInstance();
         } catch (Exception e) {
-            //if (BuildConfig.DEBUG) e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
         return null;
     }

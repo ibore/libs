@@ -1,6 +1,11 @@
 package me.ibore.libs.dialog;
 
-/*
+import android.content.Context;
+import android.os.Bundle;
+
+import me.ibore.libs.R;
+import me.ibore.libs.basic.XDialog;
+
 public class DatePickerDialog extends XDialog {
 
     public DatePickerDialog(Context context) {
@@ -17,4 +22,3 @@ public class DatePickerDialog extends XDialog {
 
     }
 }
-*/

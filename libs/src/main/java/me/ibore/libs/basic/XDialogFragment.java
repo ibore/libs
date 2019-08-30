@@ -19,9 +19,12 @@ import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 import me.ibore.libs.rxbus.RxBus;
+import me.ibore.libs.util.ClassUtils;
 import me.ibore.libs.util.DisposablesUtils;
 
-public abstract class XDialogFragment extends AppCompatDialogFragment {
+public abstract class XDialogFragment<P extends XPresenter> extends AppCompatDialogFragment implements XView {
+
+    protected P mPresenter;
 
     protected abstract int getLayoutId();
 
@@ -50,6 +53,8 @@ public abstract class XDialogFragment extends AppCompatDialogFragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         onBindView(savedInstanceState);
+        mPresenter = ClassUtils.getClass(this, 0);
+        if (null != mPresenter) mPresenter.onAttach(this);
         RxBus.get().register(this);
         onBindData();
     }
@@ -58,11 +63,13 @@ public abstract class XDialogFragment extends AppCompatDialogFragment {
     public void onDestroyView() {
         RxBus.get().unRegister(this);
         DisposablesUtils.clear(this);
+        if (null != mPresenter) mPresenter.onDetach();
         unBinder.unbind();
         super.onDestroyView();
     }
 
-    protected final XActivity getXActivity() {
+    @Override
+    public final XActivity getXActivity() {
         return (XActivity) getActivity();
     }
 

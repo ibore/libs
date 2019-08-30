@@ -2,12 +2,14 @@ package me.ibore.libs.util;
 
 import java.util.WeakHashMap;
 
+import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subscribers.DisposableSubscriber;
 
 public final class DisposablesUtils {
 
@@ -28,6 +30,14 @@ public final class DisposablesUtils {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(observer);
+        return add(tag, disposable);
+    }
+
+    public static Disposable add(Object tag, Flowable flowable, DisposableSubscriber subscriber) {
+        Disposable disposable = (Disposable) flowable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(subscriber);
         return add(tag, disposable);
     }
 

@@ -10,7 +10,7 @@ public interface XView {
 
     XActivity getXActivity();
 
-    AppCompatActivity getActivity();
+    //AppCompatActivity getActivity();
 
     Context getContext();
 

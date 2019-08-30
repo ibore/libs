@@ -18,7 +18,7 @@ import androidx.core.app.NotificationManagerCompat;
  *     desc  : utils about notification
  * </pre>
  */
-public class NotificationUtils {
+public final class NotificationUtils {
 
     private NotificationUtils() {
         throw new UnsupportedOperationException("u can't instantiate me...");

@@ -19,8 +19,10 @@ import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 import me.ibore.libs.rxbus.RxBus;
+import me.ibore.libs.util.ClassUtils;
 import me.ibore.libs.util.DisposablesUtils;
 import me.ibore.libs.util.HandleBackUtils;
+import me.ibore.widget.LoadLayout;
 
 /**
  * description:
@@ -29,8 +31,9 @@ import me.ibore.libs.util.HandleBackUtils;
  * website: ibore.me
  */
 
-public abstract class XFragment extends Fragment implements HandleBackUtils.HandleBackInterface {
+public abstract class XFragment<P extends XPresenter> extends Fragment implements XView, HandleBackUtils.HandleBackInterface {
 
+    protected P mPresenter;
     private boolean isPrepared;
     private boolean isVisible;
     private boolean isInitialized;
@@ -75,6 +78,8 @@ public abstract class XFragment extends Fragment implements HandleBackUtils.Hand
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         onBindView(savedInstanceState);
+        mPresenter = ClassUtils.getClass(this, 0);
+        if (null != mPresenter) mPresenter.onAttach(this);
         RxBus.get().register(this);
         isPrepared = true;
         if (isVisible && !isInitialized) {
@@ -87,6 +92,7 @@ public abstract class XFragment extends Fragment implements HandleBackUtils.Hand
     public void onDestroyView() {
         RxBus.get().unRegister(this);
         DisposablesUtils.clear(this);
+        if (null != mPresenter) mPresenter.onDetach();
         unBinder.unbind();
         super.onDestroyView();
     }
@@ -96,8 +102,14 @@ public abstract class XFragment extends Fragment implements HandleBackUtils.Hand
         return HandleBackUtils.handleBackPress(this);
     }
 
-    protected final XActivity getXActivity() {
+    @Override
+    public final XActivity getXActivity() {
         return (XActivity) getActivity();
+    }
+
+    @Override
+    public LoadLayout loadLayout() {
+        return null;
     }
 
     protected final int getColorX(@ColorRes int colorId) {
