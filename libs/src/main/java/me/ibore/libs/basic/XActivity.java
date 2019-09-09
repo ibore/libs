@@ -1,5 +1,6 @@
 package me.ibore.libs.basic;
 
+import android.app.DownloadManager;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;

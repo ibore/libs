@@ -5,13 +5,10 @@ import android.os.Bundle;
 import androidx.core.text.HtmlCompat;
 
 import me.ibore.libs.basic.XFragment;
-import me.ibore.libs.demo.DialogFragment;
 import me.ibore.libs.demo.R;
 import me.ibore.libs.demo.Test;
-import me.ibore.libs.dialog.XAlertDialog;
 import me.ibore.libs.rxbus.RxBus;
 import me.ibore.libs.util.LogUtils;
-import me.ibore.widget.text.html.HtmlText;
 
 public class HomeFragment extends XFragment {
     @Override
